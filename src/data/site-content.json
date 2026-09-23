@@ -1,0 +1,382 @@
+{
+  "business": {
+    "name": "Jalaram Digital Sign",
+    "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat.",
+    "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
+    "phone": "+91 94270 33363",
+    "whatsapp": "919427033363",
+    "email": "info@jalaramdigitalsign.com",
+    "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
+    "hours": "Mon - Sat: 9:00 AM - 8:00 PM"
+  },
+  "socials": {
+    "instagram": "#",
+    "facebook": "#",
+    "twitter": "#",
+    "linkedin": "#"
+  },
+  "homePage": {
+    "heroTagline": "Digital Printing • Signage • Visual Branding",
+    "heroHeadline": "WE PRINT IDEAS THAT GET NOTICED.",
+    "heroSubtitle": "Gandhinagar's trusted partner for large-format printing, LED signage, banners, and complete visual branding solutions.",
+    "aboutHeadline": "About Jalaram Digital Sign",
+    "aboutText": "From massive highway hoardings to precision acrylic lettering, we have been transforming brands into bold, visible identities across Gandhinagar and Gujarat for over 15 years.",
+    "ctaHeadline": "Ready to Make Your Brand Impossible to Miss?",
+    "ctaSubtitle": "Contact us today for a free quote and consultation.",
+    "whyUsItems": [
+      { "title": "15+ Years Experience", "desc": "Trusted by hundreds of businesses across Gujarat since our founding." },
+      { "title": "State-of-the-Art Equipment", "desc": "Large-format printers and precision LED fabrication tools." },
+      { "title": "Fast Turnaround", "desc": "Most orders ready in 24–48 hours with professional installation." }
+    ]
+  },
+  "aboutPage": {
+    "heroImage": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
+    "heroTagline": "Our Journey • Visual Branding Specialists",
+    "heroHeadline": "OUR STORY.",
+    "heroSubtitle": "We are a team of visual branding specialists, dedicated to helping businesses in Gandhinagar and beyond make a lasting impression.",
+    "storyHeadline": "We believe that visibility is everything.",
+    "storyImage": "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?q=80&w=2070&auto=format&fit=crop",
+    "storyParagraph1": "At Jalaram Digital Sign, we don't just print banners or manufacture signs. We build the visual components that allow your brand to be seen, recognized, and trusted in the real world.",
+    "storyParagraph2": "Founded on the principles of precision and quality, our facility in Sector 11, Gandhinagar is equipped to handle everything from intricate acrylic 3D letters to massive outdoor flex installations.",
+    "storyParagraph3": "We understand that when you invest in physical branding, you are investing in your business's reputation. That's why we approach every project—no matter the size—with the same level of craftsmanship and attention to detail.",
+    "qualityHeadline": "Quality & Craftsmanship",
+    "qualitySubtitle": "We combine modern printing technology with hands-on fabrication expertise to deliver outstanding results.",
+    "qualityPoints": [
+      { "title": "State-of-the-art Printing", "desc": "High-resolution large format printers ensuring vibrant colors and sharp details on any material." },
+      { "title": "Premium Materials", "desc": "We source high-grade vinyl, acrylic, and flex materials to ensure your signage withstands the elements." },
+      { "title": "Expert Installation", "desc": "Our job doesn't end at the printer. We offer professional, secure installation for all our signage products." }
+    ],
+    "ctaHeadline": "Ready to work with us?"
+  },
+  "contactPage": {
+    "heroImage": "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop",
+    "heroTagline": "Contact Us • Fast Quotes & Consultation",
+    "heroHeadline": "LET'S MAKE YOUR BRAND IMPOSSIBLE TO MISS.",
+    "heroSubtitle": "Tell us what you need printed, branded or installed. Our team will help you find the right solution.",
+    "mapImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
+  },
+  "heroImages": [
+    "/hoardings.webp",
+    "/flex banner.webp",
+    "/3d led board.webp"
+  ],
+  "bannerSizes": [
+    {
+      "id": "1",
+      "productName": "Flex Banner (Standard)",
+      "material": "Star Flex 380 GSM",
+      "minSize": "1 ft x 1 ft",
+      "maxSize": "Any custom size",
+      "commonSizes": ["2 ft x 4 ft", "3 ft x 6 ft", "4 ft x 8 ft", "5 ft x 10 ft", "6 ft x 12 ft"],
+      "dpi": "72 DPI @ final print size",
+      "fileFormats": ["CDR", "AI", "PDF", "PSD", "JPEG (at actual size)"],
+      "colorMode": "CMYK",
+      "bleedArea": "0.5 inch on all sides",
+      "notes": "Provide design in actual print size. Include 0.5 inch bleed. Font should be outlined/embedded."
+    },
+    {
+      "id": "2",
+      "productName": "Vinyl / Self-Adhesive Sticker",
+      "material": "Oracal 3M Premium Vinyl",
+      "minSize": "Any size",
+      "maxSize": "48 inch width x unlimited length",
+      "commonSizes": ["A4", "A3", "A2", "A1", "Custom"],
+      "dpi": "150-300 DPI",
+      "fileFormats": ["CDR", "AI", "PDF", "EPS", "SVG"],
+      "colorMode": "CMYK",
+      "bleedArea": "3 mm on all sides",
+      "notes": "For cut vinyl (single color), provide vector file. For printed vinyl, send high-res artwork."
+    },
+    {
+      "id": "3",
+      "productName": "Hoarding / Billboard",
+      "material": "500 GSM Star Flex / Front Lit Flex",
+      "minSize": "10 ft x 10 ft",
+      "maxSize": "Unlimited (multi-section)",
+      "commonSizes": ["10 ft x 20 ft", "12 ft x 24 ft", "15 ft x 30 ft", "20 ft x 40 ft"],
+      "dpi": "15-25 DPI @ full scale (300 DPI thumbnail scale-up)",
+      "fileFormats": ["CDR", "AI", "PSD", "JPEG (high-res)"],
+      "colorMode": "CMYK",
+      "bleedArea": "1 inch on all sides",
+      "notes": "For large hoardings, artwork can be at 1:10 scale at 150 DPI. Confirm exact size before sending file."
+    },
+    {
+      "id": "4",
+      "productName": "UV Printing (Acrylic/Board)",
+      "material": "Acrylic, ACP, Sunboard, MDF, Glass",
+      "minSize": "Any size",
+      "maxSize": "4 ft x 8 ft per sheet",
+      "commonSizes": ["A4", "A3", "2 ft x 4 ft", "3 ft x 4 ft", "4 ft x 8 ft"],
+      "dpi": "300-600 DPI",
+      "fileFormats": ["CDR", "AI", "PDF", "PSD", "PNG (transparent background)"],
+      "colorMode": "CMYK + White Ink layer",
+      "bleedArea": "3 mm on all sides",
+      "notes": "For transparent or backlit effects, provide separate white layer. Mention substrate material when ordering."
+    },
+    {
+      "id": "5",
+      "productName": "1-Way Vision / Perforated Film",
+      "material": "50/50 Perforated Window Film",
+      "minSize": "Any size",
+      "maxSize": "4 ft x 50 ft roll",
+      "commonSizes": ["2 ft x 4 ft", "3 ft x 6 ft", "4 ft x 8 ft"],
+      "dpi": "150 DPI (at 50% opacity view)",
+      "fileFormats": ["CDR", "AI", "PDF", "JPEG"],
+      "colorMode": "CMYK",
+      "bleedArea": "0.5 inch on all sides",
+      "notes": "Design must be bold with high contrast — lighter images do not print well on perforated film."
+    },
+    {
+      "id": "6",
+      "productName": "Acrylic / LED Glow Sign Board",
+      "material": "Acrylic + Aluminum Frame + LED Module",
+      "minSize": "1 ft x 1 ft",
+      "maxSize": "Any custom size",
+      "commonSizes": ["2 ft x 3 ft", "2 ft x 4 ft", "3 ft x 5 ft", "4 ft x 6 ft"],
+      "dpi": "300 DPI",
+      "fileFormats": ["CDR", "AI", "PDF"],
+      "colorMode": "CMYK or RGB (mention usage)",
+      "bleedArea": "0.25 inch on all sides",
+      "notes": "Provide logo and text in vector format. Mention if backlit or front-lit is required."
+    }
+  ],
+  "clients": [],
+  "services": [
+    {
+      "id": "1",
+      "slug": "digital-printing",
+      "title": "Digital Printing",
+      "shortDescription": "High-resolution digital prints for everyday promotional needs.",
+      "description": "Our high-speed digital printing services offer crisp, vibrant results for brochures, flyers, business cards, and promotional materials. Perfect for short runs and fast turnaround times.",
+      "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
+      "category": "Printing",
+      "features": ["Fast Turnaround", "High Resolution", "Custom Sizes", "Vibrant Colors"],
+      "featured": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "2",
+      "slug": "flex-banner-printing",
+      "title": "Flex & Banner Printing",
+      "shortDescription": "Durable, high-impact banners for outdoor and indoor visibility.",
+      "description": "Make your message impossible to miss. We produce bold, high-resolution banners built for storefronts, promotions, events, and outdoor visibility.",
+      "image": "/flex banner.webp",
+      "category": "Large Format",
+      "features": ["Weather Resistant", "Any Size", "Grommets & Finishing", "High Visibility"],
+      "featured": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "3",
+      "slug": "led-illuminated-signage",
+      "title": "LED & Illuminated Signage",
+      "shortDescription": "Stand out day and night with custom illuminated signs.",
+      "description": "Premium LED signage designed to make your business visible 24/7. From backlit boards to 3D glowing letters, we build signs that demand attention.",
+      "image": "/3d led board.webp",
+      "category": "Signage",
+      "features": ["Energy Efficient", "High Brightness", "Custom Designs", "Durable Build"],
+      "featured": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "4",
+      "slug": "vinyl-printing",
+      "title": "Vinyl Printing",
+      "shortDescription": "Versatile vinyl graphics for windows, walls, and vehicles.",
+      "description": "Custom vinyl prints for a variety of applications including window decals, wall graphics, and vehicle branding. Precision cut and professionally installed.",
+      "image": "/vinyl printing.webp",
+      "category": "Printing",
+      "features": ["Indoor & Outdoor", "Precision Cut", "Matte & Gloss Options", "Easy Removal"],
+      "featured": false,
+      "sortOrder": 4
+    }
+  ],
+  "portfolio": [
+    {
+      "id": "1",
+      "slug": "hoardings",
+      "title": "Highway & Urban Hoardings",
+      "category": "Hoardings",
+      "description": "Massive roadside billboards and high-impact structural hoardings designed for maximum brand exposure across Gandhinagar and major highway corridors.",
+      "image": "/hoardings.webp",
+      "images": [
+        "/hoardings.webp"
+      ],
+      "location": "Gandhinagar - SG Highway",
+      "featured": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "2",
+      "slug": "flex-banner",
+      "title": "High-Resolution Flex Banners",
+      "category": "Flex Banner",
+      "description": "Vibrant, weather-resistant flex and star flex banners with reinforced grommets for storefront promotions, grand openings, and large-scale public events.",
+      "image": "/flex banner.webp",
+      "images": [
+        "/flex banner.webp"
+      ],
+      "location": "Gandhinagar",
+      "featured": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "3",
+      "slug": "vinyl-printing",
+      "title": "Commercial Vinyl Printing",
+      "category": "Vinyl Printing",
+      "description": "Precision-cut, high-grade self-adhesive vinyl for storefront branding, corporate wall murals, floor graphics, and commercial vehicle fleet wraps.",
+      "image": "/vinyl printing.webp",
+      "images": [
+        "/vinyl printing.webp"
+      ],
+      "location": "Ahmedabad",
+      "featured": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "4",
+      "slug": "radium-work",
+      "title": "Radium & Reflective Work",
+      "category": "Raduim Work",
+      "description": "High-intensity radium and micro-prismatic retro-reflective sheet cutting for glow-in-the-dark night visibility, safety boards, and traffic signage.",
+      "image": "/radium work.webp",
+      "images": [
+        "/radium work.webp"
+      ],
+      "location": "Gandhinagar",
+      "featured": true,
+      "sortOrder": 4
+    },
+    {
+      "id": "5",
+      "slug": "uv-printing",
+      "title": "Flatbed UV Printing",
+      "category": "UV Printing",
+      "description": "Direct-to-substrate UV printing on acrylic, wood, glass, ACP, and sunboard delivering ultra-sharp resolution, vivid color depth, and scratch-resistant durability.",
+      "image": "/UV-flatbed-printer-close-1080x600.webp",
+      "images": [
+        "/UV-flatbed-printer-close-1080x600.webp"
+      ],
+      "location": "Ahmedabad",
+      "featured": true,
+      "sortOrder": 5
+    },
+    {
+      "id": "6",
+      "slug": "1way-vision-print",
+      "title": "1-Way Vision Glass Graphics",
+      "category": "1Way Vision Print",
+      "description": "Perforated window film graphics offering full-color exterior branding and privacy while maintaining crystal-clear outward visibility from indoors.",
+      "image": "/1 way vision print.webp",
+      "images": [
+        "/1 way vision print.webp"
+      ],
+      "location": "Gandhinagar",
+      "featured": true,
+      "sortOrder": 6
+    },
+    {
+      "id": "7",
+      "slug": "acrylic-board",
+      "title": "3D Laser-Cut Acrylic Boards",
+      "category": "Acrylic Board",
+      "description": "Custom laser-cut acrylic letters, embossed 3D logo plaques, clear reception backdrops, and premium polished corporate identity boards.",
+      "image": "/acrylic board.webp",
+      "images": [
+        "/acrylic board.webp"
+      ],
+      "location": "Gandhinagar",
+      "featured": true,
+      "sortOrder": 7
+    },
+    {
+      "id": "8",
+      "slug": "glow-sign-board",
+      "title": "Illuminated Glow Sign Boards",
+      "category": "Glow Sign",
+      "description": "Backlit aluminum-cased glow sign boxes with high-lumen internal LED lighting and weather-proof flex faces for 24/7 retail and corporate recognition.",
+      "image": "/glow signs.webp",
+      "images": [
+        "/glow signs.webp"
+      ],
+      "location": "Gandhinagar",
+      "featured": true,
+      "sortOrder": 8
+    },
+    {
+      "id": "9",
+      "slug": "led-board",
+      "title": "LED Display & Channel Boards",
+      "category": "Board LED Board",
+      "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence.",
+      "image": "/3d led board.webp",
+      "images": [
+        "/3d led board.webp"
+      ],
+      "location": "Ahmedabad",
+      "featured": true,
+      "sortOrder": 9
+    }
+  ],
+  "team": [
+    {
+      "id": "1",
+      "name": "Rahul Patel",
+      "role": "Founder / Owner",
+      "bio": "Leading the vision and operations with over 15 years in print media.",
+      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+      "socialLinks": {},
+      "sortOrder": 1
+    },
+    {
+      "id": "2",
+      "name": "Priya Sharma",
+      "role": "Creative Designer",
+      "bio": "Turning ideas into high-impact visuals ready for large-format production.",
+      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
+      "socialLinks": {},
+      "sortOrder": 2
+    },
+    {
+      "id": "3",
+      "name": "Amit Desai",
+      "role": "Production Specialist",
+      "bio": "Overseeing the technical precision of our state-of-the-art printers.",
+      "image": "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?q=80&w=1974&auto=format&fit=crop",
+      "socialLinks": {},
+      "sortOrder": 3
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "1",
+      "name": "Vikram Mehta",
+      "business": "Local Business",
+      "quote": "Outstanding quality and incredibly fast turnaround. The signage transformed our storefront completely.",
+      "rating": 5
+    }
+  ],
+  "faqs": [
+    {
+      "id": "1",
+      "question": "What types of banners do you print?",
+      "answer": "We print a wide variety of banners including standard flex banners, star flex, backlit banners, and fabric banners suitable for both indoor and outdoor use."
+    },
+    {
+      "id": "2",
+      "question": "Can you print custom sizes?",
+      "answer": "Yes, our large-format printing capabilities allow us to print banners and signage in virtually any custom size to fit your specific requirements."
+    },
+    {
+      "id": "3",
+      "question": "Do you provide installation services?",
+      "answer": "Yes, we offer professional installation services for signage, large banners, and vehicle branding across Gandhinagar and surrounding areas."
+    },
+    {
+      "id": "4",
+      "question": "How quickly can an order be completed?",
+      "answer": "Standard orders are typically completed within 24-48 hours. Complex signage or large bulk orders may require more time, which we will discuss during the quotation phase."
+    }
+  ]
+}

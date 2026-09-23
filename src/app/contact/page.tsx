@@ -1,0 +1,157 @@
+"use client";
+
+import { useState } from "react";
+import { siteData } from "@/data/site";
+import { MapPin, Phone, Mail, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+
+export default function ContactPage() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const contact = siteData.contactPage;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+  };
+
+  return (
+    <>
+      <section className="pt-40 pb-20 bg-black border-b border-black/10 relative overflow-hidden">
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src={contact.heroImage}
+            alt="Contact background"
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
+              {contact.heroTagline}
+            </span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
+              {contact.heroHeadline}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl drop-shadow-md">
+              {contact.heroSubtitle}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 md:py-32">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Contact Info */}
+            <div className="space-y-10">
+              <div>
+                <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] border-l-2 border-accent pl-4 mb-4 block">
+                  Get in Touch
+                </span>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tighter leading-tight mb-8">
+                  Contact Information
+                </h2>
+                <div className="space-y-6">
+                  {[
+                    { icon: MapPin, label: "Our Location", value: siteData.business.address },
+                    { icon: Phone, label: "Phone & WhatsApp", value: siteData.business.phone },
+                    { icon: Mail, label: "Email", value: siteData.business.email },
+                    { icon: Clock, label: "Business Hours", value: siteData.business.hours },
+                  ].map(({ icon: Icon, label, value }) => (
+                    <div key={label} className="flex items-start gap-5">
+                      <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                        <Icon className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold mb-1 text-lg">{label}</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed max-w-xs">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Map */}
+              <div className="aspect-video bg-card-bg border border-black/5 rounded-sm overflow-hidden">
+                <iframe
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(siteData.business.address)}&output=embed`}
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="bg-card-bg p-8 md:p-12 border border-black/5 rounded-sm">
+              <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] border-l-2 border-accent pl-4 mb-4 block">
+                Quick Quotation
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter mb-8">Send an Enquiry</h2>
+
+              {isSubmitted ? (
+                <div className="bg-green-500/5 border border-green-500/20 p-10 text-center rounded-sm">
+                  <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/20">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-3">Message Sent</h3>
+                  <p className="text-gray-600 mb-8 leading-relaxed">
+                    Thank you for reaching out. Our team will get back to you shortly.
+                  </p>
+                  <button
+                    onClick={() => setIsSubmitted(false)}
+                    className="text-accent font-bold text-sm uppercase tracking-widest"
+                  >
+                    Send another message
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-600">Name</label>
+                      <input required type="text" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="John Doe" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <input required type="tel" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="+91 XXXXX XXXXX" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <input required type="email" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="john@example.com" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-600">Company (Optional)</label>
+                      <input type="text" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="Your Business" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Service of Interest</label>
+                    <select className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm">
+                      <option value="">Select a service</option>
+                      {siteData.services.map((s) => (
+                        <option key={s.id} value={s.title}>{s.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Message</label>
+                    <textarea required rows={5} className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors resize-none rounded-sm" placeholder="Tell us about your project..." />
+                  </div>
+                  <button type="submit" className="w-full bg-accent hover:bg-red-600 text-white px-8 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-accent/20">
+                    Submit Enquiry <ArrowRight className="w-5 h-5" />
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

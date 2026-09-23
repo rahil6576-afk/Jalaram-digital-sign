@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1200" height="400" viewBox="0 0 1200 400">
+
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#c0c0c0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0c0c0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="dividerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7B2FFF;stop-opacity:0" />
+      <stop offset="30%" style="stop-color:#7B2FFF;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#7B2FFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7B2FFF;stop-opacity:0" />
+    </linearGradient>
+    <clipPath id="logoClip">
+      <rect x="20" y="20" width="380" height="360" rx="16" ry="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bgGrad)"/>
+
+  <!-- Top accent stripe -->
+  <rect x="0" y="0" width="1200" height="4" fill="url(#goldGrad)"/>
+  <!-- Bottom accent stripe -->
+  <rect x="0" y="396" width="1200" height="4" fill="url(#goldGrad)"/>
+
+  <!-- New PNG Logo — large on the LEFT -->
+  <image
+    href="ChatGPT Image Sep 23, 2026, 10_46_42 AM.png"
+    x="20" y="20"
+    width="380" height="360"
+    clip-path="url(#logoClip)"
+    preserveAspectRatio="xMidYMid meet"
+  />
+
+  <!-- Vertical purple divider (matching logo brand color) -->
+  <line x1="435" y1="0" x2="435" y2="400" stroke="url(#dividerGrad)" stroke-width="2"/>
+
+  <!-- Right side: Company name -->
+  <text
+    x="820"
+    y="150"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="76"
+    font-weight="bold"
+    text-anchor="middle"
+    fill="#6A0DAD"
+    filter="url(#textGlow)"
+    letter-spacing="2"
+  >Jalaram</text>
+
+  <text
+    x="820"
+    y="240"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="76"
+    font-weight="bold"
+    text-anchor="middle"
+    fill="#6A0DAD"
+    filter="url(#textGlow)"
+    letter-spacing="2"
+  >Digital Sign</text>
+
+  <!-- Thin purple underline -->
+  <line x1="450" y1="262" x2="1180" y2="262" stroke="#6A0DAD" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Tagline -->
+  <text
+    x="820"
+    y="330"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="28"
+    font-weight="400"
+    text-anchor="middle"
+    fill="#CC1199"
+    letter-spacing="4"
+  >Design  |  Printing  |  Processing</text>
+
+</svg>
