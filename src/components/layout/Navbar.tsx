@@ -13,7 +13,6 @@ const navLinks = [
   { name: "Portfolio", href: "/portfolio" },
   { name: "Team", href: "/team" },
   { name: "Services", href: "/services" },
-  { name: "About Us", href: "/about" },
   { name: "Contact Us", href: "/contact" },
 ];
 
@@ -108,7 +107,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-4 lg:gap-7">
+            <nav className="hidden md:flex items-center gap-5 lg:gap-8">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
                 return (
@@ -169,7 +168,7 @@ export default function Navbar() {
             style={{ overscrollBehavior: "contain" }}
           >
             {/* Dedicated Mobile Header with Logo & Close Button */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
               <Link
                 href="/"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -194,10 +193,10 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Mobile Nav Links */}
+            {/* Mobile Nav Links without arrows */}
             <nav className="flex-1 px-5 py-6 flex flex-col gap-2">
               <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-3 mb-1">
-                Explore Pages
+                Menu Navigation
               </p>
               {navLinks.map((link) => {
                 const active = isActive(link.href);
@@ -207,7 +206,7 @@ export default function Navbar() {
                     href={link.href}
                     prefetch={true}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center justify-between px-4 py-3.5 rounded-xl font-bold uppercase tracking-wider text-base transition-all min-h-[50px] ${
+                    className={`flex items-center px-4 py-3.5 rounded-xl font-bold uppercase tracking-wider text-base transition-all min-h-[50px] ${
                       active
                         ? "bg-purple-50 text-[#6F20E8] border border-purple-200 shadow-sm"
                         : "text-gray-800 hover:bg-gray-50 active:bg-gray-100"
@@ -221,19 +220,12 @@ export default function Navbar() {
                       />
                       {link.name}
                     </span>
-                    <span
-                      className={`text-sm ${
-                        active ? "text-[#6F20E8]" : "text-gray-400"
-                      }`}
-                    >
-                      →
-                    </span>
                   </Link>
                 );
               })}
 
-              {/* Quick Actions & Direct Contact */}
-              <div className="mt-6 pt-5 border-t border-gray-100 flex flex-col gap-3">
+              {/* Quick Actions (Get a Free Quote CTA button) */}
+              <div className="mt-6 pt-5 border-t border-gray-100">
                 <Link
                   href="/contact"
                   prefetch={true}
@@ -242,31 +234,8 @@ export default function Navbar() {
                 >
                   Get a Free Quote
                 </Link>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <a
-                    href={`tel:${siteData.business.phone.replace(/[^0-9+]/g, "")}`}
-                    className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs tracking-wide min-h-[44px]"
-                  >
-                    Call Us
-                  </a>
-                  <a
-                    href={`https://wa.me/${siteData.business.whatsapp || "919427033363"}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-[#25D366]/10 text-[#128C7E] font-semibold text-xs tracking-wide border border-[#25D366]/30 min-h-[44px]"
-                  >
-                    WhatsApp
-                  </a>
-                </div>
               </div>
             </nav>
-
-            {/* Mobile Footer in Drawer */}
-            <div className="p-5 bg-gray-50 border-t border-gray-100 text-center">
-              <p className="text-xs text-gray-500 font-medium">
-                {siteData.business.name} • Gandhinagar, Gujarat
-              </p>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -58,6 +58,7 @@ type ActiveModal = {
   type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
   idOrIndex: string | number;
   isNew?: boolean;
+  mode?: "view" | "edit";
 } | null;
 
 const TABS = [
@@ -128,8 +129,18 @@ function validatePhoto(file: File): { valid: boolean; error?: string } {
   return { valid: true };
 }
 
-// ── ImageInput (With Clean Aspect Ratio Preview That Never Cuts Heads & Displays Photo Size) ─────
-function ImageInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+// ── ImageInput (Responsive upload button + ReadOnly view mode) ─────────────────
+function ImageInput({
+  value,
+  onChange,
+  label,
+  readOnly = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label?: string;
+  readOnly?: boolean;
+}) {
   const [uploading, setUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [photoDims, setPhotoDims] = useState<{ w: number; h: number } | null>(null);
@@ -137,6 +148,7 @@ function ImageInput({ value, onChange, label }: { value: string; onChange: (v: s
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
+    if (readOnly) return;
     setErrorMsg(null);
     const check = validatePhoto(file);
     if (!check.valid) {
@@ -164,41 +176,43 @@ function ImageInput({ value, onChange, label }: { value: string; onChange: (v: s
   return (
     <div className="space-y-2">
       {label && <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</label>}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => {
-            setErrorMsg(null);
-            onChange(e.target.value);
-          }}
-          placeholder="Paste image URL or upload →"
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6F20E8] focus:ring-2 focus:ring-[#6F20E8]/20"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setErrorMsg(null);
-            fileRef.current?.click();
-          }}
-          disabled={uploading}
-          className="px-3 py-2 rounded-lg bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50 shrink-0"
-        >
-          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-          Upload
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept={ACCEPT_PHOTO_ATTR}
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) handleUpload(f);
-            e.target.value = "";
-          }}
-        />
-      </div>
+      {!readOnly ? (
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => {
+              setErrorMsg(null);
+              onChange(e.target.value);
+            }}
+            placeholder="Paste image URL or upload →"
+            className="w-full sm:flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6F20E8] focus:ring-2 focus:ring-[#6F20E8]/20"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setErrorMsg(null);
+              fileRef.current?.click();
+            }}
+            disabled={uploading}
+            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 shrink-0"
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Upload
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={ACCEPT_PHOTO_ATTR}
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleUpload(f);
+              e.target.value = "";
+            }}
+          />
+        </div>
+      ) : null}
 
       {errorMsg && (
         <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center justify-between">
@@ -218,7 +232,7 @@ function ImageInput({ value, onChange, label }: { value: string; onChange: (v: s
         )}
       </div>
 
-      {value && (
+      {value ? (
         <div className="relative w-full min-h-[140px] max-h-60 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2 group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -235,7 +249,11 @@ function ImageInput({ value, onChange, label }: { value: string; onChange: (v: s
             </span>
           )}
         </div>
-      )}
+      ) : readOnly ? (
+        <div className="p-4 rounded-xl border border-dashed border-gray-200 text-center text-xs text-gray-400">
+          No photo uploaded
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -248,8 +266,10 @@ function ModalWrapper({
   children,
   onClose,
   onSave,
+  onEdit,
   saving,
   errorMessage,
+  mode = "edit",
 }: {
   title: string;
   subtitle: string;
@@ -257,9 +277,12 @@ function ModalWrapper({
   children: React.ReactNode;
   onClose: () => void;
   onSave: () => void;
+  onEdit?: () => void;
   saving: boolean;
   errorMessage?: string | null;
+  mode?: "view" | "edit";
 }) {
+  const isView = mode === "view";
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -280,7 +303,14 @@ function ModalWrapper({
               </div>
             )}
             <div>
-              <h3 className="font-bold text-base sm:text-lg text-gray-900">{title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-base sm:text-lg text-gray-900">{title}</h3>
+                {isView && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-[#6F20E8] px-2 py-0.5 rounded-full border border-purple-200">
+                    View Mode
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
             </div>
           </div>
@@ -305,7 +335,7 @@ function ModalWrapper({
           {children}
         </div>
 
-        {/* Modal Footer with Close Details and Save */}
+        {/* Modal Footer with Close Details and Save / Edit */}
         <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-3 shrink-0">
           <button
             type="button"
@@ -314,18 +344,31 @@ function ModalWrapper({
           >
             Close Details
           </button>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={(e) => {
-              e.preventDefault();
-              onSave();
-            }}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save
-          </button>
+          {isView ? (
+            onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all active:scale-[0.98]"
+              >
+                <Edit3 className="w-4 h-4" />
+                Edit
+              </button>
+            ) : null
+          ) : (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => {
+                e.preventDefault();
+                onSave();
+              }}
+              className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Save
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -784,7 +827,7 @@ export default function AdminDashboard() {
                     onClick={() => {
                       const newIdx = data.heroImages.length;
                       setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
-                      setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true });
+                      setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-xs md:text-sm font-semibold rounded-xl text-[#6F20E8] transition-all border border-purple-200"
                   >
@@ -813,7 +856,7 @@ export default function AdminDashboard() {
                       {data.heroImages.map((url, i) => (
                         <tr
                           key={i}
-                          onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                          onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center">
@@ -833,21 +876,21 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4">
                             <p className="font-medium text-gray-900 truncate max-w-md">{url || <span className="text-gray-400 italic">No image URL configured</span>}</p>
-                            <span className="text-xs text-gray-400">Click to view & edit details</span>
+                            <span className="text-xs text-gray-400">Click to view details</span>
                           </td>
                           <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -891,7 +934,7 @@ export default function AdminDashboard() {
                         logo: "",
                       };
                       setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
-                      setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true });
+                      setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -930,7 +973,7 @@ export default function AdminDashboard() {
                       {data.clients.map((client, i) => (
                         <tr
                           key={client.id || i}
-                          onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                          onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -948,7 +991,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4">
                             <p className="font-bold text-gray-900">{client.name || "Untitled Client"}</p>
-                            <span className="text-xs text-gray-400">Click to view & edit details</span>
+                            <span className="text-xs text-gray-400">Click to view details</span>
                           </td>
                           <td className="py-3 px-4">
                             {client.tag ? (
@@ -963,15 +1006,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1020,7 +1063,7 @@ export default function AdminDashboard() {
                         sortOrder: data.portfolio.length + 1,
                       };
                       setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
-                      setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true });
+                      setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1052,7 +1095,7 @@ export default function AdminDashboard() {
                       {data.portfolio.map((item, idx) => (
                         <tr
                           key={item.id}
-                          onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                          onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -1070,7 +1113,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4 font-bold text-gray-900">
                             <div className="max-w-[220px] truncate">{item.title || "Untitled Project"}</div>
-                            <span className="text-xs font-normal text-gray-400">Click to view & edit details</span>
+                            <span className="text-xs font-normal text-gray-400">Click to view details</span>
                           </td>
                           <td className="py-3 px-4">
                             <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
@@ -1093,15 +1136,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1149,7 +1192,7 @@ export default function AdminDashboard() {
                         sortOrder: data.services.length + 1,
                       };
                       setData((p) => p ? { ...p, services: [...p.services, s] } : p);
-                      setActiveModal({ type: "service", idOrIndex: s.id, isNew: true });
+                      setActiveModal({ type: "service", idOrIndex: s.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1181,7 +1224,7 @@ export default function AdminDashboard() {
                       {data.services.map((svc, idx) => (
                         <tr
                           key={svc.id}
-                          onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                          onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -1199,7 +1242,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4 font-bold text-gray-900">
                             <div className="max-w-[220px] truncate">{svc.title || "Untitled Service"}</div>
-                            <span className="text-xs font-normal text-gray-400">Click to view & edit details</span>
+                            <span className="text-xs font-normal text-gray-400">Click to view details</span>
                           </td>
                           <td className="py-3 px-4">
                             <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
@@ -1224,15 +1267,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1278,7 +1321,7 @@ export default function AdminDashboard() {
                         sortOrder: data.team.length + 1,
                       };
                       setData((p) => p ? { ...p, team: [...p.team, m] } : p);
-                      setActiveModal({ type: "team", idOrIndex: m.id, isNew: true });
+                      setActiveModal({ type: "team", idOrIndex: m.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1308,7 +1351,7 @@ export default function AdminDashboard() {
                       {data.team.map((m, idx) => (
                         <tr
                           key={m.id}
-                          onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                          onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -1326,7 +1369,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-3 px-4 font-bold text-gray-900">
                             {m.name || "Untitled Member"}
-                            <div className="text-xs font-normal text-gray-400">Click to view & edit details</div>
+                            <div className="text-xs font-normal text-gray-400">Click to view details</div>
                           </td>
                           <td className="py-3 px-4">
                             <span className="font-semibold text-xs text-[#6F20E8] bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200">
@@ -1337,15 +1380,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1384,7 +1427,7 @@ export default function AdminDashboard() {
                     onClick={() => {
                       const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
                       setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
-                      setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true });
+                      setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1415,7 +1458,7 @@ export default function AdminDashboard() {
                       {data.testimonials.map((t, idx) => (
                         <tr
                           key={t.id}
-                          onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                          onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -1441,15 +1484,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1488,7 +1531,7 @@ export default function AdminDashboard() {
                     onClick={() => {
                       const newFaq = { id: genId(), question: "", answer: "" };
                       setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
-                      setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true });
+                      setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true, mode: "edit" });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1517,7 +1560,7 @@ export default function AdminDashboard() {
                       {data.faqs.map((faq, i) => (
                         <tr
                           key={faq.id}
-                          onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                          onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
                           className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
@@ -1533,15 +1576,15 @@ export default function AdminDashboard() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
                                 className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details"
+                                title="View details (Read Only)"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "edit" })}
                                 className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
                                 title="Edit details"
                               >
@@ -1738,13 +1781,16 @@ export default function AdminDashboard() {
       {activeModal?.type === "portfolio" && (() => {
         const item = data.portfolio.find((x) => x.id === activeModal.idOrIndex);
         if (!item) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit Portfolio Project"
-            subtitle="View or edit project specifications, cover photo, and gallery"
+            title={isReadOnly ? "View Portfolio Project" : "Edit Portfolio Project"}
+            subtitle={isReadOnly ? "Project specifications, cover photo, and gallery (Read Only)" : "View or edit project specifications, cover photo, and gallery"}
             icon={<LayoutGrid className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!item.title || !item.title.trim()) {
                 setModalError("Project Title is required. Please fill in the project title before saving.");
@@ -1761,8 +1807,11 @@ export default function AdminDashboard() {
                 <label className={labelCls}>Project Title *</label>
                 <input
                   type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={item.title}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     setModalError(null);
                     setData((p) => p ? {
                       ...p,
@@ -1773,7 +1822,7 @@ export default function AdminDashboard() {
                       } : x)
                     } : p);
                   }}
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   placeholder="e.g. Reliance Retail LED Display"
                 />
               </div>
@@ -1781,12 +1830,16 @@ export default function AdminDashboard() {
                 <div>
                   <label className={labelCls}>Category *</label>
                   <select
+                    disabled={isReadOnly}
                     value={item.category}
-                    onChange={(e) => setData((p) => p ? {
-                      ...p,
-                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
-                    } : p)}
-                    className={field + " cursor-pointer font-medium"}
+                    onChange={(e) => {
+                      if (isReadOnly) return;
+                      setData((p) => p ? {
+                        ...p,
+                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
+                      } : p);
+                    }}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : " cursor-pointer font-medium")}
                   >
                     {CATEGORY_OPTIONS.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -1800,12 +1853,17 @@ export default function AdminDashboard() {
                   <label className={labelCls}>Location</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={item.location}
-                    onChange={(e) => setData((p) => p ? {
-                      ...p,
-                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
-                    } : p)}
-                    className={field}
+                    onChange={(e) => {
+                      if (isReadOnly) return;
+                      setData((p) => p ? {
+                        ...p,
+                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
+                      } : p);
+                    }}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                     placeholder="e.g. Gandhinagar, Gujarat"
                   />
                 </div>
@@ -1814,66 +1872,86 @@ export default function AdminDashboard() {
               <ImageInput
                 label="Cover Photo"
                 value={item.image}
-                onChange={(v) => setData((p) => p ? {
-                  ...p,
-                  portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: v } : x)
-                } : p)}
+                readOnly={isReadOnly}
+                onChange={(v) => {
+                  if (isReadOnly) return;
+                  setData((p) => p ? {
+                    ...p,
+                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: v } : x)
+                  } : p);
+                }}
               />
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className={labelCls}>Gallery Photos</label>
-                  <button
-                    type="button"
-                    onClick={() => setData((p) => p ? {
-                      ...p,
-                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: [...x.images, ""] } : x)
-                    } : p)}
-                    className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Add Image
-                  </button>
-                </div>
-                {item.images.map((img, gi) => (
-                  <div key={gi} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={img}
-                      onChange={(e) => setData((p) => p ? {
-                        ...p,
-                        portfolio: p.portfolio.map((x) => {
-                          if (x.id !== item.id) return x;
-                          const imgs = [...x.images];
-                          imgs[gi] = e.target.value;
-                          return { ...x, images: imgs };
-                        })
-                      } : p)}
-                      className={field}
-                      placeholder="Image URL"
-                    />
+                  {!isReadOnly && (
                     <button
                       type="button"
                       onClick={() => setData((p) => p ? {
                         ...p,
-                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: x.images.filter((_, k) => k !== gi) } : x)
+                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: [...x.images, ""] } : x)
                       } : p)}
-                      className="text-red-500 hover:text-red-600 px-2"
+                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-3 h-3" /> Add Image
                     </button>
+                  )}
+                </div>
+                {item.images.length === 0 && isReadOnly && (
+                  <p className="text-xs text-gray-400 italic">No gallery photos uploaded</p>
+                )}
+                {item.images.map((img, gi) => (
+                  <div key={gi} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      disabled={isReadOnly}
+                      readOnly={isReadOnly}
+                      value={img}
+                      onChange={(e) => {
+                        if (isReadOnly) return;
+                        setData((p) => p ? {
+                          ...p,
+                          portfolio: p.portfolio.map((x) => {
+                            if (x.id !== item.id) return x;
+                            const imgs = [...x.images];
+                            imgs[gi] = e.target.value;
+                            return { ...x, images: imgs };
+                          })
+                        } : p);
+                      }}
+                      className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                      placeholder="Image URL"
+                    />
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => setData((p) => p ? {
+                          ...p,
+                          portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: x.images.filter((_, k) => k !== gi) } : x)
+                        } : p)}
+                        className="text-red-500 hover:text-red-600 px-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer pt-1">
+              <label className={`flex items-center gap-2 pt-1 ${isReadOnly ? "cursor-default" : "cursor-pointer"}`}>
                 <input
                   type="checkbox"
+                  disabled={isReadOnly}
                   checked={item.featured}
-                  onChange={(e) => setData((p) => p ? {
-                    ...p,
-                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, featured: e.target.checked } : x)
-                  } : p)}
-                  className="w-4 h-4 accent-[#6F20E8]"
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    setData((p) => p ? {
+                      ...p,
+                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, featured: e.target.checked } : x)
+                    } : p);
+                  }}
+                  className={`w-4 h-4 accent-[#6F20E8] ${isReadOnly ? "cursor-not-allowed opacity-60" : ""}`}
                 />
                 <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
               </label>
@@ -1886,13 +1964,16 @@ export default function AdminDashboard() {
       {activeModal?.type === "service" && (() => {
         const svc = data.services.find((x) => x.id === activeModal.idOrIndex);
         if (!svc) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit Service"
-            subtitle="View or edit service specifications, photo, and features"
+            title={isReadOnly ? "View Service" : "Edit Service"}
+            subtitle={isReadOnly ? "Service specifications, photo, and features (Read Only)" : "View or edit service specifications, photo, and features"}
             icon={<Briefcase className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!svc.title || !svc.title.trim()) {
                 setModalError("Service Title is required. Please fill in the title before saving.");
@@ -1910,26 +1991,33 @@ export default function AdminDashboard() {
                   <label className={labelCls}>Service Title *</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={svc.title}
                     onChange={(e) => {
+                      if (isReadOnly) return;
                       setModalError(null);
                       setData((p) => p ? {
                         ...p,
                         services: p.services.map((x) => x.id === svc.id ? { ...x, title: e.target.value } : x)
                       } : p);
                     }}
-                    className={field}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
                 <div>
                   <label className={labelCls}>Category *</label>
                   <select
+                    disabled={isReadOnly}
                     value={svc.category}
-                    onChange={(e) => setData((p) => p ? {
-                      ...p,
-                      services: p.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x)
-                    } : p)}
-                    className={field + " cursor-pointer font-medium"}
+                    onChange={(e) => {
+                      if (isReadOnly) return;
+                      setData((p) => p ? {
+                        ...p,
+                        services: p.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x)
+                      } : p);
+                    }}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : " cursor-pointer font-medium")}
                   >
                     {CATEGORY_OPTIONS.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -1944,66 +2032,86 @@ export default function AdminDashboard() {
               <ImageInput
                 label="Service Photo"
                 value={svc.image}
-                onChange={(v) => setData((p) => p ? {
-                  ...p,
-                  services: p.services.map((x) => x.id === svc.id ? { ...x, image: v } : x)
-                } : p)}
+                readOnly={isReadOnly}
+                onChange={(v) => {
+                  if (isReadOnly) return;
+                  setData((p) => p ? {
+                    ...p,
+                    services: p.services.map((x) => x.id === svc.id ? { ...x, image: v } : x)
+                  } : p);
+                }}
               />
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className={labelCls}>Key Features / Bullet Points</label>
-                  <button
-                    type="button"
-                    onClick={() => setData((p) => p ? {
-                      ...p,
-                      services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
-                    } : p)}
-                    className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Add Feature
-                  </button>
-                </div>
-                {svc.features.map((feat, fi) => (
-                  <div key={fi} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={feat}
-                      onChange={(e) => setData((p) => p ? {
-                        ...p,
-                        services: p.services.map((x) => {
-                          if (x.id !== svc.id) return x;
-                          const f = [...x.features];
-                          f[fi] = e.target.value;
-                          return { ...x, features: f };
-                        })
-                      } : p)}
-                      className={field}
-                      placeholder="Feature description"
-                    />
+                  {!isReadOnly && (
                     <button
                       type="button"
                       onClick={() => setData((p) => p ? {
                         ...p,
-                        services: p.services.map((x) => x.id === svc.id ? { ...x, features: x.features.filter((_, k) => k !== fi) } : x)
+                        services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
                       } : p)}
-                      className="text-red-500 hover:text-red-600 px-2"
+                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-3 h-3" /> Add Feature
                     </button>
+                  )}
+                </div>
+                {svc.features.length === 0 && isReadOnly && (
+                  <p className="text-xs text-gray-400 italic">No features listed</p>
+                )}
+                {svc.features.map((feat, fi) => (
+                  <div key={fi} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      disabled={isReadOnly}
+                      readOnly={isReadOnly}
+                      value={feat}
+                      onChange={(e) => {
+                        if (isReadOnly) return;
+                        setData((p) => p ? {
+                          ...p,
+                          services: p.services.map((x) => {
+                            if (x.id !== svc.id) return x;
+                            const f = [...x.features];
+                            f[fi] = e.target.value;
+                            return { ...x, features: f };
+                          })
+                        } : p);
+                      }}
+                      className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                      placeholder="Feature description"
+                    />
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => setData((p) => p ? {
+                          ...p,
+                          services: p.services.map((x) => x.id === svc.id ? { ...x, features: x.features.filter((_, k) => k !== fi) } : x)
+                        } : p)}
+                        className="text-red-500 hover:text-red-600 px-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
 
-              <label className="flex items-center gap-2 cursor-pointer pt-1">
+              <label className={`flex items-center gap-2 pt-1 ${isReadOnly ? "cursor-default" : "cursor-pointer"}`}>
                 <input
                   type="checkbox"
+                  disabled={isReadOnly}
                   checked={svc.featured}
-                  onChange={(e) => setData((p) => p ? {
-                    ...p,
-                    services: p.services.map((x) => x.id === svc.id ? { ...x, featured: e.target.checked } : x)
-                  } : p)}
-                  className="w-4 h-4 accent-[#6F20E8]"
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    setData((p) => p ? {
+                      ...p,
+                      services: p.services.map((x) => x.id === svc.id ? { ...x, featured: e.target.checked } : x)
+                    } : p);
+                  }}
+                  className={`w-4 h-4 accent-[#6F20E8] ${isReadOnly ? "cursor-not-allowed opacity-60" : ""}`}
                 />
                 <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
               </label>
@@ -2016,13 +2124,16 @@ export default function AdminDashboard() {
       {activeModal?.type === "team" && (() => {
         const m = data.team.find((x) => x.id === activeModal.idOrIndex);
         if (!m) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit Team Member"
-            subtitle="View or update member profile, position, and photo"
+            title={isReadOnly ? "View Team Member" : "Edit Team Member"}
+            subtitle={isReadOnly ? "Member profile, position, and photo (Read Only)" : "View or update member profile, position, and photo"}
             icon={<Users className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!m.name || !m.name.trim() || !m.role || !m.role.trim()) {
                 setModalError("Both Full Name and Role / Position are required before saving.");
@@ -2040,24 +2151,30 @@ export default function AdminDashboard() {
                   <label className={labelCls}>Full Name *</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={m.name}
                     onChange={(e) => {
+                      if (isReadOnly) return;
                       setModalError(null);
                       setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, name: e.target.value } : x) } : p);
                     }}
-                    className={field}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
                 <div>
                   <label className={labelCls}>Role / Position *</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={m.role}
                     onChange={(e) => {
+                      if (isReadOnly) return;
                       setModalError(null);
                       setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, role: e.target.value } : x) } : p);
                     }}
-                    className={field}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
               </div>
@@ -2065,7 +2182,11 @@ export default function AdminDashboard() {
               <ImageInput
                 label="Profile Photo"
                 value={m.image}
-                onChange={(v) => setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p)}
+                readOnly={isReadOnly}
+                onChange={(v) => {
+                  if (isReadOnly) return;
+                  setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p);
+                }}
               />
             </div>
           </ModalWrapper>
@@ -2077,13 +2198,16 @@ export default function AdminDashboard() {
         const clientIndex = (data.clients || []).findIndex((x) => x.id === activeModal.idOrIndex);
         const client = (data.clients || [])[clientIndex];
         if (!client) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit Client Organization"
-            subtitle="Update company name, category tag, and transparent logo"
+            title={isReadOnly ? "View Client Organization" : "Edit Client Organization"}
+            subtitle={isReadOnly ? "Company name, category tag, and transparent logo (Read Only)" : "Update company name, category tag, and transparent logo"}
             icon={<Building2 className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!client.name || !client.name.trim()) {
                 setModalError("Company / Institution Name is required.");
@@ -2100,8 +2224,11 @@ export default function AdminDashboard() {
                 <label className={labelCls}>Company / Institution Name *</label>
                 <input
                   type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={client.name}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     const val = e.target.value;
                     setModalError(null);
                     setData((p) => {
@@ -2112,15 +2239,18 @@ export default function AdminDashboard() {
                     });
                   }}
                   placeholder="e.g. BJP, NFSU College, Xavier School..."
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                 />
               </div>
               <div>
                 <label className={labelCls}>Category / Tag (Optional)</label>
                 <input
                   type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={client.tag || ""}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     const val = e.target.value;
                     setData((p) => {
                       if (!p) return p;
@@ -2130,14 +2260,16 @@ export default function AdminDashboard() {
                     });
                   }}
                   placeholder="e.g. Educational Institution, Food Brand..."
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                 />
               </div>
 
               <ImageInput
                 label="Client Logo Image"
                 value={client.logo || ""}
+                readOnly={isReadOnly}
                 onChange={(v) => {
+                  if (isReadOnly) return;
                   setData((p) => {
                     if (!p) return p;
                     const updated = [...(p.clients || [])];
@@ -2155,13 +2287,16 @@ export default function AdminDashboard() {
       {activeModal?.type === "testimonial" && (() => {
         const t = data.testimonials.find((x) => x.id === activeModal.idOrIndex);
         if (!t) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit Client Review"
-            subtitle="Manage review rating, quote, and client business information"
+            title={isReadOnly ? "View Client Review" : "Edit Client Review"}
+            subtitle={isReadOnly ? "Review rating, quote, and client business information (Read Only)" : "Manage review rating, quote, and client business information"}
             icon={<MessageSquare className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!t.name || !t.name.trim() || !t.quote || !t.quote.trim()) {
                 setModalError("Client Name and Review Quote are required before saving.");
@@ -2179,21 +2314,29 @@ export default function AdminDashboard() {
                   <label className={labelCls}>Client Name *</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={t.name}
                     onChange={(e) => {
+                      if (isReadOnly) return;
                       setModalError(null);
                       setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, name: e.target.value } : x) } : p);
                     }}
-                    className={field}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
                 <div>
                   <label className={labelCls}>Business Name</label>
                   <input
                     type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
                     value={t.business}
-                    onChange={(e) => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, business: e.target.value } : x) } : p)}
-                    className={field}
+                    onChange={(e) => {
+                      if (isReadOnly) return;
+                      setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, business: e.target.value } : x) } : p);
+                    }}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
               </div>
@@ -2201,13 +2344,16 @@ export default function AdminDashboard() {
               <div>
                 <label className={labelCls}>Review Quote *</label>
                 <textarea
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={t.quote}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     setModalError(null);
                     setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, quote: e.target.value } : x) } : p);
                   }}
                   rows={3}
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                 />
               </div>
 
@@ -2218,9 +2364,15 @@ export default function AdminDashboard() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, rating: s } : x) } : p)}
+                      disabled={isReadOnly}
+                      onClick={() => {
+                        if (isReadOnly) return;
+                        setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, rating: s } : x) } : p);
+                      }}
                       className={`w-10 h-10 rounded-xl text-sm font-bold flex items-center justify-center gap-1 transition-all ${
-                        s <= t.rating ? "bg-yellow-400 text-black shadow-sm" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        isReadOnly ? "cursor-default " : ""
+                      }${
+                        s <= t.rating ? "bg-yellow-400 text-black shadow-sm" : "bg-gray-100 text-gray-400" + (isReadOnly ? "" : " hover:bg-gray-200")
                       }`}
                     >
                       <Star className={`w-4 h-4 ${s <= t.rating ? "fill-black" : ""}`} />
@@ -2238,13 +2390,16 @@ export default function AdminDashboard() {
       {activeModal?.type === "faq" && (() => {
         const faq = data.faqs.find((x) => x.id === activeModal.idOrIndex);
         if (!faq) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title="Edit FAQ"
-            subtitle="Update customer frequently asked question and answer"
+            title={isReadOnly ? "View FAQ" : "Edit FAQ"}
+            subtitle={isReadOnly ? "Customer frequently asked question and answer (Read Only)" : "Update customer frequently asked question and answer"}
             icon={<HelpCircle className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!faq.question || !faq.question.trim() || !faq.answer || !faq.answer.trim()) {
                 setModalError("Both Question and Answer are required before saving.");
@@ -2261,24 +2416,30 @@ export default function AdminDashboard() {
                 <label className={labelCls}>Question *</label>
                 <input
                   type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={faq.question}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     setModalError(null);
                     setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, question: e.target.value } : x) } : p);
                   }}
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                 />
               </div>
               <div>
                 <label className={labelCls}>Detailed Answer *</label>
                 <textarea
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
                   value={faq.answer}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     setModalError(null);
                     setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, answer: e.target.value } : x) } : p);
                   }}
                   rows={4}
-                  className={field}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                 />
               </div>
             </div>
@@ -2291,13 +2452,16 @@ export default function AdminDashboard() {
         const idx = Number(activeModal.idOrIndex);
         const url = data.heroImages[idx];
         if (url === undefined) return null;
+        const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
-            title={`Edit Hero Slide ${idx + 1}`}
-            subtitle="Paste image URL or upload image file for this hero slide"
+            title={isReadOnly ? `View Hero Slide ${idx + 1}` : `Edit Hero Slide ${idx + 1}`}
+            subtitle={isReadOnly ? `Hero slide ${idx + 1} image preview (Read Only)` : "Paste image URL or upload image file for this hero slide"}
             icon={<ImageIcon className="w-5 h-5 text-[#6F20E8]" />}
             onClose={closeModal}
             errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
               if (!url || !url.trim()) {
                 setModalError("Image URL or uploaded photo is required for the slide.");
@@ -2313,7 +2477,9 @@ export default function AdminDashboard() {
               <ImageInput
                 label={`Hero Slide ${idx + 1} Image`}
                 value={url}
+                readOnly={isReadOnly}
                 onChange={(v) => {
+                  if (isReadOnly) return;
                   setModalError(null);
                   setData((p) => {
                     if (!p) return p;
