@@ -295,7 +295,7 @@ function ModalWrapper({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-50/70 via-white to-white shrink-0">
+        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-50/70 via-white to-white shrink-0">
           <div className="flex items-center gap-3">
             {icon && (
               <div className="w-10 h-10 rounded-xl bg-purple-100/70 text-[#6F20E8] flex items-center justify-center font-bold shrink-0 border border-purple-200/60">
@@ -325,7 +325,7 @@ function ModalWrapper({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-left">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 text-left">
           {errorMessage && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
               <span className="text-base shrink-0">⚠️</span>
@@ -336,7 +336,7 @@ function ModalWrapper({
         </div>
 
         {/* Modal Footer with Close Details and Save / Edit */}
-        <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-3 shrink-0">
+        <div className="px-4 py-3 sm:px-6 sm:py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -751,12 +751,12 @@ export default function AdminDashboard() {
       {/* ── MAIN CONTENT AREA ──────────────────────────────────────── */}
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-6xl">
         <div className="space-y-6">
-          {/* ── SOCIAL LINKS & BUSINESS INFO ────────────────────────── */}
+          {/* ── SOCIAL LINKS ────────────────────────────────────────── */}
           {activeTab === "business" && (
             <div className="space-y-6">
               <SectionHeader
-                title="Business & Social Links"
-                subtitle="Configure official social media profile URLs and business contact details."
+                title="Social Profiles"
+                subtitle="Configure official social media profile URLs (Instagram and Facebook)."
                 onSave={handleSave}
                 saving={saving}
               />
@@ -778,36 +778,6 @@ export default function AdminDashboard() {
                       />
                     </div>
                   ))}
-                </div>
-              </div>
-
-              <div className={sectionCard}>
-                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2"><Building2 className="w-4 h-4 text-[#6F20E8]" /> Business Contact Details</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelCls}>Business Name</label>
-                    <input type="text" value={data.business.name} onChange={(e) => updateBusiness("name", e.target.value)} className={field} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Phone Number</label>
-                    <input type="text" value={data.business.phone} onChange={(e) => updateBusiness("phone", e.target.value)} className={field} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>WhatsApp Number</label>
-                    <input type="text" value={data.business.whatsapp} onChange={(e) => updateBusiness("whatsapp", e.target.value)} className={field} />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Email Address</label>
-                    <input type="text" value={data.business.email} onChange={(e) => updateBusiness("email", e.target.value)} className={field} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className={labelCls}>Address</label>
-                    <input type="text" value={data.business.address} onChange={(e) => updateBusiness("address", e.target.value)} className={field} />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className={labelCls}>Google Maps Embed Link</label>
-                    <input type="text" value={data.business.mapsLink} onChange={(e) => updateBusiness("mapsLink", e.target.value)} className={field} />
-                  </div>
                 </div>
               </div>
             </div>
@@ -843,13 +813,13 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[520px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-14">Slide</th>
-                        <th className="py-3.5 px-4 w-32">Preview</th>
-                        <th className="py-3.5 px-4">Image Source</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-28">Preview</th>
+                        <th className="py-3.5 px-4 min-w-[180px]">Image Source</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -878,7 +848,7 @@ export default function AdminDashboard() {
                             <p className="font-medium text-gray-900 truncate max-w-md">{url || <span className="text-gray-400 italic">No image URL configured</span>}</p>
                             <span className="text-xs text-gray-400">Click to view details</span>
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -959,14 +929,14 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[560px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28">Logo</th>
-                        <th className="py-3.5 px-4">Company / Institution Name</th>
-                        <th className="py-3.5 px-4">Category / Tag</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-20">Logo</th>
+                        <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Company / Institution Name</th>
+                        <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Category / Tag</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -989,20 +959,20 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4">
-                            <p className="font-bold text-gray-900">{client.name || "Untitled Client"}</p>
-                            <span className="text-xs text-gray-400">Click to view details</span>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <div className="font-bold text-gray-900 leading-tight">{client.name || "Untitled Client"}</div>
+                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             {client.tag ? (
-                              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 whitespace-nowrap">
                                 {client.tag}
                               </span>
                             ) : (
                               <span className="text-xs text-gray-400">—</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1079,16 +1049,16 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[680px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28">Photo</th>
-                        <th className="py-3.5 px-4">Project Title</th>
-                        <th className="py-3.5 px-4">Category</th>
-                        <th className="py-3.5 px-4">Location</th>
-                        <th className="py-3.5 px-4">Status</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-20">Photo</th>
+                        <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Project Title</th>
+                        <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
+                        <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Location</th>
+                        <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -1111,28 +1081,28 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 font-bold text-gray-900">
-                            <div className="max-w-[220px] truncate">{item.title || "Untitled Project"}</div>
-                            <span className="text-xs font-normal text-gray-400">Click to view details</span>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <div className="font-bold text-gray-900 leading-tight">{item.title || "Untitled Project"}</div>
+                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
                               {item.category}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-gray-600 text-xs font-medium">
+                          <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs font-medium">
                             {item.location || "—"}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             {item.featured ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
                                 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
                               </span>
                             ) : (
                               <span className="text-xs text-gray-400">Standard</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1208,16 +1178,16 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[640px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28">Photo</th>
-                        <th className="py-3.5 px-4">Service Title</th>
-                        <th className="py-3.5 px-4">Category</th>
-                        <th className="py-3.5 px-4">Key Features</th>
-                        <th className="py-3.5 px-4">Status</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-20">Photo</th>
+                        <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Service Title</th>
+                        <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
+                        <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Key Features</th>
+                        <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -1240,30 +1210,30 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 font-bold text-gray-900">
-                            <div className="max-w-[220px] truncate">{svc.title || "Untitled Service"}</div>
-                            <span className="text-xs font-normal text-gray-400">Click to view details</span>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <div className="font-bold text-gray-900 leading-tight">{svc.title || "Untitled Service"}</div>
+                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
                               {svc.category}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-gray-600 text-xs">
-                            <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                          <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs">
+                            <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 whitespace-nowrap">
                               {svc.features?.length || 0} feature(s)
                             </span>
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             {svc.featured ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
                                 <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
                               </span>
                             ) : (
                               <span className="text-xs text-gray-400">Standard</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1337,14 +1307,14 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[580px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28">Photo</th>
-                        <th className="py-3.5 px-4">Full Name</th>
-                        <th className="py-3.5 px-4">Role / Position</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-20">Photo</th>
+                        <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">Full Name</th>
+                        <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Role / Position</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -1367,16 +1337,16 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 font-bold text-gray-900">
-                            {m.name || "Untitled Member"}
-                            <div className="text-xs font-normal text-gray-400">Click to view details</div>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <div className="font-bold text-gray-900 leading-tight">{m.name || "Untitled Member"}</div>
+                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
                           </td>
-                          <td className="py-3 px-4">
-                            <span className="font-semibold text-xs text-[#6F20E8] bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200">
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center font-semibold text-xs text-[#6F20E8] bg-purple-50 px-3 py-1 rounded-full border border-purple-200 shadow-sm whitespace-nowrap">
                               {m.role || "Member"}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1443,15 +1413,15 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[660px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28">Rating</th>
-                        <th className="py-3.5 px-4">Client Name</th>
-                        <th className="py-3.5 px-4">Business</th>
-                        <th className="py-3.5 px-4">Review Quote</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 w-28 whitespace-nowrap">Rating</th>
+                        <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Client Name</th>
+                        <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Business</th>
+                        <th className="py-3.5 px-4 min-w-[200px]">Review Quote</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -1464,23 +1434,23 @@ export default function AdminDashboard() {
                           <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
                             {idx + 1}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-0.5">
                               {[1,2,3,4,5].map((s) => (
                                 <Star key={s} className={`w-3.5 h-3.5 ${s <= t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`} />
                               ))}
                             </div>
                           </td>
-                          <td className="py-3 px-4 font-bold text-gray-900">
+                          <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">
                             {t.name || "Client"}
                           </td>
-                          <td className="py-3 px-4 text-xs text-gray-600 font-medium">
+                          <td className="py-3 px-4 text-xs text-gray-600 font-medium whitespace-nowrap">
                             {t.business || "—"}
                           </td>
                           <td className="py-3 px-4 text-xs text-gray-500 max-w-sm truncate">
                             &quot;{t.quote}&quot;
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
@@ -1547,13 +1517,13 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[560px] text-left border-collapse">
                     <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4">Question</th>
-                        <th className="py-3.5 px-4">Answer Preview</th>
-                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                        <th className="py-3.5 px-4 min-w-[180px]">Question</th>
+                        <th className="py-3.5 px-4 min-w-[240px]">Answer Preview</th>
+                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
@@ -1572,7 +1542,7 @@ export default function AdminDashboard() {
                           <td className="py-3 px-4 text-xs text-gray-500 max-w-md truncate">
                             {faq.answer}
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
