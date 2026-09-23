@@ -8,8 +8,32 @@ export type PortfolioItem = SiteData["portfolio"][number];
 export type TeamMember = SiteData["team"][number];
 export type TestimonialItem = SiteData["testimonials"][number];
 export type FaqItem = SiteData["faqs"][number];
+export interface ClientItem {
+  id: string;
+  name: string;
+  tag?: string;
+  logo?: string;
+}
 
-// siteData is the static JSON used for initial render and client components.
-// When content is updated via the Admin Panel, the JSON file on disk is updated
-// and Next.js will pick it up on the next server reload / revalidation.
+// Baseline static JSON for initial SSR / fallback
 export const siteData: SiteData = siteContentJson;
+
+// Server-side helper to read latest live content from disk
+export function getSiteData(): SiteData {
+  if (typeof window === "undefined") {
+    try {
+      // Dynamic require prevents client bundler issues
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const fs = require("fs");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const path = require("path");
+      const filePath = path.join(process.cwd(), "src", "data", "site-content.json");
+      if (fs.existsSync(filePath)) {
+        return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      }
+    } catch {
+      // safe fallback
+    }
+  }
+  return siteContentJson;
+}

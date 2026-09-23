@@ -36,18 +36,18 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-red-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50/50 via-white to-fuchsia-50/40 p-4">
       {/* Background decorative circles */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-red-600/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-red-400/10 rounded-full blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#6F20E8]/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#7C3AED]/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative w-full max-w-md bg-white border border-red-100 rounded-2xl p-8 shadow-xl shadow-red-600/10">
+      <div className="relative w-full max-w-md bg-white border border-purple-100 rounded-2xl p-8 shadow-xl shadow-[#6F20E8]/10">
         {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-red-600 mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-[#6F20E8] mb-6 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Website
         </Link>
@@ -86,7 +86,7 @@ export default function AdminLoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-sm transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6F20E8] focus:ring-2 focus:ring-[#6F20E8]/20 text-base sm:text-sm transition-all"
               />
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter admin password"
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-sm transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6F20E8] focus:ring-2 focus:ring-[#6F20E8]/20 text-base sm:text-sm transition-all"
               />
               <button
                 type="button"
@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
+            className="w-full mt-2 py-3 px-4 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white font-semibold rounded-xl shadow-lg shadow-[#6F20E8]/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 min-h-[48px]"
           >
             {loading ? (
               <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

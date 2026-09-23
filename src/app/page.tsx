@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { siteData } from "@/data/site";
+import { useSiteData } from "@/context/SiteDataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronRight, ChevronLeft, PhoneCall } from "lucide-react";
 import Image from "next/image";
+import { formatWhatsAppUrl } from "@/lib/utils";
+import ClientLogoMarquee from "@/components/home/ClientLogoMarquee";
 
 export default function Home() {
+  const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
   const showcaseRef = useRef<HTMLDivElement>(null);
+
+  const heroImages = siteData?.heroImages?.length ? siteData.heroImages : ["/hoardings.webp"];
 
   const scrollShowcase = (direction: 'left' | 'right') => {
     if (showcaseRef.current) {
@@ -19,11 +24,12 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (!heroImages.length) return;
     const interval = setInterval(() => {
-      setCurrentHeroImage((prev) => (prev + 1) % siteData.heroImages.length);
+      setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   return (
     <>
@@ -41,7 +47,7 @@ export default function Home() {
               className="absolute inset-0"
             >
               <Image
-                src={siteData.heroImages[currentHeroImage]}
+                src={heroImages[currentHeroImage % heroImages.length] || "/hoardings.webp"}
                 alt="Hero background"
                 fill
                 priority
@@ -53,16 +59,17 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/40 z-10" />
         </div>
 
-        <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-20 flex flex-col items-center text-center">
+        <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16 sm:pb-20 flex flex-col items-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-6"
           >
-            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em]">
-              Digital Printing • Signage • Visual Branding
-            </span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase shadow-lg">
+              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
+              <span>Digital Printing • Signage • Visual Branding</span>
+            </div>
           </motion.div>
 
           <motion.h1
@@ -71,7 +78,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tighter leading-[1.1] mb-8 max-w-5xl text-white drop-shadow-lg"
           >
-            WE PRINT IDEAS THAT <br className="hidden md:block" /> GET <span className="text-accent relative inline-block">
+            WE PRINT IDEAS THAT <br className="hidden md:block" /> GET <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white relative inline-block drop-shadow-md">
               NOTICED.
             </span>
           </motion.h1>
@@ -80,7 +87,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto mb-12 font-light leading-relaxed drop-shadow-md"
+            className="text-base sm:text-lg md:text-xl text-gray-100 max-w-2xl mx-auto mb-10 sm:mb-12 font-light leading-relaxed drop-shadow-md"
           >
             From high-impact banners to premium signage and large-format graphics, we turn your brand into something people can see, remember and trust.
           </motion.p>
@@ -89,17 +96,17 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col sm:flex-row items-center gap-4"
+            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
           >
             <Link
               href="/contact"
-              className="w-full sm:w-auto bg-accent hover:bg-red-600 text-white px-10 py-4 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-accent/20"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-10 py-4 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-[#6F20E8]/30 min-h-[48px]"
             >
               Get a Free Quote <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/portfolio"
-              className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center"
+              className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center min-h-[48px]"
             >
               Explore Our Work
             </Link>
@@ -108,7 +115,7 @@ export default function Home() {
         
         {/* Carousel Indicators */}
         <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-3">
-          {siteData.heroImages.map((_, i) => (
+          {heroImages.map((_, i) => (
             <button 
               key={i}
               onClick={() => setCurrentHeroImage(i)}
@@ -122,7 +129,7 @@ export default function Home() {
       {/* 2. TRUST / STATISTICS SECTION */}
       <section className="py-12 border-y border-black/5 bg-secondary-bg">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 md:gap-12">
             {[
               { number: "25+", label: "Years of Experience" },
               { number: "1000+", label: "Projects Completed" },
@@ -135,15 +142,18 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ delay: i * 0.1, duration: 0.6 }}
-                className="text-center flex flex-col gap-2"
+                className="text-center flex flex-col gap-2 p-2 sm:p-0"
               >
-                <span className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground drop-shadow-sm">{stat.number}</span>
-                <span className="text-sm text-muted uppercase tracking-wider font-semibold">{stat.label}</span>
+                <span className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter text-foreground drop-shadow-sm">{stat.number}</span>
+                <span className="text-xs sm:text-sm text-muted uppercase tracking-wider font-semibold">{stat.label}</span>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+ 
+      {/* 2.5 CLIENT COMPANIES INFINITE DUAL MARQUEE */}
+      <ClientLogoMarquee clients={siteData?.clients} />
 
       {/* 3. ABOUT INTRODUCTION */}
       <section className="py-24 md:py-32 relative overflow-hidden">
@@ -197,43 +207,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3.5 PROJECT SHOWCASE MARQUEE */}
-      <section className="py-24 md:py-32 bg-white border-t border-black/5 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+      {/* 3.5 PROJECT SHOWCASE INFINITE SLOW MARQUEE */}
+      <section className="py-20 md:py-28 bg-white border-t border-black/5 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div>
-            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block md:inline-block">
+            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-3 block md:inline-block">
               Project Showcase
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter">
               Our Recent Installations.
             </h2>
+            <p className="text-gray-500 text-sm mt-1">Glimpse into our live outdoor, retail, and corporate installations across Gujarat.</p>
           </div>
-          <div className="flex gap-4 justify-center">
-            <button onClick={() => scrollShowcase('left')} aria-label="Previous slide" className="w-12 h-12 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-sm bg-white">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button onClick={() => scrollShowcase('right')} aria-label="Next slide" className="w-12 h-12 rounded-full border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-sm bg-white">
-              <ChevronRight className="w-6 h-6" />
-            </button>
+          <div>
+            <Link
+              href="/portfolio"
+              className="inline-flex items-center gap-2 text-foreground font-bold uppercase tracking-widest text-xs md:text-sm hover:text-accent transition-colors group"
+            >
+              View All Projects <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
         
-        {/* Manual Scroll Slider */}
-        <div ref={showcaseRef} className="flex w-full overflow-x-auto pb-8 snap-x snap-mandatory" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            .hide-scroll::-webkit-scrollbar { display: none; }
-          `}} />
-          <div className="flex gap-6 min-w-max px-4 md:px-8 hide-scroll">
-            {[...siteData.portfolio.flatMap(p => p.images), ...siteData.portfolio.flatMap(p => p.images)].map((img, i) => (
-              <div key={i} className="relative w-80 md:w-[28rem] h-64 md:h-96 rounded-sm overflow-hidden flex-shrink-0 shadow-lg snap-center">
-                <Image
-                  src={img}
-                  alt={`Showcase ${i}`}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-            ))}
+        {/* Infinite Slow Marquee Track with Fade Masks */}
+        <div className="relative w-full overflow-hidden py-2">
+          {/* Left and Right Fade Masks */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+
+          {/* Marquee Track */}
+          <div className="animate-marquee-slow flex gap-6 min-w-max">
+            {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
+              const projectSlug = project.slug || project.id || project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const imgSrc = project.image ? encodeURI(project.image) : "/hoardings.webp";
+              return (
+                <Link
+                  key={`${project.id || i}-${i}`}
+                  href={`/portfolio/${projectSlug}`}
+                  className="group block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg border border-black/10 shrink-0 bg-gray-900 transition-all duration-300 hover:shadow-2xl"
+                >
+                  <Image
+                    src={imgSrc}
+                    alt={project.title}
+                    fill
+                    loading="eager"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity group-hover:opacity-90" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-1 group-hover:translate-y-0 transition-transform">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white mb-2 shadow-sm">
+                      {project.category}
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-bold text-white leading-snug line-clamp-1 drop-shadow-md">
+                      {project.title}
+                    </h3>
+                    <div className="flex items-center text-xs text-gray-300 mt-2">
+                      <span>{project.location}</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -346,75 +380,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. PORTFOLIO PREVIEW */}
-      <section className="py-24 md:py-32 bg-secondary-bg">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
-                Featured Work
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
-                Work That Speaks <br/> For Itself.
-              </h2>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <Link
-                href="/portfolio"
-                className="inline-flex items-center gap-2 text-foreground font-bold uppercase tracking-widest hover:text-accent transition-colors group"
-              >
-                View All Projects <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </motion.div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-             {siteData.portfolio.slice(0, 3).map((project, i) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-              >
-                <Link href={`/portfolio/${project.slug}`} className="group block relative overflow-hidden aspect-[4/3] bg-card-bg shadow-2xl rounded-sm">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
-                  <div className="absolute bottom-0 left-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
-                    <span className="text-accent text-xs font-bold uppercase tracking-widest mb-3 block">
-                      {project.category}
-                    </span>
-                    <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{project.title}</h3>
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-sm text-gray-300 font-medium">{project.location}</span>
-                      <span className="flex items-center gap-2 text-sm text-white uppercase tracking-wider font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                        View Project <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-             ))}
-          </div>
-        </div>
-      </section>
+
 
 
       {/* 7. FINAL CTA */}
-      <section className="py-24 md:py-32 bg-accent relative overflow-hidden">
+      <section className="py-20 sm:py-24 md:py-32 bg-gradient-to-br from-[#6F20E8] via-[#5B16C7] to-[#3B0764] relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <motion.h2 
@@ -422,7 +393,7 @@ export default function Home() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter text-white mb-8 drop-shadow-xl"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tighter text-white mb-6 sm:mb-8 drop-shadow-xl"
           >
             READY TO MAKE <br/> AN IMPRESSION?
           </motion.h2>
@@ -431,7 +402,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl text-white/90 max-w-2xl mx-auto mb-12 font-medium drop-shadow-md"
+            className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto mb-10 sm:mb-12 font-medium drop-shadow-md px-2"
           >
             Tell us what you&apos;re planning. We&apos;ll help turn it into something worth noticing.
           </motion.p>
@@ -440,19 +411,19 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
           >
             <Link
               href="/contact"
-              className="w-full sm:w-auto bg-black text-white hover:bg-neutral-900 px-10 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-2xl"
+              className="w-full sm:w-auto bg-black text-white hover:bg-neutral-900 px-10 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-2xl min-h-[48px]"
             >
               Get a Free Quote <ArrowRight className="w-4 h-4" />
             </Link>
             <a
-              href={`https://wa.me/${siteData.business.whatsapp}`}
+              href={formatWhatsAppUrl(siteData?.business?.whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto bg-black/10 backdrop-blur-md border-2 border-black text-black hover:bg-black hover:text-white px-10 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border-2 border-white text-white px-10 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 min-h-[48px]"
             >
               <PhoneCall className="w-4 h-4" /> Talk on WhatsApp
             </a>

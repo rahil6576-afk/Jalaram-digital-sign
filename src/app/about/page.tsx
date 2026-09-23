@@ -1,21 +1,25 @@
-import { siteData } from "@/data/site";
+import { siteData, getSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic";
+
 export function generateMetadata() {
+  const data = getSiteData();
   return {
-    title: `About Us | ${siteData.business.name}`,
-    description: siteData.aboutPage.heroSubtitle,
+    title: `About Us | ${data.business.name}`,
+    description: data.aboutPage.heroSubtitle,
   };
 }
 
 export default function AboutPage() {
-  const about = siteData.aboutPage;
+  const data = getSiteData();
+  const about = data.aboutPage;
   return (
     <>
       {/* PAGE HERO */}
-      <section className="pt-40 pb-20 bg-black border-b border-black/10 relative overflow-hidden">
+      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src={about.heroImage}
@@ -28,14 +32,15 @@ export default function AboutPage() {
         </div>
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
-            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
-              {about.heroTagline}
-            </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-lg">
+              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
+              <span>{about.heroTagline}</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
               {about.heroHeadline.replace("STORY.", "")}
-              <span className="text-accent">STORY.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">STORY.</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-200 font-light leading-relaxed drop-shadow-md">
+            <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed drop-shadow-md">
               {about.heroSubtitle}
             </p>
           </div>
@@ -43,7 +48,7 @@ export default function AboutPage() {
       </section>
 
       {/* STORY & APPROACH */}
-      <section className="py-24 md:py-32">
+      <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="relative aspect-square md:aspect-[4/3] bg-card-bg overflow-hidden rounded-sm group shadow-2xl">
@@ -106,15 +111,15 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 md:py-32 relative overflow-hidden">
+      <section className="py-16 sm:py-24 md:py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-accent/5 mix-blend-overlay" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tighter mb-6 sm:mb-8">
             {about.ctaHeadline}
           </h2>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 bg-accent hover:bg-red-600 text-white px-10 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest shadow-xl shadow-accent/20"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest shadow-xl shadow-[#6F20E8]/30 min-h-[48px]"
           >
             Get in Touch <ArrowRight className="w-5 h-5" />
           </Link>

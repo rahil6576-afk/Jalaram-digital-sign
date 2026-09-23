@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { siteData } from "@/data/site";
+import { useSiteData } from "@/context/SiteDataContext";
+import { formatWhatsAppUrl } from "@/lib/utils";
 
 export default function FloatingWhatsApp() {
   const pathname = usePathname();
+  const siteData = useSiteData();
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDraggingState, setIsDraggingState] = useState(false);
 
@@ -15,21 +17,20 @@ export default function FloatingWhatsApp() {
     startY: number;
     initialX: number;
     initialY: number;
-    moved: boolean;
+    hasMoved: boolean;
   }>({
     isDragging: false,
     startX: 0,
     startY: 0,
     initialX: 0,
     initialY: 0,
-    moved: false,
+    hasMoved: false,
   });
 
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  const whatsappUrl = `https://wa.me/${siteData.business.whatsapp}?text=${encodeURIComponent(
-    "Hello Jalaram Digital Sign, I would like to inquire about your printing & signage services."
-  )}`;
+  // Generate safe WhatsApp URL
+  const whatsappUrl = formatWhatsAppUrl(siteData?.business?.whatsapp);
 
   // Keep within bounds on window resize if already positioned
   useEffect(() => {
@@ -61,15 +62,8 @@ export default function FloatingWhatsApp() {
       startY: e.clientY,
       initialX: rect.left,
       initialY: rect.top,
-      moved: false,
+      hasMoved: false,
     };
-
-    setIsDraggingState(true);
-    try {
-      el.setPointerCapture(e.pointerId);
-    } catch {
-      // safe fallback
-    }
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -78,11 +72,15 @@ export default function FloatingWhatsApp() {
     const deltaX = e.clientX - dragState.current.startX;
     const deltaY = e.clientY - dragState.current.startY;
 
-    if (Math.hypot(deltaX, deltaY) > 5) {
-      dragState.current.moved = true;
+    // Only count as drag if moved more than 8px
+    if (Math.hypot(deltaX, deltaY) > 8) {
+      if (!dragState.current.hasMoved) {
+        dragState.current.hasMoved = true;
+        setIsDraggingState(true);
+      }
     }
 
-    if (dragState.current.moved) {
+    if (dragState.current.hasMoved) {
       const maxX = Math.max(16, window.innerWidth - 72);
       const maxY = Math.max(16, window.innerHeight - 72);
 
@@ -93,24 +91,21 @@ export default function FloatingWhatsApp() {
     }
   };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerUp = () => {
     if (!dragState.current.isDragging) return;
     dragState.current.isDragging = false;
     setIsDraggingState(false);
-    try {
-      buttonRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      // safe fallback
-    }
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    // If the user moved/dragged the button, do not trigger the WhatsApp link
-    if (dragState.current.moved) {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If the user actually dragged, cancel the link navigation
+    if (dragState.current.hasMoved) {
       e.preventDefault();
       e.stopPropagation();
-      dragState.current.moved = false;
+      dragState.current.hasMoved = false;
+      return;
     }
+    // Otherwise allow natural <a> navigation to open https://wa.me in new tab
   };
 
   if (pathname?.startsWith("/admin")) {
@@ -138,10 +133,10 @@ export default function FloatingWhatsApp() {
           : undefined
       }
       className={`fixed z-[9999] w-14 h-14 select-none touch-none group ${
-        !position ? "bottom-6 right-6" : ""
+        !position ? "bottom-5 right-4 sm:bottom-6 sm:right-6" : ""
       } ${isDraggingState ? "cursor-grabbing" : "cursor-grab"}`}
     >
-      {/* Tooltip positioned absolutely so it does not affect button dimensions or placement */}
+      {/* Tooltip positioned absolutely */}
       <div
         className={`hidden sm:block absolute top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-gray-950/95 text-white text-xs font-semibold rounded-full shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap backdrop-blur-md border border-white/10 ${
           tooltipOnRight ? "left-full ml-3" : "right-full mr-3"
@@ -158,7 +153,7 @@ export default function FloatingWhatsApp() {
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp with Jalaram Digital Sign"
         draggable={false}
-        className="relative flex items-center justify-center w-14 h-14 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-full shadow-2xl shadow-[#25D366]/50 hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 select-none"
+        className="relative flex items-center justify-center w-14 h-14 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-full shadow-2xl shadow-[#25D366]/50 hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none focus:ring-4 focus:ring-[#25D366]/30 select-none cursor-pointer"
       >
         {/* Radar ping effect */}
         {!isDraggingState && (

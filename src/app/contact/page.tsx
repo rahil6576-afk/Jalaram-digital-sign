@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { siteData } from "@/data/site";
+import { useSiteData } from "@/context/SiteDataContext";
 import { MapPin, Phone, Mail, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import { formatExternalUrl } from "@/lib/utils";
 
 export default function ContactPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const siteData = useSiteData();
   const contact = siteData.contactPage;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -16,7 +18,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="pt-40 pb-20 bg-black border-b border-black/10 relative overflow-hidden">
+      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src={contact.heroImage}
@@ -29,22 +31,23 @@ export default function ContactPage() {
         </div>
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
-            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
-              {contact.heroTagline}
-            </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-lg">
+              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
+              <span>{contact.heroTagline}</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
               {contact.heroHeadline}
             </h1>
-            <p className="text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl drop-shadow-md">
+            <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl drop-shadow-md">
               {contact.heroSubtitle}
             </p>
           </div>
         </div>
       </section>
 
-      <section className="py-24 md:py-32">
+      <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             {/* Contact Info */}
             <div className="space-y-10">
               <div>
@@ -71,6 +74,78 @@ export default function ContactPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Social Media Links */}
+                <div className="pt-4 border-t border-black/5">
+                  <h3 className="font-bold text-lg mb-3">Follow Our Social Channels</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      {
+                        name: "Instagram",
+                        href: siteData.socials.instagram,
+                        icon: (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        name: "Facebook",
+                        href: siteData.socials.facebook,
+                        icon: (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        name: "Twitter / X",
+                        href: siteData.socials.twitter,
+                        icon: (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                          </svg>
+                        ),
+                      },
+                      {
+                        name: "LinkedIn",
+                        href: siteData.socials.linkedin,
+                        icon: (
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                            <rect width="4" height="12" x="2" y="9"/>
+                            <circle cx="4" cy="4" r="2"/>
+                          </svg>
+                        ),
+                      },
+                    ].map((s) => {
+                      const finalUrl = formatExternalUrl(s.href);
+                      const hasLink = finalUrl !== "#";
+                      return (
+                        <a
+                          key={s.name}
+                          href={hasLink ? finalUrl : "#"}
+                          target={hasLink ? "_blank" : undefined}
+                          rel={hasLink ? "noopener noreferrer" : undefined}
+                          onClick={(e) => {
+                            if (!hasLink) e.preventDefault();
+                          }}
+                          title={hasLink ? `${s.name} - Opens in new tab` : `${s.name} (Configure link in Admin)`}
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-sm border text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-sm ${
+                            hasLink
+                              ? "bg-card-bg border-black/10 hover:border-[#6F20E8] hover:bg-[#6F20E8] hover:text-white text-gray-700 cursor-pointer"
+                              : "bg-gray-50 border-black/5 text-gray-400 hover:text-[#6F20E8] hover:border-purple-300 cursor-default"
+                          }`}
+                        >
+                          {s.icon}
+                          <span>{s.name}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -143,7 +218,7 @@ export default function ContactPage() {
                     <label className="text-sm font-medium text-gray-600">Message</label>
                     <textarea required rows={5} className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors resize-none rounded-sm" placeholder="Tell us about your project..." />
                   </div>
-                  <button type="submit" className="w-full bg-accent hover:bg-red-600 text-white px-8 py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-accent/20">
+                  <button type="submit" className="w-full bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-8 py-4 sm:py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-[#6F20E8]/30 min-h-[50px]">
                     Submit Enquiry <ArrowRight className="w-5 h-5" />
                   </button>
                 </form>

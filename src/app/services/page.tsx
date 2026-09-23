@@ -1,8 +1,10 @@
 import { Metadata } from "next";
-import { siteData } from "@/data/site";
+import { siteData, getSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: `Our Services | ${siteData.business.name}`,
@@ -10,10 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default function ServicesPage() {
+  const currentData = getSiteData();
   return (
     <>
       {/* PAGE HERO */}
-      <section className="pt-40 pb-20 bg-secondary-bg border-b border-black/5 relative overflow-hidden">
+      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-secondary-bg border-b border-black/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
             src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop"
@@ -26,13 +29,14 @@ export default function ServicesPage() {
         </div>
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
-            <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
-              Capabilities • Materials • Solutions
-            </span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 drop-shadow-sm text-foreground leading-[1.1]">
-              WHAT WE <span className="text-accent">CREATE.</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/90 border border-purple-200/80 text-[#6F20E8] font-bold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#6F20E8] shrink-0" />
+              <span>Capabilities • Materials • Solutions</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 drop-shadow-sm text-foreground leading-[1.1]">
+              WHAT WE <span className="text-[#6F20E8]">CREATE.</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed drop-shadow-sm">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 font-light leading-relaxed drop-shadow-sm">
               Comprehensive visual branding and printing solutions designed to get your business noticed.
             </p>
           </div>
@@ -40,10 +44,10 @@ export default function ServicesPage() {
       </section>
 
       {/* SERVICES GRID */}
-      <section className="py-24 md:py-32">
+      <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {siteData.services.map((service, index) => (
+            {currentData.services.map((service, index) => (
               <Link key={service.id} href={`/services/${service.slug}`} className="group block">
                 <div className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:border-accent/50 transition-all duration-300">
                   <div className="aspect-video relative overflow-hidden">

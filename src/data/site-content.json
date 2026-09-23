@@ -10,11 +10,43 @@
     "hours": "Mon - Sat: 9:00 AM - 8:00 PM"
   },
   "socials": {
-    "instagram": "#",
-    "facebook": "#",
-    "twitter": "#",
-    "linkedin": "#"
+    "instagram": "https://www.instagram.com/jalaram_digital_signs",
+    "facebook": "https://www.facebook.com/jalaramdigitalsign",
+    "twitter": "",
+    "linkedin": ""
   },
+  "clients": [
+    {
+      "id": "client-1",
+      "name": "BJP",
+      "tag": "Government & Civic Campaigns",
+      "logo": "/client-bjp.webp"
+    },
+    {
+      "id": "client-2",
+      "name": "NFSU College",
+      "tag": "National Forensic Sciences University",
+      "logo": "/client-nsfu.webp"
+    },
+    {
+      "id": "client-3",
+      "name": "Jay Gotli Mukhwas",
+      "tag": "Food & FMCG Brand",
+      "logo": "/client-mukhwas.webp"
+    },
+    {
+      "id": "client-4",
+      "name": "Mount Carmel School",
+      "tag": "Educational Institution",
+      "logo": "/client-mount-carmel.webp"
+    },
+    {
+      "id": "client-5",
+      "name": "Xavier School",
+      "tag": "Academic Institution",
+      "logo": "/client-st-xavier.webp"
+    }
+  ],
   "homePage": {
     "heroTagline": "Digital Printing • Signage • Visual Branding",
     "heroHeadline": "WE PRINT IDEAS THAT GET NOTICED.",
@@ -24,9 +56,18 @@
     "ctaHeadline": "Ready to Make Your Brand Impossible to Miss?",
     "ctaSubtitle": "Contact us today for a free quote and consultation.",
     "whyUsItems": [
-      { "title": "15+ Years Experience", "desc": "Trusted by hundreds of businesses across Gujarat since our founding." },
-      { "title": "State-of-the-Art Equipment", "desc": "Large-format printers and precision LED fabrication tools." },
-      { "title": "Fast Turnaround", "desc": "Most orders ready in 24–48 hours with professional installation." }
+      {
+        "title": "15+ Years Experience",
+        "desc": "Trusted by hundreds of businesses across Gujarat since our founding."
+      },
+      {
+        "title": "State-of-the-Art Equipment",
+        "desc": "Large-format printers and precision LED fabrication tools."
+      },
+      {
+        "title": "Fast Turnaround",
+        "desc": "Most orders ready in 24–48 hours with professional installation."
+      }
     ]
   },
   "aboutPage": {
@@ -42,9 +83,18 @@
     "qualityHeadline": "Quality & Craftsmanship",
     "qualitySubtitle": "We combine modern printing technology with hands-on fabrication expertise to deliver outstanding results.",
     "qualityPoints": [
-      { "title": "State-of-the-art Printing", "desc": "High-resolution large format printers ensuring vibrant colors and sharp details on any material." },
-      { "title": "Premium Materials", "desc": "We source high-grade vinyl, acrylic, and flex materials to ensure your signage withstands the elements." },
-      { "title": "Expert Installation", "desc": "Our job doesn't end at the printer. We offer professional, secure installation for all our signage products." }
+      {
+        "title": "State-of-the-art Printing",
+        "desc": "High-resolution large format printers ensuring vibrant colors and sharp details on any material."
+      },
+      {
+        "title": "Premium Materials",
+        "desc": "We source high-grade vinyl, acrylic, and flex materials to ensure your signage withstands the elements."
+      },
+      {
+        "title": "Expert Installation",
+        "desc": "Our job doesn't end at the printer. We offer professional, secure installation for all our signage products."
+      }
     ],
     "ctaHeadline": "Ready to work with us?"
   },
@@ -57,8 +107,8 @@
   },
   "heroImages": [
     "/hoardings.webp",
-    "/flex banner.webp",
-    "/3d led board.webp"
+    "/flex-banner.webp",
+    "/3d-led-board.webp"
   ],
   "bannerSizes": [
     {
@@ -67,9 +117,21 @@
       "material": "Star Flex 380 GSM",
       "minSize": "1 ft x 1 ft",
       "maxSize": "Any custom size",
-      "commonSizes": ["2 ft x 4 ft", "3 ft x 6 ft", "4 ft x 8 ft", "5 ft x 10 ft", "6 ft x 12 ft"],
+      "commonSizes": [
+        "2 ft x 4 ft",
+        "3 ft x 6 ft",
+        "4 ft x 8 ft",
+        "5 ft x 10 ft",
+        "6 ft x 12 ft"
+      ],
       "dpi": "72 DPI @ final print size",
-      "fileFormats": ["CDR", "AI", "PDF", "PSD", "JPEG (at actual size)"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PDF",
+        "PSD",
+        "JPEG (at actual size)"
+      ],
       "colorMode": "CMYK",
       "bleedArea": "0.5 inch on all sides",
       "notes": "Provide design in actual print size. Include 0.5 inch bleed. Font should be outlined/embedded."
@@ -80,9 +142,21 @@
       "material": "Oracal 3M Premium Vinyl",
       "minSize": "Any size",
       "maxSize": "48 inch width x unlimited length",
-      "commonSizes": ["A4", "A3", "A2", "A1", "Custom"],
+      "commonSizes": [
+        "A4",
+        "A3",
+        "A2",
+        "A1",
+        "Custom"
+      ],
       "dpi": "150-300 DPI",
-      "fileFormats": ["CDR", "AI", "PDF", "EPS", "SVG"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PDF",
+        "EPS",
+        "SVG"
+      ],
       "colorMode": "CMYK",
       "bleedArea": "3 mm on all sides",
       "notes": "For cut vinyl (single color), provide vector file. For printed vinyl, send high-res artwork."
@@ -93,9 +167,19 @@
       "material": "500 GSM Star Flex / Front Lit Flex",
       "minSize": "10 ft x 10 ft",
       "maxSize": "Unlimited (multi-section)",
-      "commonSizes": ["10 ft x 20 ft", "12 ft x 24 ft", "15 ft x 30 ft", "20 ft x 40 ft"],
+      "commonSizes": [
+        "10 ft x 20 ft",
+        "12 ft x 24 ft",
+        "15 ft x 30 ft",
+        "20 ft x 40 ft"
+      ],
       "dpi": "15-25 DPI @ full scale (300 DPI thumbnail scale-up)",
-      "fileFormats": ["CDR", "AI", "PSD", "JPEG (high-res)"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PSD",
+        "JPEG (high-res)"
+      ],
       "colorMode": "CMYK",
       "bleedArea": "1 inch on all sides",
       "notes": "For large hoardings, artwork can be at 1:10 scale at 150 DPI. Confirm exact size before sending file."
@@ -106,9 +190,21 @@
       "material": "Acrylic, ACP, Sunboard, MDF, Glass",
       "minSize": "Any size",
       "maxSize": "4 ft x 8 ft per sheet",
-      "commonSizes": ["A4", "A3", "2 ft x 4 ft", "3 ft x 4 ft", "4 ft x 8 ft"],
+      "commonSizes": [
+        "A4",
+        "A3",
+        "2 ft x 4 ft",
+        "3 ft x 4 ft",
+        "4 ft x 8 ft"
+      ],
       "dpi": "300-600 DPI",
-      "fileFormats": ["CDR", "AI", "PDF", "PSD", "PNG (transparent background)"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PDF",
+        "PSD",
+        "PNG (transparent background)"
+      ],
       "colorMode": "CMYK + White Ink layer",
       "bleedArea": "3 mm on all sides",
       "notes": "For transparent or backlit effects, provide separate white layer. Mention substrate material when ordering."
@@ -119,9 +215,18 @@
       "material": "50/50 Perforated Window Film",
       "minSize": "Any size",
       "maxSize": "4 ft x 50 ft roll",
-      "commonSizes": ["2 ft x 4 ft", "3 ft x 6 ft", "4 ft x 8 ft"],
+      "commonSizes": [
+        "2 ft x 4 ft",
+        "3 ft x 6 ft",
+        "4 ft x 8 ft"
+      ],
       "dpi": "150 DPI (at 50% opacity view)",
-      "fileFormats": ["CDR", "AI", "PDF", "JPEG"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PDF",
+        "JPEG"
+      ],
       "colorMode": "CMYK",
       "bleedArea": "0.5 inch on all sides",
       "notes": "Design must be bold with high contrast — lighter images do not print well on perforated film."
@@ -132,15 +237,23 @@
       "material": "Acrylic + Aluminum Frame + LED Module",
       "minSize": "1 ft x 1 ft",
       "maxSize": "Any custom size",
-      "commonSizes": ["2 ft x 3 ft", "2 ft x 4 ft", "3 ft x 5 ft", "4 ft x 6 ft"],
+      "commonSizes": [
+        "2 ft x 3 ft",
+        "2 ft x 4 ft",
+        "3 ft x 5 ft",
+        "4 ft x 6 ft"
+      ],
       "dpi": "300 DPI",
-      "fileFormats": ["CDR", "AI", "PDF"],
+      "fileFormats": [
+        "CDR",
+        "AI",
+        "PDF"
+      ],
       "colorMode": "CMYK or RGB (mention usage)",
       "bleedArea": "0.25 inch on all sides",
       "notes": "Provide logo and text in vector format. Mention if backlit or front-lit is required."
     }
   ],
-  "clients": [],
   "services": [
     {
       "id": "1",
@@ -150,7 +263,12 @@
       "description": "Our high-speed digital printing services offer crisp, vibrant results for brochures, flyers, business cards, and promotional materials. Perfect for short runs and fast turnaround times.",
       "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
       "category": "Printing",
-      "features": ["Fast Turnaround", "High Resolution", "Custom Sizes", "Vibrant Colors"],
+      "features": [
+        "Fast Turnaround",
+        "High Resolution",
+        "Custom Sizes",
+        "Vibrant Colors"
+      ],
       "featured": true,
       "sortOrder": 1
     },
@@ -160,9 +278,14 @@
       "title": "Flex & Banner Printing",
       "shortDescription": "Durable, high-impact banners for outdoor and indoor visibility.",
       "description": "Make your message impossible to miss. We produce bold, high-resolution banners built for storefronts, promotions, events, and outdoor visibility.",
-      "image": "/flex banner.webp",
+      "image": "/flex-banner.webp",
       "category": "Large Format",
-      "features": ["Weather Resistant", "Any Size", "Grommets & Finishing", "High Visibility"],
+      "features": [
+        "Weather Resistant",
+        "Any Size",
+        "Grommets & Finishing",
+        "High Visibility"
+      ],
       "featured": true,
       "sortOrder": 2
     },
@@ -172,9 +295,14 @@
       "title": "LED & Illuminated Signage",
       "shortDescription": "Stand out day and night with custom illuminated signs.",
       "description": "Premium LED signage designed to make your business visible 24/7. From backlit boards to 3D glowing letters, we build signs that demand attention.",
-      "image": "/3d led board.webp",
+      "image": "/3d-led-board.webp",
       "category": "Signage",
-      "features": ["Energy Efficient", "High Brightness", "Custom Designs", "Durable Build"],
+      "features": [
+        "Energy Efficient",
+        "High Brightness",
+        "Custom Designs",
+        "Durable Build"
+      ],
       "featured": true,
       "sortOrder": 3
     },
@@ -184,9 +312,14 @@
       "title": "Vinyl Printing",
       "shortDescription": "Versatile vinyl graphics for windows, walls, and vehicles.",
       "description": "Custom vinyl prints for a variety of applications including window decals, wall graphics, and vehicle branding. Precision cut and professionally installed.",
-      "image": "/vinyl printing.webp",
+      "image": "/vinyl-printing.webp",
       "category": "Printing",
-      "features": ["Indoor & Outdoor", "Precision Cut", "Matte & Gloss Options", "Easy Removal"],
+      "features": [
+        "Indoor & Outdoor",
+        "Precision Cut",
+        "Matte & Gloss Options",
+        "Easy Removal"
+      ],
       "featured": false,
       "sortOrder": 4
     }
@@ -212,9 +345,9 @@
       "title": "High-Resolution Flex Banners",
       "category": "Flex Banner",
       "description": "Vibrant, weather-resistant flex and star flex banners with reinforced grommets for storefront promotions, grand openings, and large-scale public events.",
-      "image": "/flex banner.webp",
+      "image": "/flex-banner.webp",
       "images": [
-        "/flex banner.webp"
+        "/flex-banner.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -226,9 +359,9 @@
       "title": "Commercial Vinyl Printing",
       "category": "Vinyl Printing",
       "description": "Precision-cut, high-grade self-adhesive vinyl for storefront branding, corporate wall murals, floor graphics, and commercial vehicle fleet wraps.",
-      "image": "/vinyl printing.webp",
+      "image": "/vinyl-printing.webp",
       "images": [
-        "/vinyl printing.webp"
+        "/vinyl-printing.webp"
       ],
       "location": "Ahmedabad",
       "featured": true,
@@ -240,9 +373,9 @@
       "title": "Radium & Reflective Work",
       "category": "Raduim Work",
       "description": "High-intensity radium and micro-prismatic retro-reflective sheet cutting for glow-in-the-dark night visibility, safety boards, and traffic signage.",
-      "image": "/radium work.webp",
+      "image": "/radium-work.webp",
       "images": [
-        "/radium work.webp"
+        "/radium-work.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -268,9 +401,9 @@
       "title": "1-Way Vision Glass Graphics",
       "category": "1Way Vision Print",
       "description": "Perforated window film graphics offering full-color exterior branding and privacy while maintaining crystal-clear outward visibility from indoors.",
-      "image": "/1 way vision print.webp",
+      "image": "/1-way-vision-print.webp",
       "images": [
-        "/1 way vision print.webp"
+        "/1-way-vision-print.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -282,9 +415,9 @@
       "title": "3D Laser-Cut Acrylic Boards",
       "category": "Acrylic Board",
       "description": "Custom laser-cut acrylic letters, embossed 3D logo plaques, clear reception backdrops, and premium polished corporate identity boards.",
-      "image": "/acrylic board.webp",
+      "image": "/acrylic-board.webp",
       "images": [
-        "/acrylic board.webp"
+        "/acrylic-board.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -296,9 +429,9 @@
       "title": "Illuminated Glow Sign Boards",
       "category": "Glow Sign",
       "description": "Backlit aluminum-cased glow sign boxes with high-lumen internal LED lighting and weather-proof flex faces for 24/7 retail and corporate recognition.",
-      "image": "/glow signs.webp",
+      "image": "/glow-signs.webp",
       "images": [
-        "/glow signs.webp"
+        "/glow-signs.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -310,9 +443,9 @@
       "title": "LED Display & Channel Boards",
       "category": "Board LED Board",
       "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence.",
-      "image": "/3d led board.webp",
+      "image": "/3d-led-board.webp",
       "images": [
-        "/3d led board.webp"
+        "/3d-led-board.webp"
       ],
       "location": "Ahmedabad",
       "featured": true,

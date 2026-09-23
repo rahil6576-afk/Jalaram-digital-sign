@@ -18,7 +18,7 @@ export async function GET() {
 
     const fileNames = fs.readdirSync(UPLOADS_DIR);
     const files = fileNames
-      .filter((name) => !name.startsWith(".") && /\.(png|jpe?g|webp|svg|gif)$/i.test(name))
+      .filter((name) => !name.startsWith(".") && /\.(png|jpe?g|webp)$/i.test(name))
       .map((name) => {
         const stats = fs.statSync(path.join(UPLOADS_DIR, name));
         return {
@@ -47,18 +47,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Check file type
-    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml", "image/gif"];
-    if (!validTypes.includes(file.type) && !/\.(png|jpe?g|webp|svg|gif)$/i.test(file.name)) {
+    // Check file type: strictly JPG, JPEG, PNG, WEBP
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    const hasValidExt = /\.(jpe?g|png|webp)$/i.test(file.name);
+    const hasValidMime = validTypes.includes(file.type);
+
+    if (!hasValidExt && !hasValidMime) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPG, PNG, WEBP, SVG, and GIF are allowed." },
+        { error: "Invalid photo format. Only JPG, JPEG, PNG, or WEBP photos are allowed." },
         { status: 400 }
       );
     }
 
     // Max 15MB size check
-    if (file.size > 15 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds 15MB limit" }, { status: 400 });
+    const MAX_SIZE = 15 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      return NextResponse.json(
+        { error: `File exceeds allowed size (${sizeMb}MB). Please upload files up to 15 MB.` },
+        { status: 400 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
