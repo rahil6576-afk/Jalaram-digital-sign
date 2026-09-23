@@ -13,8 +13,10 @@ import {
   Plus,
   Trash2,
   Edit3,
+  Eye,
   Check,
   X,
+  Menu,
   Loader2,
   Star,
   Globe,
@@ -27,7 +29,7 @@ interface Business {
   name: string; description: string; address: string; phone: string;
   whatsapp: string; email: string; mapsLink: string; hours: string;
 }
-interface Socials { instagram: string; facebook: string; twitter: string; linkedin: string; }
+interface Socials { instagram: string; facebook: string; }
 interface Service {
   id: string; slug: string; title: string; shortDescription?: string;
   description?: string; image: string; category: string; features: string[];
@@ -51,6 +53,12 @@ interface SiteData {
   testimonials: Testimonial[]; faqs: FAQ[];
 }
 interface UploadedFile { name: string; url: string; size: number; createdAt: string; }
+
+type ActiveModal = {
+  type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
+  idOrIndex: string | number;
+  isNew?: boolean;
+} | null;
 
 const TABS = [
   { id: "business", label: "Social Links", icon: Globe },
@@ -84,10 +92,10 @@ function Toast({ message, type, onDismiss }: { message: string; type: "success" 
     loading: "bg-blue-50 border-blue-200 text-blue-700",
   };
   return (
-    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-xl border flex items-center gap-2.5 shadow-xl text-sm font-semibold ${colors[type]}`}>
+    <div className={`fixed bottom-6 right-6 z-[9999] px-5 py-3 rounded-xl border flex items-center gap-2.5 shadow-xl text-sm font-semibold ${colors[type]}`}>
       {type === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : type === "success" ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
       {message}
-      <button onClick={onDismiss} className="ml-2 opacity-60 hover:opacity-100"><X className="w-3.5 h-3.5" /></button>
+      <button type="button" onClick={onDismiss} className="ml-2 opacity-60 hover:opacity-100"><X className="w-3.5 h-3.5" /></button>
     </div>
   );
 }
@@ -232,6 +240,98 @@ function ImageInput({ value, onChange, label }: { value: string; onChange: (v: s
   );
 }
 
+// ── Modal Pop Screen Wrapper ───────────────────────────────────────────────
+function ModalWrapper({
+  title,
+  subtitle,
+  icon,
+  children,
+  onClose,
+  onSave,
+  saving,
+  errorMessage,
+}: {
+  title: string;
+  subtitle: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  onClose: () => void;
+  onSave: () => void;
+  saving: boolean;
+  errorMessage?: string | null;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-50/70 via-white to-white shrink-0">
+          <div className="flex items-center gap-3">
+            {icon && (
+              <div className="w-10 h-10 rounded-xl bg-purple-100/70 text-[#6F20E8] flex items-center justify-center font-bold shrink-0 border border-purple-200/60">
+                {icon}
+              </div>
+            )}
+            <div>
+              <h3 className="font-bold text-base sm:text-lg text-gray-900">{title}</h3>
+              <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Scrollable Body */}
+        <div className="p-6 overflow-y-auto space-y-4 flex-1 text-left">
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+              <span className="text-base shrink-0">⚠️</span>
+              <span>{errorMessage}</span>
+            </div>
+          )}
+          {children}
+        </div>
+
+        {/* Modal Footer with Close Details and Save */}
+        <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            Close Details
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={(e) => {
+              e.preventDefault();
+              onSave();
+            }}
+            className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Section Header with Save Button ─────────────────────────────────────────
 function SectionHeader({
   title,
@@ -256,7 +356,11 @@ function SectionHeader({
         {actionButton}
         <button
           type="button"
-          onClick={onSave}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onSave();
+          }}
           disabled={saving}
           className="flex items-center gap-1.5 py-2 px-4 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
         >
@@ -277,6 +381,7 @@ const labelCls = "text-xs font-semibold text-gray-500 uppercase tracking-wider m
 // ── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("business");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [data, setData] = useState<SiteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -285,10 +390,47 @@ export default function AdminDashboard() {
   const [mediaUploading, setMediaUploading] = useState(false);
   const mediaFileRef = useRef<HTMLInputElement>(null);
 
-  // Expanded items state: click photo/card to expand details
-  const [expandedPortfolio, setExpandedPortfolio] = useState<string | null>(null);
-  const [expandedService, setExpandedService] = useState<string | null>(null);
-  const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+  // Active modal popup state for viewing & editing entries in a popup screen
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  // Delete confirmation popup state
+  const [deletePrompt, setDeletePrompt] = useState<{
+    type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
+    idOrIndex: string | number;
+    name: string;
+  } | null>(null);
+
+  // Backward compatibility / convenience setters that open/close the modal
+  const setExpandedPortfolio = (id: string | null) => setActiveModal(id ? { type: "portfolio", idOrIndex: id } : null);
+  const setExpandedService = (id: string | null) => setActiveModal(id ? { type: "service", idOrIndex: id } : null);
+  const setExpandedTeam = (id: string | null) => setActiveModal(id ? { type: "team", idOrIndex: id } : null);
+
+  const closeModal = () => {
+    // If closing a draft that was never validly saved, clean it up
+    if (activeModal?.isNew && data) {
+      if (activeModal.type === "portfolio") {
+        setData((p) => p ? { ...p, portfolio: p.portfolio.filter((x) => x.id !== activeModal.idOrIndex || x.title.trim() !== "") } : p);
+      } else if (activeModal.type === "service") {
+        setData((p) => p ? { ...p, services: p.services.filter((x) => x.id !== activeModal.idOrIndex || x.title.trim() !== "") } : p);
+      } else if (activeModal.type === "team") {
+        setData((p) => p ? { ...p, team: p.team.filter((x) => x.id !== activeModal.idOrIndex || x.name.trim() !== "") } : p);
+      } else if (activeModal.type === "client") {
+        setData((p) => p ? { ...p, clients: (p.clients || []).filter((x) => x.id !== activeModal.idOrIndex || x.name.trim() !== "") } : p);
+      } else if (activeModal.type === "testimonial") {
+        setData((p) => p ? { ...p, testimonials: p.testimonials.filter((x) => x.id !== activeModal.idOrIndex || x.name.trim() !== "") } : p);
+      } else if (activeModal.type === "faq") {
+        setData((p) => p ? { ...p, faqs: p.faqs.filter((x) => x.id !== activeModal.idOrIndex || x.question.trim() !== "") } : p);
+      } else if (activeModal.type === "hero") {
+        setData((p) => p ? { ...p, heroImages: p.heroImages.filter((_, idx) => idx !== activeModal.idOrIndex) } : p);
+      }
+    }
+    setActiveModal(null);
+    setModalError(null);
+    setExpandedPortfolio(null);
+    setExpandedService(null);
+    setExpandedTeam(null);
+  };
 
   const showToast = useCallback((message: string, type: "success" | "error" | "loading") => {
     setToast({ message, type });
@@ -342,20 +484,19 @@ export default function AdminDashboard() {
     return c;
   };
 
-  const handleSave = async () => {
-    if (!data) return;
+  const handleSave = async (customData?: SiteData) => {
+    const payload = customData || data;
+    if (!payload) return;
     setSaving(true);
     showToast("Saving…", "loading");
     try {
       const sanitizedData: SiteData = {
-        ...data,
+        ...payload,
         socials: {
-          instagram: cleanSocialUrl(data.socials?.instagram || ""),
-          facebook: cleanSocialUrl(data.socials?.facebook || ""),
-          twitter: cleanSocialUrl(data.socials?.twitter || ""),
-          linkedin: cleanSocialUrl(data.socials?.linkedin || ""),
+          instagram: cleanSocialUrl(payload.socials?.instagram || ""),
+          facebook: cleanSocialUrl(payload.socials?.facebook || ""),
         },
-        clients: (data.clients || []).filter((c) => c.name.trim() !== ""),
+        clients: (payload.clients || []).filter((c) => c.name.trim() !== ""),
       };
 
       // Validate client logo formats (must be JPG, JPEG, PNG, or WEBP if provided)
@@ -378,128 +519,210 @@ export default function AdminDashboard() {
         body: JSON.stringify(sanitizedData),
       });
       if (!res.ok) throw new Error("Save failed");
-
       setData(sanitizedData);
 
-      // Instant live sync across all components and open browser tabs
+      // Immediately propagate updates to localStorage and custom events
+      // This synchronizes all open browser tabs and components instantly with ZERO page reload!
       try {
         localStorage.setItem("jalaram_site_content_v2", JSON.stringify(sanitizedData));
         localStorage.setItem("jalaram_site_content_v2_time", Date.now().toString());
         window.dispatchEvent(new CustomEvent("site-content-updated", { detail: sanitizedData }));
       } catch {
-        // safe fallback
+        // safe fallback if storage is restricted
       }
 
-      showToast("Saved successfully! Live site updated.", "success");
+      showToast("Saved successfully!", "success");
     } catch {
-      showToast("Failed to save. Please try again.", "error");
+      showToast("Failed to save changes", "error");
     } finally {
       setSaving(false);
     }
   };
 
-  const updateSocials = (field: keyof Socials, value: string) => {
-    let clean = value;
-    while (clean.startsWith("#")) {
-      clean = clean.slice(1);
+  // Execute deletion after user confirms in popup
+  const executeDelete = async () => {
+    if (!deletePrompt || !data) return;
+    const { type, idOrIndex } = deletePrompt;
+    let updated: SiteData = { ...data };
+
+    if (type === "portfolio") {
+      updated = { ...updated, portfolio: updated.portfolio.filter((x) => x.id !== idOrIndex) };
+    } else if (type === "service") {
+      updated = { ...updated, services: updated.services.filter((x) => x.id !== idOrIndex) };
+    } else if (type === "team") {
+      updated = { ...updated, team: updated.team.filter((x) => x.id !== idOrIndex) };
+    } else if (type === "client") {
+      updated = { ...updated, clients: (updated.clients || []).filter((x) => x.id !== idOrIndex) };
+    } else if (type === "testimonial") {
+      updated = { ...updated, testimonials: updated.testimonials.filter((x) => x.id !== idOrIndex) };
+    } else if (type === "faq") {
+      updated = { ...updated, faqs: updated.faqs.filter((x) => x.id !== idOrIndex) };
+    } else if (type === "hero") {
+      updated = { ...updated, heroImages: updated.heroImages.filter((_, idx) => idx !== idOrIndex) };
     }
-    setData((prev) => prev ? { ...prev, socials: { ...prev.socials, [field]: clean } } : prev);
+
+    setData(updated);
+    setDeletePrompt(null);
+    await handleSave(updated);
   };
 
-  const handleSocialBlur = (field: keyof Socials) => {
+  const updateBusiness = (k: keyof Business, v: string) =>
+    setData((p) => p ? { ...p, business: { ...p.business, [k]: v } } : p);
+
+  const updateSocials = (k: keyof Socials, v: string) =>
+    setData((p) => p ? { ...p, socials: { ...p.socials, [k]: v } } : p);
+
+  const handleSocialBlur = (k: keyof Socials) => {
     if (!data) return;
-    const val = data.socials[field]?.trim();
-    if (!val) return;
-    const formatted = cleanSocialUrl(val);
-    setData((prev) => prev ? { ...prev, socials: { ...prev.socials, [field]: formatted } } : prev);
+    const current = data.socials[k];
+    const cleaned = cleanSocialUrl(current);
+    if (cleaned !== current) {
+      updateSocials(k, cleaned);
+    }
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-400">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin mx-auto mb-3 text-[#6F20E8]" />
-          <p className="text-sm font-medium">Loading dashboard…</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#6F20E8]" />
+          <p className="text-sm font-medium text-gray-500">Loading admin panel…</p>
         </div>
       </div>
     );
   }
 
-  if (!data) return (
-    <div className="flex-1 flex items-center justify-center text-red-400 text-sm font-medium">
-      Failed to load site data. Please refresh.
-    </div>
-  );
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-red-500 font-medium">Failed to load content.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row min-h-0">
-      {/* Sidebar Tabs (desktop) */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 bg-white border-r border-gray-200 pt-6 pb-8 px-3 gap-1">
-        {TABS.map(({ id, label, icon: Icon }) => (
+    <div className="min-h-screen bg-[#F8F9FC] text-gray-900 flex flex-col md:flex-row">
+      {/* ── MOBILE TOP BAR ────────────────────────────────────────── */}
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <div className="flex items-center gap-2.5">
           <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-left transition-all ${activeTab === id ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-md shadow-[#6F20E8]/25" : "text-gray-500 hover:text-gray-900 hover:bg-purple-50"}`}
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+            title="Open navigation menu"
           >
-            <Icon className="w-4 h-4 shrink-0" />
-            {label}
+            <Menu className="w-5 h-5" />
           </button>
-        ))}
-        <div className="mt-auto pt-6 border-t border-gray-200">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-sm font-bold rounded-xl shadow-lg shadow-[#6F20E8]/25 transition-all disabled:opacity-50 active:scale-[0.98]"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#6F20E8] to-[#8A3FFC] flex items-center justify-center text-white font-black text-xs">
+              J
+            </div>
+            <span className="font-bold text-sm text-gray-900">Jalaram Admin</span>
+          </div>
         </div>
-      </aside>
-
-      {/* Mobile Tab Bar — smooth horizontal swipe with no scrollbar */}
-      <div className="md:hidden flex overflow-x-auto gap-1.5 p-3 bg-white border-b border-gray-200 shrink-0 no-scrollbar touch-pan-x">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 min-h-[36px] ${activeTab === id ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-sm" : "text-gray-500 hover:text-gray-900 bg-gray-50 active:bg-gray-100"}`}
-          >
-            <Icon className="w-3.5 h-3.5 shrink-0" />
-            {label}
-          </button>
-        ))}
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-semibold text-[#6F20E8] bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg"
+        >
+          View Site ↗
+        </a>
       </div>
 
-      {/* Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="max-w-5xl mx-auto space-y-6">
-          {/* Mobile Save Button */}
-          <div className="md:hidden flex justify-end">
+      {/* ── MOBILE DRAWER BACKDROP ─────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden animate-fade-in"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* ── SIDEBAR (DESKTOP & MOBILE DRAWER) ──────────────────────── */}
+      <aside
+        className={`fixed md:sticky top-0 left-0 z-50 md:z-30 h-screen w-64 bg-white border-r border-gray-200 flex flex-col justify-between transition-transform duration-300 ease-in-out shrink-0 ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div>
+          {/* Sidebar Header */}
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#6F20E8] to-[#8A3FFC] flex items-center justify-center shadow-md shadow-[#6F20E8]/20 shrink-0">
+                <span className="text-white font-black text-lg">J</span>
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-sm font-bold text-gray-900 truncate">Jalaram Admin</h1>
+                <p className="text-[11px] text-gray-400 truncate">Content & Site Manager</p>
+              </div>
+            </div>
             <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 py-2 px-5 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-sm font-bold rounded-xl shadow-md disabled:opacity-50 min-h-[44px]"
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="md:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600"
             >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Save
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* ── SOCIAL LINKS ─────────────────────────────────────────── */}
+          {/* Navigation Links */}
+          <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const isActive = activeTab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(t.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-left ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-md shadow-[#6F20E8]/25 font-bold"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-purple-50/60"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{t.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer with View Site Link */}
+        <div className="p-4 border-t border-gray-100">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[#6F20E8] bg-purple-50 border border-purple-200 hover:bg-purple-100 transition-colors shadow-sm"
+          >
+            View Site ↗
+          </a>
+        </div>
+      </aside>
+
+      {/* ── MAIN CONTENT AREA ──────────────────────────────────────── */}
+      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 max-w-6xl">
+        <div className="space-y-6">
+          {/* ── SOCIAL LINKS & BUSINESS INFO ────────────────────────── */}
           {activeTab === "business" && (
             <div className="space-y-6">
               <SectionHeader
-                title="Social Media Links"
-                subtitle="Manage your public social media profiles and links."
+                title="Business & Social Links"
+                subtitle="Configure official social media profile URLs and business contact details."
                 onSave={handleSave}
                 saving={saving}
               />
               <div className={sectionCard}>
-                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2"><Globe className="w-4 h-4 text-[#6F20E8]" /> Social Profiles</h3>
+                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-[#6F20E8]" /> Official Social Profiles
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(["instagram","facebook","twitter","linkedin"] as (keyof Socials)[]).map((key) => (
+                  {(["instagram", "facebook"] as (keyof Socials)[]).map((key) => (
                     <div key={key}>
                       <label className={labelCls}>{key.charAt(0).toUpperCase() + key.slice(1)} URL</label>
                       <input
@@ -514,47 +737,147 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               </div>
+
+              <div className={sectionCard}>
+                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2"><Building2 className="w-4 h-4 text-[#6F20E8]" /> Business Contact Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelCls}>Business Name</label>
+                    <input type="text" value={data.business.name} onChange={(e) => updateBusiness("name", e.target.value)} className={field} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Phone Number</label>
+                    <input type="text" value={data.business.phone} onChange={(e) => updateBusiness("phone", e.target.value)} className={field} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>WhatsApp Number</label>
+                    <input type="text" value={data.business.whatsapp} onChange={(e) => updateBusiness("whatsapp", e.target.value)} className={field} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Email Address</label>
+                    <input type="text" value={data.business.email} onChange={(e) => updateBusiness("email", e.target.value)} className={field} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Address</label>
+                    <input type="text" value={data.business.address} onChange={(e) => updateBusiness("address", e.target.value)} className={field} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Google Maps Embed Link</label>
+                    <input type="text" value={data.business.mapsLink} onChange={(e) => updateBusiness("mapsLink", e.target.value)} className={field} />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* ── HERO IMAGES ────────────────────────────────────────────── */}
+          {/* ── HERO IMAGES (TABLE VIEW + MODAL POP SCREEN) ───────────── */}
           {activeTab === "hero" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Hero Carousel Images"
-                subtitle="These images cycle through the homepage hero section. Paste an image URL or upload a file."
+                subtitle="Click any row or action icon to view and edit the hero slide in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
                   <button
                     type="button"
-                    onClick={() => setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p)}
+                    onClick={() => {
+                      const newIdx = data.heroImages.length;
+                      setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
+                      setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true });
+                    }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-xs md:text-sm font-semibold rounded-xl text-[#6F20E8] transition-all border border-purple-200"
                   >
                     <Plus className="w-4 h-4" /> Add Image
                   </button>
                 }
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {data.heroImages.map((url, i) => (
-                  <div key={i} className={sectionCard + " !space-y-3"}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Slide {i + 1}</span>
-                      <button onClick={() => setData((p) => p ? { ...p, heroImages: p.heroImages.filter((_, idx) => idx !== i) } : p)} className="text-red-500 hover:text-red-600 p-1 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                    <ImageInput value={url} onChange={(v) => setData((p) => { if (!p) return p; const imgs = [...p.heroImages]; imgs[i] = v; return { ...p, heroImages: imgs }; })} />
-                  </div>
-                ))}
-              </div>
+
+              {data.heroImages.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No hero images added yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-14">Slide</th>
+                        <th className="py-3.5 px-4 w-32">Preview</th>
+                        <th className="py-3.5 px-4">Image Source</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.heroImages.map((url, i) => (
+                        <tr
+                          key={i}
+                          onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3 px-4 text-center">
+                            <span className="w-7 h-7 rounded-full bg-purple-50 text-[#6F20E8] font-bold text-xs inline-flex items-center justify-center border border-purple-200">
+                              {i + 1}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="w-24 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                              {url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={url} alt={`Slide ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <ImageIcon className="w-6 h-6 text-gray-300" />
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-medium text-gray-900 truncate max-w-md">{url || <span className="text-gray-400 italic">No image URL configured</span>}</p>
+                            <span className="text-xs text-gray-400">Click to view & edit details</span>
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "hero", idOrIndex: i, name: `Hero Slide ${i + 1}` })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete Slide"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── CLIENT LOGOS MARQUEE ───────────────────────────────────── */}
+          {/* ── CLIENT LOGOS MARQUEE (TABLE VIEW + MODAL POP SCREEN) ──── */}
           {activeTab === "clients" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Client Companies & Marquee Logos"
-                subtitle="Manage the client organizations displayed in the infinite dual marquee on the homepage."
+                subtitle="All client entries displayed in a table. Click any entry or photo to view and edit in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
@@ -563,11 +886,12 @@ export default function AdminDashboard() {
                     onClick={() => {
                       const newClient: ClientCompany = {
                         id: `client-${genId()}`,
-                        name: "New Client",
-                        tag: "Client Organization",
+                        name: "",
+                        tag: "",
                         logo: "",
                       };
                       setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
+                      setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -580,7 +904,7 @@ export default function AdminDashboard() {
               <div className="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs text-purple-900 font-medium flex items-center gap-2.5 shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-[#6F20E8] shrink-0" />
                 <span>
-                  <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>15 MB</strong> in size. Logos are seamlessly displayed without square background boxes in the marquee.
+                  <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>15 MB</strong> in size. Logos are displayed seamlessly without background boxes.
                 </span>
               </div>
 
@@ -588,97 +912,96 @@ export default function AdminDashboard() {
                 <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                   <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm font-semibold text-gray-700">No client companies added yet</p>
-                  <p className="text-xs text-gray-400 mt-1">Click &quot;Add Client&quot; above to add brands like BJP, NFSU College, Xavier School, etc.</p>
+                  <p className="text-xs text-gray-400 mt-1">Click &quot;Add Client Company&quot; above to add brands.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {data.clients.map((client, i) => (
-                    <div key={client.id || i} className={sectionCard + " !space-y-4"}>
-                      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-6 h-6 rounded-full bg-purple-50 text-[#6F20E8] font-bold text-xs flex items-center justify-center border border-purple-200">
-                            {i + 1}
-                          </span>
-                          <span className="font-bold text-sm text-gray-900 truncate max-w-[180px]">{client.name || "Untitled Client"}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setData((p) => p ? { ...p, clients: (p.clients || []).filter((_, idx) => idx !== i) } : p);
-                          }}
-                          className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1 text-xs font-semibold"
-                          title="Remove Client"
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4 w-28">Logo</th>
+                        <th className="py-3.5 px-4">Company / Institution Name</th>
+                        <th className="py-3.5 px-4">Category / Tag</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.clients.map((client, i) => (
+                        <tr
+                          key={client.id || i}
+                          onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
-                          <Trash2 className="w-4 h-4" /> Remove
-                        </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <label className={labelCls}>Company / Institution Name *</label>
-                          <input
-                            type="text"
-                            value={client.name}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setData((p) => {
-                                if (!p) return p;
-                                const updated = [...(p.clients || [])];
-                                updated[i] = { ...updated[i], name: val };
-                                return { ...p, clients: updated };
-                              });
-                            }}
-                            placeholder="e.g. BJP, NFSU College, Xavier School..."
-                            className={field}
-                          />
-                        </div>
-                        <div>
-                          <label className={labelCls}>Category / Tag (Optional)</label>
-                          <input
-                            type="text"
-                            value={client.tag || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setData((p) => {
-                                if (!p) return p;
-                                const updated = [...(p.clients || [])];
-                                updated[i] = { ...updated[i], tag: val };
-                                return { ...p, clients: updated };
-                              });
-                            }}
-                            placeholder="e.g. Educational Institution, Food Brand..."
-                            className={field}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <ImageInput
-                          label="Client Logo Image"
-                          value={client.logo || ""}
-                          onChange={(v) => {
-                            setData((p) => {
-                              if (!p) return p;
-                              const updated = [...(p.clients || [])];
-                              updated[i] = { ...updated[i], logo: v };
-                              return { ...p, clients: updated };
-                            });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            {i + 1}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="w-16 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center p-1 overflow-hidden shrink-0">
+                              {client.logo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={client.logo} alt={client.name} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <Building2 className="w-5 h-5 text-gray-300" />
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-bold text-gray-900">{client.name || "Untitled Client"}</p>
+                            <span className="text-xs text-gray-400">Click to view & edit details</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {client.tag ? (
+                              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                {client.tag}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">—</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "client", idOrIndex: client.id, name: client.name || "this client" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Remove Client"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── PORTFOLIO (GRID VIEW WITH CLICK-TO-EXPAND DETAILS) ─────── */}
+          {/* ── PORTFOLIO (TABLE VIEW + MODAL POP SCREEN) ─────────────── */}
           {activeTab === "portfolio" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Portfolio Projects"
-                subtitle="Click any photo or project card to view and edit its full details."
+                subtitle="All projects organized in a table. Click any row or action icon to view and edit details in a popup modal screen."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
@@ -688,16 +1011,16 @@ export default function AdminDashboard() {
                       const newItem: PortfolioItem = {
                         id: genId(),
                         slug: `project-${genId()}`,
-                        title: "New Project",
+                        title: "",
                         category: "Hoardings",
                         image: "",
                         images: [],
-                        location: "Gandhinagar",
+                        location: "",
                         featured: false,
                         sortOrder: data.portfolio.length + 1,
                       };
                       setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
-                      setExpandedPortfolio(newItem.id);
+                      setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -706,250 +1029,109 @@ export default function AdminDashboard() {
                 }
               />
 
-              {/* Portfolio Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {data.portfolio.map((item) => {
-                  const isExpanded = expandedPortfolio === item.id;
-                  return (
-                    <div
-                      key={item.id}
-                      className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all flex flex-col ${
-                        isExpanded ? "border-[#6F20E8] ring-2 ring-[#6F20E8]/15 sm:col-span-2 lg:col-span-3" : "border-gray-200 hover:shadow-md"
-                      }`}
-                    >
-                      {/* Photo Thumbnail / Banner — Clicking photo opens all details */}
-                      <div
-                        onClick={() => setExpandedPortfolio(isExpanded ? null : item.id)}
-                        className="relative aspect-[4/3] w-full bg-gray-100 cursor-pointer group border-b border-gray-200 overflow-hidden"
-                        title="Click photo to view or edit details"
-                      >
-                        {item.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                            <ImageIcon className="w-12 h-12 mb-2 text-gray-300 group-hover:text-[#6F20E8] transition-colors" />
-                            <span className="text-xs font-semibold text-gray-500">Click to add cover photo</span>
-                          </div>
-                        )}
-
-                        {item.featured && (
-                          <span className="absolute top-2.5 left-2.5 text-[10px] font-bold uppercase bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white px-2.5 py-1 rounded-full shadow-md">
-                            Featured
-                          </span>
-                        )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3.5">
-                          <span className="text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
-                            <Edit3 className="w-3.5 h-3.5" />
-                            {isExpanded ? "Hide Details" : "Click photo to edit details"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Summary Info Bar */}
-                      <div className="p-4 flex items-center justify-between gap-2">
-                        <div
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => setExpandedPortfolio(isExpanded ? null : item.id)}
+              {data.portfolio.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <LayoutGrid className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No portfolio projects found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4 w-28">Photo</th>
+                        <th className="py-3.5 px-4">Project Title</th>
+                        <th className="py-3.5 px-4">Category</th>
+                        <th className="py-3.5 px-4">Location</th>
+                        <th className="py-3.5 px-4">Status</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.portfolio.map((item, idx) => (
+                        <tr
+                          key={item.id}
+                          onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
-                          <h4 className="font-bold text-gray-900 text-sm truncate">{item.title || "Untitled Project"}</h4>
-                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                            <span className="text-[11px] font-semibold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            {idx + 1}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                              {item.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <ImageIcon className="w-5 h-5 text-gray-300" />
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-bold text-gray-900">
+                            <div className="max-w-[220px] truncate">{item.title || "Untitled Project"}</div>
+                            <span className="text-xs font-normal text-gray-400">Click to view & edit details</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
                               {item.category}
                             </span>
-                            {item.location && (
-                              <span className="text-[11px] text-gray-500 truncate">· {item.location}</span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-600 text-xs font-medium">
+                            {item.location || "—"}
+                          </td>
+                          <td className="py-3 px-4">
+                            {item.featured ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">Standard</span>
                             )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedPortfolio(isExpanded ? null : item.id)}
-                            className={`p-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1 ${
-                              isExpanded
-                                ? "bg-[#6F20E8] text-white border-[#6F20E8]"
-                                : "bg-purple-50 text-[#6F20E8] border-purple-200 hover:bg-purple-100"
-                            }`}
-                            title={isExpanded ? "Hide Details" : "Edit Details"}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{isExpanded ? "Close" : "Details"}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setData((p) => p ? { ...p, portfolio: p.portfolio.filter((x) => x.id !== item.id) } : p);
-                            }}
-                            className="text-red-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Delete Project"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Expanded Full Details Form (No Description Field) */}
-                      {isExpanded && (
-                        <div className="border-t border-gray-100 p-5 space-y-4 bg-gray-50/80">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="sm:col-span-2">
-                              <label className={labelCls}>Project Title</label>
-                              <input
-                                type="text"
-                                value={item.title}
-                                onChange={(e) => setData((p) => p ? {
-                                  ...p,
-                                  portfolio: p.portfolio.map((x) => x.id === item.id ? {
-                                    ...x,
-                                    title: e.target.value,
-                                    slug: x.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
-                                  } : x)
-                                } : p)}
-                                className={field}
-                              />
-                            </div>
-                            <div>
-                              <label className={labelCls}>Category</label>
-                              <select
-                                value={item.category}
-                                onChange={(e) => setData((p) => p ? {
-                                  ...p,
-                                  portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
-                                } : p)}
-                                className={field + " cursor-pointer font-medium"}
-                              >
-                                {CATEGORY_OPTIONS.map((cat) => (
-                                  <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                                {!CATEGORY_OPTIONS.includes(item.category) && item.category && (
-                                  <option value={item.category}>{item.category}</option>
-                                )}
-                              </select>
-                            </div>
-                            <div>
-                              <label className={labelCls}>Location</label>
-                              <input
-                                type="text"
-                                value={item.location}
-                                onChange={(e) => setData((p) => p ? {
-                                  ...p,
-                                  portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
-                                } : p)}
-                                className={field}
-                              />
-                            </div>
-                          </div>
-
-                          <ImageInput
-                            label="Cover Photo"
-                            value={item.image}
-                            onChange={(v) => setData((p) => p ? {
-                              ...p,
-                              portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: v } : x)
-                            } : p)}
-                          />
-
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <label className={labelCls}>Gallery Photos</label>
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setData((p) => p ? {
-                                  ...p,
-                                  portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: [...x.images, ""] } : x)
-                                } : p)}
-                                className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
+                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
                               >
-                                <Plus className="w-3 h-3" /> Add Image
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "portfolio", idOrIndex: item.id, name: item.title || "this project" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete Project"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            {item.images.map((img, gi) => (
-                              <div key={gi} className="flex gap-2 mb-2">
-                                <input
-                                  type="text"
-                                  value={img}
-                                  onChange={(e) => setData((p) => p ? {
-                                    ...p,
-                                    portfolio: p.portfolio.map((x) => {
-                                      if (x.id !== item.id) return x;
-                                      const imgs = [...x.images];
-                                      imgs[gi] = e.target.value;
-                                      return { ...x, images: imgs };
-                                    })
-                                  } : p)}
-                                  className={field}
-                                  placeholder="Image URL"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setData((p) => p ? {
-                                    ...p,
-                                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: x.images.filter((_, k) => k !== gi) } : x)
-                                  } : p)}
-                                  className="text-red-500 hover:text-red-600 px-2"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-
-                          <label className="flex items-center gap-2 cursor-pointer pt-1">
-                            <input
-                              type="checkbox"
-                              checked={item.featured}
-                              onChange={(e) => setData((p) => p ? {
-                                ...p,
-                                portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, featured: e.target.checked } : x)
-                              } : p)}
-                              className="w-4 h-4 accent-[#6F20E8]"
-                            />
-                            <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
-                          </label>
-
-                          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200/70">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedPortfolio(null)}
-                              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              Close Details
-                            </button>
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={async () => {
-                                await handleSave();
-                                setExpandedPortfolio(null);
-                              }}
-                              className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
-                            >
-                              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── SERVICES (GRID VIEW WITH CLICK-TO-EXPAND DETAILS) ──────── */}
+          {/* ── SERVICES (TABLE VIEW + MODAL POP SCREEN) ──────────────── */}
           {activeTab === "services" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Services"
-                subtitle="Click any photo or service card to view and edit its full details."
+                subtitle="All services listed in a table. Click any entry or action icon to view and edit details in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
@@ -959,7 +1141,7 @@ export default function AdminDashboard() {
                       const s: Service = {
                         id: genId(),
                         slug: `service-${genId()}`,
-                        title: "New Service",
+                        title: "",
                         image: "",
                         category: "Flex Banner",
                         features: [],
@@ -967,7 +1149,7 @@ export default function AdminDashboard() {
                         sortOrder: data.services.length + 1,
                       };
                       setData((p) => p ? { ...p, services: [...p.services, s] } : p);
-                      setExpandedService(s.id);
+                      setActiveModal({ type: "service", idOrIndex: s.id, isNew: true });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -976,229 +1158,111 @@ export default function AdminDashboard() {
                 }
               />
 
-              {/* Services Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {data.services.map((svc) => {
-                  const isExpanded = expandedService === svc.id;
-                  return (
-                    <div
-                      key={svc.id}
-                      className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all flex flex-col ${
-                        isExpanded ? "border-[#6F20E8] ring-2 ring-[#6F20E8]/15 sm:col-span-2 lg:col-span-3" : "border-gray-200 hover:shadow-md"
-                      }`}
-                    >
-                      {/* Photo Thumbnail / Banner — Clicking photo opens all details */}
-                      <div
-                        onClick={() => setExpandedService(isExpanded ? null : svc.id)}
-                        className="relative aspect-[4/3] w-full bg-gray-100 cursor-pointer group border-b border-gray-200 overflow-hidden"
-                        title="Click photo to view or edit details"
-                      >
-                        {svc.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={svc.image}
-                            alt={svc.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                            <Briefcase className="w-12 h-12 mb-2 text-gray-300 group-hover:text-[#6F20E8] transition-colors" />
-                            <span className="text-xs font-semibold text-gray-500">Click to add service photo</span>
-                          </div>
-                        )}
-
-                        {svc.featured && (
-                          <span className="absolute top-2.5 left-2.5 text-[10px] font-bold uppercase bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white px-2.5 py-1 rounded-full shadow-md">
-                            Featured
-                          </span>
-                        )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3.5">
-                          <span className="text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
-                            <Edit3 className="w-3.5 h-3.5" />
-                            {isExpanded ? "Hide Details" : "Click photo to edit details"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Summary Info Bar */}
-                      <div className="p-4 flex items-center justify-between gap-2">
-                        <div
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => setExpandedService(isExpanded ? null : svc.id)}
+              {data.services.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No services found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4 w-28">Photo</th>
+                        <th className="py-3.5 px-4">Service Title</th>
+                        <th className="py-3.5 px-4">Category</th>
+                        <th className="py-3.5 px-4">Key Features</th>
+                        <th className="py-3.5 px-4">Status</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.services.map((svc, idx) => (
+                        <tr
+                          key={svc.id}
+                          onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
-                          <h4 className="font-bold text-gray-900 text-sm truncate">{svc.title || "Untitled Service"}</h4>
-                          <span className="text-[11px] font-semibold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 mt-1 inline-block">
-                            {svc.category}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedService(isExpanded ? null : svc.id)}
-                            className={`p-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1 ${
-                              isExpanded
-                                ? "bg-[#6F20E8] text-white border-[#6F20E8]"
-                                : "bg-purple-50 text-[#6F20E8] border-purple-200 hover:bg-purple-100"
-                            }`}
-                            title={isExpanded ? "Hide Details" : "Edit Details"}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{isExpanded ? "Close" : "Details"}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setData((p) => p ? { ...p, services: p.services.filter((x) => x.id !== svc.id) } : p);
-                            }}
-                            className="text-red-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Delete Service"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Expanded Full Details Form (No Description / Short Description Fields) */}
-                      {isExpanded && (
-                        <div className="border-t border-gray-100 p-5 space-y-4 bg-gray-50/80">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <label className={labelCls}>Service Title</label>
-                              <input
-                                type="text"
-                                value={svc.title}
-                                onChange={(e) => setData((p) => p ? {
-                                  ...p,
-                                  services: p.services.map((x) => x.id === svc.id ? { ...x, title: e.target.value } : x)
-                                } : p)}
-                                className={field}
-                              />
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            {idx + 1}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                              {svc.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={svc.image} alt={svc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <Briefcase className="w-5 h-5 text-gray-300" />
+                              )}
                             </div>
-                            <div>
-                              <label className={labelCls}>Category</label>
-                              <select
-                                value={svc.category}
-                                onChange={(e) => setData((p) => p ? {
-                                  ...p,
-                                  services: p.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x)
-                                } : p)}
-                                className={field + " cursor-pointer font-medium"}
-                              >
-                                {CATEGORY_OPTIONS.map((cat) => (
-                                  <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                                {!CATEGORY_OPTIONS.includes(svc.category) && svc.category && (
-                                  <option value={svc.category}>{svc.category}</option>
-                                )}
-                              </select>
-                            </div>
-                          </div>
-
-                          <ImageInput
-                            label="Service Photo"
-                            value={svc.image}
-                            onChange={(v) => setData((p) => p ? {
-                              ...p,
-                              services: p.services.map((x) => x.id === svc.id ? { ...x, image: v } : x)
-                            } : p)}
-                          />
-
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <label className={labelCls}>Key Features / Bullet Points</label>
+                          </td>
+                          <td className="py-3 px-4 font-bold text-gray-900">
+                            <div className="max-w-[220px] truncate">{svc.title || "Untitled Service"}</div>
+                            <span className="text-xs font-normal text-gray-400">Click to view & edit details</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200">
+                              {svc.category}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-600 text-xs">
+                            <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
+                              {svc.features?.length || 0} feature(s)
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {svc.featured ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
+                              </span>
+                            ) : (
+                              <span className="text-xs text-gray-400">Standard</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setData((p) => p ? {
-                                  ...p,
-                                  services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
-                                } : p)}
-                                className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
+                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
                               >
-                                <Plus className="w-3 h-3" /> Add Feature
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "service", idOrIndex: svc.id, name: svc.title || "this service" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete Service"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            {svc.features.map((feat, fi) => (
-                              <div key={fi} className="flex gap-2 mb-2">
-                                <input
-                                  type="text"
-                                  value={feat}
-                                  onChange={(e) => setData((p) => p ? {
-                                    ...p,
-                                    services: p.services.map((x) => {
-                                      if (x.id !== svc.id) return x;
-                                      const f = [...x.features];
-                                      f[fi] = e.target.value;
-                                      return { ...x, features: f };
-                                    })
-                                  } : p)}
-                                  className={field}
-                                  placeholder="Feature description"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setData((p) => p ? {
-                                    ...p,
-                                    services: p.services.map((x) => x.id === svc.id ? { ...x, features: x.features.filter((_, k) => k !== fi) } : x)
-                                  } : p)}
-                                  className="text-red-500 hover:text-red-600 px-2"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-
-                          <label className="flex items-center gap-2 cursor-pointer pt-1">
-                            <input
-                              type="checkbox"
-                              checked={svc.featured}
-                              onChange={(e) => setData((p) => p ? {
-                                ...p,
-                                services: p.services.map((x) => x.id === svc.id ? { ...x, featured: e.target.checked } : x)
-                              } : p)}
-                              className="w-4 h-4 accent-[#6F20E8]"
-                            />
-                            <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
-                          </label>
-
-                          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200/70">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedService(null)}
-                              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              Close Details
-                            </button>
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={async () => {
-                                await handleSave();
-                                setExpandedService(null);
-                              }}
-                              className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
-                            >
-                              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── TEAM (GRID VIEW WITH CLICK-TO-EXPAND DETAILS) ─────────── */}
+          {/* ── TEAM (TABLE VIEW + MODAL POP SCREEN) ─────────────────── */}
           {activeTab === "team" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Team Members"
-                subtitle="Click any member photo or card to view and edit details."
+                subtitle="All team members displayed in a table. Click any row or action icon to view and edit details in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
@@ -1207,14 +1271,14 @@ export default function AdminDashboard() {
                     onClick={() => {
                       const m: TeamMember = {
                         id: genId(),
-                        name: "New Member",
-                        role: "Role / Position",
+                        name: "",
+                        role: "",
                         image: "",
                         socialLinks: {},
                         sortOrder: data.team.length + 1,
                       };
                       setData((p) => p ? { ...p, team: [...p.team, m] } : p);
-                      setExpandedTeam(m.id);
+                      setActiveModal({ type: "team", idOrIndex: m.id, isNew: true });
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
@@ -1223,218 +1287,282 @@ export default function AdminDashboard() {
                 }
               />
 
-              {/* Team Members Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {data.team.map((m) => {
-                  const isExpanded = expandedTeam === m.id;
-                  return (
-                    <div
-                      key={m.id}
-                      className={`bg-white border rounded-2xl overflow-hidden shadow-sm transition-all flex flex-col ${
-                        isExpanded ? "border-[#6F20E8] ring-2 ring-[#6F20E8]/15 sm:col-span-2 lg:col-span-3" : "border-gray-200 hover:shadow-md"
-                      }`}
-                    >
-                      {/* Photo Thumbnail — Full Face Visible & Clicking Photo Shows Details */}
-                      <div
-                        onClick={() => setExpandedTeam(isExpanded ? null : m.id)}
-                        className="relative aspect-[4/3] w-full bg-gray-100 cursor-pointer group border-b border-gray-200 overflow-hidden"
-                        title="Click photo to view or edit details"
-                      >
-                        {m.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={m.image}
-                            alt={m.name}
-                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
-                            <Users className="w-12 h-12 mb-2 text-gray-300 group-hover:text-[#6F20E8] transition-colors" />
-                            <span className="text-xs font-semibold text-gray-500">Click to add photo</span>
-                          </div>
-                        )}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3.5">
-                          <span className="text-white text-xs font-semibold flex items-center gap-1.5 drop-shadow">
-                            <Edit3 className="w-3.5 h-3.5" />
-                            {isExpanded ? "Hide Details" : "Click photo to edit details"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Header Summary Bar */}
-                      <div className="p-4 flex items-center justify-between gap-2">
-                        <div
-                          className="flex-1 min-w-0 cursor-pointer"
-                          onClick={() => setExpandedTeam(isExpanded ? null : m.id)}
+              {data.team.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No team members added yet</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4 w-28">Photo</th>
+                        <th className="py-3.5 px-4">Full Name</th>
+                        <th className="py-3.5 px-4">Role / Position</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.team.map((m, idx) => (
+                        <tr
+                          key={m.id}
+                          onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
                         >
-                          <h4 className="font-bold text-gray-900 text-sm truncate">{m.name || "Untitled Member"}</h4>
-                          <p className="text-xs text-[#6F20E8] font-semibold truncate mt-0.5">{m.role || "Member Role"}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => setExpandedTeam(isExpanded ? null : m.id)}
-                            className={`p-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1 ${
-                              isExpanded
-                                ? "bg-[#6F20E8] text-white border-[#6F20E8]"
-                                : "bg-purple-50 text-[#6F20E8] border-purple-200 hover:bg-purple-100"
-                            }`}
-                            title={isExpanded ? "Hide Details" : "Edit Details"}
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">{isExpanded ? "Close" : "Details"}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setData((p) => p ? { ...p, team: p.team.filter((x) => x.id !== m.id) } : p);
-                            }}
-                            className="text-red-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Delete Member"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Expanded Full Details Form (No Bio/Description Field) */}
-                      {isExpanded && (
-                        <div className="border-t border-gray-100 p-5 space-y-4 bg-gray-50/80">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <label className={labelCls}>Full Name</label>
-                              <input
-                                type="text"
-                                value={m.name}
-                                onChange={(e) => setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, name: e.target.value } : x) } : p)}
-                                className={field}
-                              />
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            {idx + 1}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                              {m.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={m.image} alt={m.name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <Users className="w-5 h-5 text-gray-300" />
+                              )}
                             </div>
-                            <div>
-                              <label className={labelCls}>Role / Position</label>
-                              <input
-                                type="text"
-                                value={m.role}
-                                onChange={(e) => setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, role: e.target.value } : x) } : p)}
-                                className={field}
-                              />
+                          </td>
+                          <td className="py-3 px-4 font-bold text-gray-900">
+                            {m.name || "Untitled Member"}
+                            <div className="text-xs font-normal text-gray-400">Click to view & edit details</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-semibold text-xs text-[#6F20E8] bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200">
+                              {m.role || "Member"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "team", idOrIndex: m.id, name: m.name || "this member" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete Member"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
-                          </div>
-
-                          <ImageInput
-                            label="Profile Photo"
-                            value={m.image}
-                            onChange={(v) => setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p)}
-                          />
-
-                          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200/70">
-                            <button
-                              type="button"
-                              onClick={() => setExpandedTeam(null)}
-                              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              Close Details
-                            </button>
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={async () => {
-                                await handleSave();
-                                setExpandedTeam(null);
-                              }}
-                              className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
-                            >
-                              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── TESTIMONIALS ───────────────────────────────────────────── */}
+          {/* ── TESTIMONIALS (TABLE VIEW + MODAL POP SCREEN) ─────────── */}
           {activeTab === "testimonials" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Client Reviews"
-                subtitle="Manage testimonials and client ratings displayed on the website."
+                subtitle="All client reviews listed in a table. Click any entry or action icon to view and edit details in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
                   <button
                     type="button"
-                    onClick={() => setData((p) => p ? { ...p, testimonials: [...p.testimonials, { id: genId(), name: "Client Name", business: "Business", quote: "Great service!", rating: 5 }] } : p)}
+                    onClick={() => {
+                      const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
+                      setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
+                      setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true });
+                    }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
                     <Plus className="w-4 h-4" /> Add Review
                   </button>
                 }
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {data.testimonials.map((t) => (
-                  <div key={t.id} className={sectionCard + " !space-y-3"}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-0.5">
-                        {[1,2,3,4,5].map((s) => <Star key={s} className={`w-4 h-4 ${s <= t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />)}
-                      </div>
-                      <button onClick={() => setData((p) => p ? { ...p, testimonials: p.testimonials.filter((x) => x.id !== t.id) } : p)} className="text-red-500 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><label className={labelCls}>Client Name</label><input type="text" value={t.name} onChange={(e) => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, name: e.target.value } : x) } : p)} className={field} /></div>
-                      <div><label className={labelCls}>Business Name</label><input type="text" value={t.business} onChange={(e) => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, business: e.target.value } : x) } : p)} className={field} /></div>
-                    </div>
-                    <div><label className={labelCls}>Review Quote</label><textarea value={t.quote} onChange={(e) => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, quote: e.target.value } : x) } : p)} rows={2} className={field} /></div>
-                    <div>
-                      <label className={labelCls}>Rating (1-5)</label>
-                      <div className="flex gap-2 mt-1">
-                        {[1,2,3,4,5].map((s) => (
-                          <button key={s} type="button" onClick={() => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, rating: s } : x) } : p)} className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${s <= t.rating ? "bg-yellow-400 text-black shadow-sm" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>{s}</button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+              {data.testimonials.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No reviews found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4 w-28">Rating</th>
+                        <th className="py-3.5 px-4">Client Name</th>
+                        <th className="py-3.5 px-4">Business</th>
+                        <th className="py-3.5 px-4">Review Quote</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.testimonials.map((t, idx) => (
+                        <tr
+                          key={t.id}
+                          onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            {idx + 1}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-0.5">
+                              {[1,2,3,4,5].map((s) => (
+                                <Star key={s} className={`w-3.5 h-3.5 ${s <= t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`} />
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 font-bold text-gray-900">
+                            {t.name || "Client"}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-gray-600 font-medium">
+                            {t.business || "—"}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-gray-500 max-w-sm truncate">
+                            &quot;{t.quote}&quot;
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "testimonial", idOrIndex: t.id, name: t.name || "this review" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete Review"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ── FAQs ────────────────────────────────────────────────────── */}
+          {/* ── FAQS (TABLE VIEW + MODAL POP SCREEN) ──────────────────── */}
           {activeTab === "faqs" && (
             <div className="space-y-6">
               <SectionHeader
                 title="Frequently Asked Questions"
-                subtitle="Help prospective clients quickly understand print formats, delivery, and services."
+                subtitle="All questions listed in a table. Click any entry or action icon to view and edit details in a popup modal."
                 onSave={handleSave}
                 saving={saving}
                 actionButton={
                   <button
                     type="button"
-                    onClick={() => setData((p) => p ? { ...p, faqs: [...p.faqs, { id: genId(), question: "New Question?", answer: "Answer here." }] } : p)}
+                    onClick={() => {
+                      const newFaq = { id: genId(), question: "", answer: "" };
+                      setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
+                      setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true });
+                    }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
                   >
                     <Plus className="w-4 h-4" /> Add FAQ
                   </button>
                 }
               />
-              <div className="space-y-4">
-                {data.faqs.map((faq, i) => (
-                  <div key={faq.id} className={sectionCard + " !space-y-3"}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Q{i + 1}</span>
-                      <button onClick={() => setData((p) => p ? { ...p, faqs: p.faqs.filter((x) => x.id !== faq.id) } : p)} className="text-red-500 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button>
-                    </div>
-                    <div><label className={labelCls}>Question</label><input type="text" value={faq.question} onChange={(e) => setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, question: e.target.value } : x) } : p)} className={field} /></div>
-                    <div><label className={labelCls}>Answer</label><textarea value={faq.answer} onChange={(e) => setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, answer: e.target.value } : x) } : p)} rows={3} className={field} /></div>
-                  </div>
-                ))}
-              </div>
+
+              {data.faqs.length === 0 ? (
+                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                  <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700">No FAQs found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3.5 px-4 text-center w-12">#</th>
+                        <th className="py-3.5 px-4">Question</th>
+                        <th className="py-3.5 px-4">Answer Preview</th>
+                        <th className="py-3.5 px-4 text-right w-36">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-sm">
+                      {data.faqs.map((faq, i) => (
+                        <tr
+                          key={faq.id}
+                          onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
+                            Q{i + 1}
+                          </td>
+                          <td className="py-3 px-4 font-bold text-gray-900 max-w-xs truncate">
+                            {faq.question}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-gray-500 max-w-md truncate">
+                            {faq.answer}
+                          </td>
+                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                title="View details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id })}
+                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                title="Edit details"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletePrompt({ type: "faq", idOrIndex: faq.id, name: faq.question || "this FAQ" })}
+                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                title="Delete FAQ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
@@ -1548,6 +1676,7 @@ export default function AdminDashboard() {
                         <p className="text-[10px] text-gray-500 mt-0.5">{(file.size / 1024).toFixed(1)} KB</p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => { navigator.clipboard.writeText(window.location.origin + file.url); showToast("URL copied to clipboard!", "success"); }}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-all shadow-md"
                       >
@@ -1563,6 +1692,641 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
+
+      {/* ── DELETE CONFIRMATION POPUP MODAL ───────────────────────── */}
+      {deletePrompt && (
+        <div
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          onClick={() => setDeletePrompt(null)}
+        >
+          <div
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 space-y-4 text-center my-auto animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center mx-auto shadow-sm">
+              <Trash2 className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Are you sure you want to delete?</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Are you sure you want to delete <span className="font-semibold text-gray-800">&quot;{deletePrompt.name}&quot;</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletePrompt(null)}
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDelete}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-600/20 transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL POP SCREENS ─────────────────────────────────────── */}
+      {/* 1. Portfolio Modal */}
+      {activeModal?.type === "portfolio" && (() => {
+        const item = data.portfolio.find((x) => x.id === activeModal.idOrIndex);
+        if (!item) return null;
+        return (
+          <ModalWrapper
+            title="Edit Portfolio Project"
+            subtitle="View or edit project specifications, cover photo, and gallery"
+            icon={<LayoutGrid className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!item.title || !item.title.trim()) {
+                setModalError("Project Title is required. Please fill in the project title before saving.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className={labelCls}>Project Title *</label>
+                <input
+                  type="text"
+                  value={item.title}
+                  onChange={(e) => {
+                    setModalError(null);
+                    setData((p) => p ? {
+                      ...p,
+                      portfolio: p.portfolio.map((x) => x.id === item.id ? {
+                        ...x,
+                        title: e.target.value,
+                        slug: x.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+                      } : x)
+                    } : p);
+                  }}
+                  className={field}
+                  placeholder="e.g. Reliance Retail LED Display"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Category *</label>
+                  <select
+                    value={item.category}
+                    onChange={(e) => setData((p) => p ? {
+                      ...p,
+                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
+                    } : p)}
+                    className={field + " cursor-pointer font-medium"}
+                  >
+                    {CATEGORY_OPTIONS.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    {!CATEGORY_OPTIONS.includes(item.category) && item.category && (
+                      <option value={item.category}>{item.category}</option>
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Location</label>
+                  <input
+                    type="text"
+                    value={item.location}
+                    onChange={(e) => setData((p) => p ? {
+                      ...p,
+                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
+                    } : p)}
+                    className={field}
+                    placeholder="e.g. Gandhinagar, Gujarat"
+                  />
+                </div>
+              </div>
+
+              <ImageInput
+                label="Cover Photo"
+                value={item.image}
+                onChange={(v) => setData((p) => p ? {
+                  ...p,
+                  portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: v } : x)
+                } : p)}
+              />
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelCls}>Gallery Photos</label>
+                  <button
+                    type="button"
+                    onClick={() => setData((p) => p ? {
+                      ...p,
+                      portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: [...x.images, ""] } : x)
+                    } : p)}
+                    className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Image
+                  </button>
+                </div>
+                {item.images.map((img, gi) => (
+                  <div key={gi} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={img}
+                      onChange={(e) => setData((p) => p ? {
+                        ...p,
+                        portfolio: p.portfolio.map((x) => {
+                          if (x.id !== item.id) return x;
+                          const imgs = [...x.images];
+                          imgs[gi] = e.target.value;
+                          return { ...x, images: imgs };
+                        })
+                      } : p)}
+                      className={field}
+                      placeholder="Image URL"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setData((p) => p ? {
+                        ...p,
+                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: x.images.filter((_, k) => k !== gi) } : x)
+                      } : p)}
+                      className="text-red-500 hover:text-red-600 px-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={item.featured}
+                  onChange={(e) => setData((p) => p ? {
+                    ...p,
+                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, featured: e.target.checked } : x)
+                  } : p)}
+                  className="w-4 h-4 accent-[#6F20E8]"
+                />
+                <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
+              </label>
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 2. Service Modal */}
+      {activeModal?.type === "service" && (() => {
+        const svc = data.services.find((x) => x.id === activeModal.idOrIndex);
+        if (!svc) return null;
+        return (
+          <ModalWrapper
+            title="Edit Service"
+            subtitle="View or edit service specifications, photo, and features"
+            icon={<Briefcase className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!svc.title || !svc.title.trim()) {
+                setModalError("Service Title is required. Please fill in the title before saving.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Service Title *</label>
+                  <input
+                    type="text"
+                    value={svc.title}
+                    onChange={(e) => {
+                      setModalError(null);
+                      setData((p) => p ? {
+                        ...p,
+                        services: p.services.map((x) => x.id === svc.id ? { ...x, title: e.target.value } : x)
+                      } : p);
+                    }}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Category *</label>
+                  <select
+                    value={svc.category}
+                    onChange={(e) => setData((p) => p ? {
+                      ...p,
+                      services: p.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x)
+                    } : p)}
+                    className={field + " cursor-pointer font-medium"}
+                  >
+                    {CATEGORY_OPTIONS.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    {!CATEGORY_OPTIONS.includes(svc.category) && svc.category && (
+                      <option value={svc.category}>{svc.category}</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <ImageInput
+                label="Service Photo"
+                value={svc.image}
+                onChange={(v) => setData((p) => p ? {
+                  ...p,
+                  services: p.services.map((x) => x.id === svc.id ? { ...x, image: v } : x)
+                } : p)}
+              />
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelCls}>Key Features / Bullet Points</label>
+                  <button
+                    type="button"
+                    onClick={() => setData((p) => p ? {
+                      ...p,
+                      services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
+                    } : p)}
+                    className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Feature
+                  </button>
+                </div>
+                {svc.features.map((feat, fi) => (
+                  <div key={fi} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={feat}
+                      onChange={(e) => setData((p) => p ? {
+                        ...p,
+                        services: p.services.map((x) => {
+                          if (x.id !== svc.id) return x;
+                          const f = [...x.features];
+                          f[fi] = e.target.value;
+                          return { ...x, features: f };
+                        })
+                      } : p)}
+                      className={field}
+                      placeholder="Feature description"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setData((p) => p ? {
+                        ...p,
+                        services: p.services.map((x) => x.id === svc.id ? { ...x, features: x.features.filter((_, k) => k !== fi) } : x)
+                      } : p)}
+                      className="text-red-500 hover:text-red-600 px-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer pt-1">
+                <input
+                  type="checkbox"
+                  checked={svc.featured}
+                  onChange={(e) => setData((p) => p ? {
+                    ...p,
+                    services: p.services.map((x) => x.id === svc.id ? { ...x, featured: e.target.checked } : x)
+                  } : p)}
+                  className="w-4 h-4 accent-[#6F20E8]"
+                />
+                <span className="text-sm text-gray-700 font-medium">Mark as Featured (shown on homepage)</span>
+              </label>
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 3. Team Member Modal */}
+      {activeModal?.type === "team" && (() => {
+        const m = data.team.find((x) => x.id === activeModal.idOrIndex);
+        if (!m) return null;
+        return (
+          <ModalWrapper
+            title="Edit Team Member"
+            subtitle="View or update member profile, position, and photo"
+            icon={<Users className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!m.name || !m.name.trim() || !m.role || !m.role.trim()) {
+                setModalError("Both Full Name and Role / Position are required before saving.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Full Name *</label>
+                  <input
+                    type="text"
+                    value={m.name}
+                    onChange={(e) => {
+                      setModalError(null);
+                      setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, name: e.target.value } : x) } : p);
+                    }}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Role / Position *</label>
+                  <input
+                    type="text"
+                    value={m.role}
+                    onChange={(e) => {
+                      setModalError(null);
+                      setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, role: e.target.value } : x) } : p);
+                    }}
+                    className={field}
+                  />
+                </div>
+              </div>
+
+              <ImageInput
+                label="Profile Photo"
+                value={m.image}
+                onChange={(v) => setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p)}
+              />
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 4. Client Modal */}
+      {activeModal?.type === "client" && (() => {
+        const clientIndex = (data.clients || []).findIndex((x) => x.id === activeModal.idOrIndex);
+        const client = (data.clients || [])[clientIndex];
+        if (!client) return null;
+        return (
+          <ModalWrapper
+            title="Edit Client Organization"
+            subtitle="Update company name, category tag, and transparent logo"
+            icon={<Building2 className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!client.name || !client.name.trim()) {
+                setModalError("Company / Institution Name is required.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className={labelCls}>Company / Institution Name *</label>
+                <input
+                  type="text"
+                  value={client.name}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setModalError(null);
+                    setData((p) => {
+                      if (!p) return p;
+                      const updated = [...(p.clients || [])];
+                      updated[clientIndex] = { ...updated[clientIndex], name: val };
+                      return { ...p, clients: updated };
+                    });
+                  }}
+                  placeholder="e.g. BJP, NFSU College, Xavier School..."
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Category / Tag (Optional)</label>
+                <input
+                  type="text"
+                  value={client.tag || ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setData((p) => {
+                      if (!p) return p;
+                      const updated = [...(p.clients || [])];
+                      updated[clientIndex] = { ...updated[clientIndex], tag: val };
+                      return { ...p, clients: updated };
+                    });
+                  }}
+                  placeholder="e.g. Educational Institution, Food Brand..."
+                  className={field}
+                />
+              </div>
+
+              <ImageInput
+                label="Client Logo Image"
+                value={client.logo || ""}
+                onChange={(v) => {
+                  setData((p) => {
+                    if (!p) return p;
+                    const updated = [...(p.clients || [])];
+                    updated[clientIndex] = { ...updated[clientIndex], logo: v };
+                    return { ...p, clients: updated };
+                  });
+                }}
+              />
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 5. Review / Testimonial Modal */}
+      {activeModal?.type === "testimonial" && (() => {
+        const t = data.testimonials.find((x) => x.id === activeModal.idOrIndex);
+        if (!t) return null;
+        return (
+          <ModalWrapper
+            title="Edit Client Review"
+            subtitle="Manage review rating, quote, and client business information"
+            icon={<MessageSquare className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!t.name || !t.name.trim() || !t.quote || !t.quote.trim()) {
+                setModalError("Client Name and Review Quote are required before saving.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Client Name *</label>
+                  <input
+                    type="text"
+                    value={t.name}
+                    onChange={(e) => {
+                      setModalError(null);
+                      setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, name: e.target.value } : x) } : p);
+                    }}
+                    className={field}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Business Name</label>
+                  <input
+                    type="text"
+                    value={t.business}
+                    onChange={(e) => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, business: e.target.value } : x) } : p)}
+                    className={field}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Review Quote *</label>
+                <textarea
+                  value={t.quote}
+                  onChange={(e) => {
+                    setModalError(null);
+                    setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, quote: e.target.value } : x) } : p);
+                  }}
+                  rows={3}
+                  className={field}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Star Rating (1-5)</label>
+                <div className="flex gap-2 mt-1">
+                  {[1,2,3,4,5].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setData((p) => p ? { ...p, testimonials: p.testimonials.map((x) => x.id === t.id ? { ...x, rating: s } : x) } : p)}
+                      className={`w-10 h-10 rounded-xl text-sm font-bold flex items-center justify-center gap-1 transition-all ${
+                        s <= t.rating ? "bg-yellow-400 text-black shadow-sm" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                      }`}
+                    >
+                      <Star className={`w-4 h-4 ${s <= t.rating ? "fill-black" : ""}`} />
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 6. FAQ Modal */}
+      {activeModal?.type === "faq" && (() => {
+        const faq = data.faqs.find((x) => x.id === activeModal.idOrIndex);
+        if (!faq) return null;
+        return (
+          <ModalWrapper
+            title="Edit FAQ"
+            subtitle="Update customer frequently asked question and answer"
+            icon={<HelpCircle className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!faq.question || !faq.question.trim() || !faq.answer || !faq.answer.trim()) {
+                setModalError("Both Question and Answer are required before saving.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className={labelCls}>Question *</label>
+                <input
+                  type="text"
+                  value={faq.question}
+                  onChange={(e) => {
+                    setModalError(null);
+                    setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, question: e.target.value } : x) } : p);
+                  }}
+                  className={field}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Detailed Answer *</label>
+                <textarea
+                  value={faq.answer}
+                  onChange={(e) => {
+                    setModalError(null);
+                    setData((p) => p ? { ...p, faqs: p.faqs.map((x) => x.id === faq.id ? { ...x, answer: e.target.value } : x) } : p);
+                  }}
+                  rows={4}
+                  className={field}
+                />
+              </div>
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 7. Hero Image Slide Modal */}
+      {activeModal?.type === "hero" && (() => {
+        const idx = Number(activeModal.idOrIndex);
+        const url = data.heroImages[idx];
+        if (url === undefined) return null;
+        return (
+          <ModalWrapper
+            title={`Edit Hero Slide ${idx + 1}`}
+            subtitle="Paste image URL or upload image file for this hero slide"
+            icon={<ImageIcon className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            onSave={async () => {
+              if (!url || !url.trim()) {
+                setModalError("Image URL or uploaded photo is required for the slide.");
+                return;
+              }
+              setModalError(null);
+              await handleSave();
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <ImageInput
+                label={`Hero Slide ${idx + 1} Image`}
+                value={url}
+                onChange={(v) => {
+                  setModalError(null);
+                  setData((p) => {
+                    if (!p) return p;
+                    const imgs = [...p.heroImages];
+                    imgs[idx] = v;
+                    return { ...p, heroImages: imgs };
+                  });
+                }}
+              />
+            </div>
+          </ModalWrapper>
+        );
+      })()}
 
       {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
     </div>

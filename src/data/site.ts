@@ -27,6 +27,10 @@ export function getSiteData(): SiteData {
       const fs = require("fs");
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const path = require("path");
+      const runtimePath = path.join(process.cwd(), "data", "site-content.json");
+      if (fs.existsSync(runtimePath)) {
+        return JSON.parse(fs.readFileSync(runtimePath, "utf-8"));
+      }
       const filePath = path.join(process.cwd(), "src", "data", "site-content.json");
       if (fs.existsSync(filePath)) {
         return JSON.parse(fs.readFileSync(filePath, "utf-8"));

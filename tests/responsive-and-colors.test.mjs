@@ -207,13 +207,15 @@ test("Responsive Typography: Key pages scale headings on mobile without cutoffs"
 // ─────────────────────────────────────────────────────────────────────────────
 // SUITE 5: SOCIAL MEDIA COMPLETENESS & HERO SUBHEADER CONTRAST
 // ─────────────────────────────────────────────────────────────────────────────
-test("Social Media: Footer renders all four platforms (Instagram, Facebook, Twitter/X, LinkedIn) even without redirect links", () => {
+test("Social Media: Footer and Contact render only Instagram & Facebook, and zero Twitter/X or LinkedIn", () => {
   const footerContent = fs.readFileSync(path.join(srcDir, "components", "layout", "Footer.tsx"), "utf-8");
+  const contactContent = fs.readFileSync(path.join(srcDir, "app", "contact", "page.tsx"), "utf-8");
   assert.ok(footerContent.includes('"Instagram"'), "Footer must include Instagram");
   assert.ok(footerContent.includes('"Facebook"'), "Footer must include Facebook");
-  assert.ok(footerContent.includes('"Twitter / X"'), "Footer must include Twitter / X");
-  assert.ok(footerContent.includes('"LinkedIn"'), "Footer must include LinkedIn");
-  assert.ok(!footerContent.includes('if (finalUrl === "#") return null;'), "Footer must not return null when link is unconfigured");
+  assert.ok(!footerContent.includes('"Twitter / X"'), "Footer must NOT include Twitter / X");
+  assert.ok(!footerContent.includes('"LinkedIn"'), "Footer must NOT include LinkedIn");
+  assert.ok(!contactContent.includes('"Twitter / X"'), "Contact must NOT include Twitter / X");
+  assert.ok(!contactContent.includes('"LinkedIn"'), "Contact must NOT include LinkedIn");
 });
 
 test("Hero Subheaders: Photo hero pages use high-contrast backdrop-blur badges or high-contrast pill styling", () => {
@@ -320,10 +322,10 @@ test("Admin Panel Cards: descriptions removed from Portfolio, Services, and Team
   assert.ok(!adminPage.includes('<label className={labelCls}>Bio</label>'), "Bio field removed from Team card");
 });
 
-test("Admin Panel Grids: cards structured in responsive grid with photo click-to-expand details", () => {
+test("Admin Panel Tables & Modals: entries structured in tables with click-to-view modal pop screens", () => {
   const adminPage = fs.readFileSync(path.join(srcDir, "app", "admin", "page.tsx"), "utf-8");
-  assert.ok(adminPage.includes("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"), "Must use responsive grid for cards");
-  assert.ok(adminPage.includes("Click photo to edit details") || adminPage.includes("Click photo to view or edit details"), "Must support clicking photo to show details");
+  assert.ok(adminPage.includes("<table") && adminPage.includes("<tbody"), "Must use table layout for admin entries");
+  assert.ok(adminPage.includes("ModalWrapper") || adminPage.includes("fixed inset-0 z-[100]"), "Must support modal pop screens when viewing/clicking entries");
   assert.ok(adminPage.includes("object-contain"), "Image preview must use object-contain to prevent cutting faces or banners");
 });
 
