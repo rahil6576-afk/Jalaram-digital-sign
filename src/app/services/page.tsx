@@ -5,6 +5,7 @@ import { siteData, getSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
+import PageHero from "@/components/common/PageHero";
 
 export default function ServicesPage() {
   const currentData = getSiteData();
@@ -14,33 +15,24 @@ export default function ServicesPage() {
   return (
     <>
       {/* PAGE HERO */}
-      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <Image
-            src="/digital-printing.webp"
-            alt="Services background"
-            fill
-            priority
-            className="object-cover opacity-50"
-          />
-          <div className="absolute inset-0 bg-black/65" />
-        </div>
-        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
-              <span>Capabilities • Materials • Solutions</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
-              WHAT WE{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">CREATE.</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed drop-shadow-md">
-              Comprehensive visual branding and printing solutions designed to get your business noticed.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        badgeText="Capabilities • Materials • Solutions"
+        title={
+          <>
+            WHAT WE{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">
+              CREATE.
+            </span>
+          </>
+        }
+        subtitle="Comprehensive visual branding and printing solutions designed to get your business noticed."
+        images={[
+          "/digital-printing.webp",
+          "/vinyl-printing.webp",
+          "/flex-banner.webp",
+          "/UV-flatbed-printer-close-1080x600.webp",
+        ]}
+      />
 
       {/* SERVICES GRID */}
       <section className="py-12 sm:py-20 md:py-32">

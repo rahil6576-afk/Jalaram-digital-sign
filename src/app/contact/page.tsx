@@ -6,6 +6,8 @@ import { MapPin, Phone, Mail, Clock, ArrowRight, CheckCircle2 } from "lucide-rea
 import Image from "next/image";
 import { formatExternalUrl } from "@/lib/utils";
 
+import PageHero from "@/components/common/PageHero";
+
 export default function ContactPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const siteData = useSiteData();
@@ -18,35 +20,27 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <Image
-            src={contact.heroImage}
-            alt="Contact background"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-black/70" />
-        </div>
-        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
-              <span>{contact.heroTagline}</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
-              LET&apos;S MAKE YOUR{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">BRAND</span>
-              {" "}IMPOSSIBLE TO{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">MISS.</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl drop-shadow-md">
-              {contact.heroSubtitle}
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        badgeText={contact.heroTagline || "Contact Us • Fast Quotes & Consultation"}
+        title={
+          <>
+            LET&apos;S MAKE YOUR{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">
+              BRAND
+            </span>{" "}
+            IMPOSSIBLE TO{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">
+              MISS.
+            </span>
+          </>
+        }
+        subtitle={contact.heroSubtitle || "Tell us what you need printed, branded or installed. Our team will help you find the right solution."}
+        images={[
+          contact?.heroImage && !contact.heroImage.includes("unsplash") ? contact.heroImage : "/3d-led-board.webp",
+          "/hoardings.webp",
+          "/glow-signs.webp",
+        ]}
+      />
 
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

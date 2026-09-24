@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
+import PageHero from "@/components/common/PageHero";
 
 export default function PortfolioPage() {
   const siteData = useSiteData();
@@ -23,32 +24,24 @@ export default function PortfolioPage() {
   return (
     <>
       {/* PAGE HERO */}
-      <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <Image
-            src="/digital-printing.webp"
-            alt="Portfolio background"
-            fill
-            priority
-            className="object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-black/70" />
-        </div>
-        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase mb-6 shadow-lg">
-              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
-              <span>Featured Projects • Recent Installations</span>
-            </div>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
-              OUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">WORK.</span>
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed drop-shadow-md">
-              Explore our recent projects, from large-scale signage installations to precision print jobs.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        badgeText="Featured Projects • Recent Installations"
+        title={
+          <>
+            OUR{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">
+              WORK.
+            </span>
+          </>
+        }
+        subtitle="Explore our recent projects, from large-scale signage installations to precision print jobs."
+        images={[
+          "/hoardings.webp",
+          "/3d-led-board.webp",
+          "/glow-signs.webp",
+          "/acrylic-board.webp",
+        ]}
+      />
 
       {/* PORTFOLIO GRID */}
       <section className="py-12 sm:py-20 md:py-32">
