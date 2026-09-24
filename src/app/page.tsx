@@ -202,9 +202,9 @@ export default function Home() {
       </section>
 
       {/* 4. SERVICES SECTION */}
-      <section className="py-24 md:py-32 bg-secondary-bg relative border-t border-black/5">
+      <section className="py-12 md:py-32 relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="mb-8 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-8">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -229,7 +229,8 @@ export default function Home() {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Mobile: 2-col compact grid | Desktop: 2-col then 3-col */}
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-8">
             {siteData.services.slice(0, 6).map((service, index) => (
               <motion.div
                 key={service.id}
@@ -237,9 +238,23 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="w-full"
               >
                 <Link href={`/services/${service.slug}`} className="group block h-full">
-                  <div className="bg-card-bg p-8 md:p-10 h-full border border-black/5 card-hover relative overflow-hidden shadow-xl flex flex-col">
+                  {/* MOBILE: compact box card */}
+                  <div className="md:hidden bg-card-bg border border-black/5 rounded-xl shadow-sm p-4 flex flex-col gap-2 card-hover relative overflow-hidden h-full">
+                    <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
+                      <ChevronRight className="w-3.5 h-3.5 text-black group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 className="text-xs font-bold leading-tight pr-5">{service.title}</h3>
+                    <p className="text-[11px] text-gray-500 leading-snug line-clamp-2">{service.shortDescription}</p>
+                    <span className="absolute top-2 right-2.5 text-black/5 text-xl font-bold tracking-tighter">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  {/* DESKTOP: full card */}
+                  <div className="hidden md:flex bg-card-bg p-8 md:p-10 h-full border border-black/5 card-hover relative overflow-hidden shadow-xl flex-col">
                     <span className="absolute top-8 right-8 text-black/5 text-6xl font-bold tracking-tighter group-hover:text-black/10 transition-colors">
                       0{index + 1}
                     </span>
@@ -258,11 +273,12 @@ export default function Home() {
               </motion.div>
             ))}
           </div>
+
         </div>
       </section>
 
       {/* 5. PROCESS SECTION */}
-      <section className="py-24 md:py-32 border-t border-black/5 overflow-hidden">
+      <section className="py-24 md:py-32 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

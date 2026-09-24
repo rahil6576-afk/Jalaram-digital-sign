@@ -20,11 +20,11 @@ export default function TeamPage() {
       <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
-            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop"
+            src="/digital-printing.webp"
             alt="Team background"
             fill
             priority
-            className="object-cover"
+            className="object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>

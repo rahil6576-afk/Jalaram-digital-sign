@@ -134,15 +134,15 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-muted">{siteData.business.phone}</span>
+                <a href={`tel:${siteData.business.phone.replace(/\s/g,'')}`} className="text-muted hover:text-accent transition-colors">{siteData.business.phone}</a>
               </li>
               <li className="flex items-center gap-3">
                 <MessageCircle className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-muted">WhatsApp: {siteData.business.phone}</span>
+                <a href={`https://wa.me/${siteData.business.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-accent transition-colors">WhatsApp: {siteData.business.phone}</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-accent shrink-0" />
-                <span className="text-muted">{siteData.business.email}</span>
+                <a href={`mailto:${siteData.business.email}`} className="text-muted hover:text-accent transition-colors">{siteData.business.email}</a>
               </li>
             </ul>
           </div>

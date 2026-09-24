@@ -59,18 +59,22 @@ export default function ContactPage() {
                 </h2>
                 <div className="space-y-6">
                   {[
-                    { icon: MapPin, label: "Our Location", value: siteData.business.address },
-                    { icon: Phone, label: "Phone & WhatsApp", value: siteData.business.phone },
-                    { icon: Mail, label: "Email", value: siteData.business.email },
-                    { icon: Clock, label: "Business Hours", value: siteData.business.hours },
-                  ].map(({ icon: Icon, label, value }) => (
+                    { icon: MapPin, label: "Our Location", value: siteData.business.address, href: `https://maps.google.com/?q=${encodeURIComponent(siteData.business.address)}`, target: "_blank" },
+                    { icon: Phone, label: "Phone & WhatsApp", value: siteData.business.phone, href: `tel:${siteData.business.phone.replace(/\s/g,'')}`, target: undefined },
+                    { icon: Mail, label: "Email", value: siteData.business.email, href: `mailto:${siteData.business.email}`, target: undefined },
+                    { icon: Clock, label: "Business Hours", value: siteData.business.hours, href: undefined, target: undefined },
+                  ].map(({ icon: Icon, label, value, href, target }) => (
                     <div key={label} className="flex items-start gap-5">
                       <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
                         <Icon className="w-6 h-6 text-accent" />
                       </div>
                       <div>
                         <h3 className="font-bold mb-1 text-lg">{label}</h3>
-                        <p className="text-gray-600 text-sm leading-relaxed max-w-xs">{value}</p>
+                        {href ? (
+                          <a href={href} target={target} rel={target === "_blank" ? "noopener noreferrer" : undefined} className="text-gray-600 text-sm leading-relaxed max-w-xs hover:text-accent transition-colors">{value}</a>
+                        ) : (
+                          <p className="text-gray-600 text-sm leading-relaxed max-w-xs">{value}</p>
+                        )}
                       </div>
                     </div>
                   ))}

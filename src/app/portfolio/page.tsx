@@ -26,11 +26,11 @@ export default function PortfolioPage() {
       <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-black border-b border-black/10 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
-            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop"
+            src="/digital-printing.webp"
             alt="Portfolio background"
             fill
             priority
-            className="object-cover"
+            className="object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>
@@ -97,7 +97,7 @@ export default function PortfolioPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
                     <div className="absolute bottom-0 left-0 p-8 w-full">
-                      <span className="text-accent text-xs font-bold uppercase tracking-widest mb-3 block">
+                      <span className="inline-block px-2.5 py-0.5 bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-widest mb-3 rounded-full shadow-lg">
                         {project.category}
                       </span>
                       <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{project.title}</h3>
