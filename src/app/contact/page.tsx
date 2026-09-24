@@ -27,7 +27,7 @@ export default function ContactPage() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/70" />
         </div>
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
@@ -36,7 +36,10 @@ export default function ContactPage() {
               <span>{contact.heroTagline}</span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 text-white drop-shadow-lg leading-[1.1]">
-              {contact.heroHeadline}
+              LET&apos;S MAKE YOUR{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">BRAND</span>
+              {" "}IMPOSSIBLE TO{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-white drop-shadow-md">MISS.</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl drop-shadow-md">
               {contact.heroSubtitle}

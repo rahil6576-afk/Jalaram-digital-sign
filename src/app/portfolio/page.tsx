@@ -32,7 +32,7 @@ export default function PortfolioPage() {
             priority
             className="object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/70" />
         </div>
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
