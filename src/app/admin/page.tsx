@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   ImageIcon,
@@ -9,7 +12,6 @@ import {
   MessageSquare,
   HelpCircle,
   Upload,
-  Save,
   Plus,
   Trash2,
   Edit3,
@@ -22,6 +24,7 @@ import {
   Globe,
   LayoutGrid,
   ShieldCheck,
+  LogOut,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -363,7 +366,7 @@ function ModalWrapper({
               }}
               className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Save
             </button>
           )}
@@ -405,7 +408,7 @@ function SectionHeader({
           disabled={saving}
           className="flex items-center gap-1.5 py-2 px-4 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
         >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Save
         </button>
       </div>
@@ -421,12 +424,19 @@ const labelCls = "text-xs font-semibold text-gray-500 uppercase tracking-wider m
 
 // ── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("business");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [data, setData] = useState<SiteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "loading" } | null>(null);
+
+  const handleLogout = async () => {
+    try { await fetch("/api/admin/auth", { method: "DELETE" }); } catch {}
+    router.replace("/admin/login");
+    router.refresh();
+  };
 
   // Active modal popup state for viewing & editing entries in a popup screen
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
@@ -628,21 +638,35 @@ export default function AdminDashboard() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#6F20E8] to-[#8A3FFC] flex items-center justify-center text-white font-black text-xs">
-              J
-            </div>
-            <span className="font-bold text-sm text-gray-900">Jalaram Admin</span>
-          </div>
+          <Link href="/admin" className="flex items-center">
+            <Image
+              src="/images/jalaram-logo.png"
+              alt="Jalaram Digital Sign"
+              width={160}
+              height={34}
+              className="h-7 w-auto object-contain mix-blend-multiply"
+              priority
+            />
+          </Link>
         </div>
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs font-semibold text-[#6F20E8] bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg"
-        >
-          View Site ↗
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-semibold text-[#6F20E8] bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg"
+          >
+            View Site ↗
+          </a>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg text-gray-500 hover:text-red-600 bg-gray-100 hover:bg-red-50 border border-gray-200 transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* ── MOBILE DRAWER BACKDROP ─────────────────────────────────── */}
@@ -660,15 +684,22 @@ export default function AdminDashboard() {
         }`}
       >
         <div>
-          {/* Sidebar Header */}
-          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#6F20E8] to-[#8A3FFC] flex items-center justify-center shadow-md shadow-[#6F20E8]/20 shrink-0">
-                <span className="text-white font-black text-lg">J</span>
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm font-bold text-gray-900 truncate">Jalaram Admin</h1>
-                <p className="text-[11px] text-gray-400 truncate">Content & Site Manager</p>
+          {/* Sidebar Header with Seamless Logo & Admin Panel Branding */}
+          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex flex-col gap-1.5">
+              <Link href="/admin" className="flex items-center">
+                <Image
+                  src="/images/jalaram-logo.png"
+                  alt="Jalaram Digital Sign"
+                  width={180}
+                  height={38}
+                  className="h-8 w-auto object-contain mix-blend-multiply"
+                  priority
+                />
+              </Link>
+              <div>
+                <h1 className="text-xs font-bold text-gray-900 tracking-tight">Admin Panel</h1>
+                <p className="text-[10px] text-gray-400">Content &amp; Site Manager</p>
               </div>
             </div>
             <button
@@ -681,7 +712,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-170px)]">
             {TABS.map((t) => {
               const Icon = t.icon;
               const isActive = activeTab === t.id;
@@ -707,8 +738,8 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        {/* Sidebar Footer with View Site Link */}
-        <div className="p-4 border-t border-gray-100">
+        {/* Sidebar Footer with View Site Link & Logout Button */}
+        <div className="p-4 border-t border-gray-100 space-y-2">
           <a
             href="/"
             target="_blank"
@@ -717,6 +748,14 @@ export default function AdminDashboard() {
           >
             View Site ↗
           </a>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors shadow-sm"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
