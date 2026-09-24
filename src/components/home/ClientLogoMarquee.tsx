@@ -78,10 +78,6 @@ export default function ClientLogoMarquee({ clients }: ClientLogoMarqueeProps) {
 
   return (
     <section className="py-14 sm:py-20 bg-white border-b border-black/5 overflow-hidden relative marquee-group">
-      {/* Edge gradient fade masks for seamless Webflow-style transition on pure white */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-32 md:w-48 bg-gradient-to-r from-white via-white/90 to-transparent z-10" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-32 md:w-48 bg-gradient-to-l from-white via-white/90 to-transparent z-10" />
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-12 text-center relative z-0">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-50 border border-purple-200/80 text-[#6F20E8] text-xs font-bold tracking-wider uppercase mb-3">
           <ShieldCheck className="w-3.5 h-3.5 text-[#6F20E8]" />

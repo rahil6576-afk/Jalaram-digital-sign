@@ -179,12 +179,8 @@ export default function Home() {
           </div>
         </div>
         
-        {/* Infinite Slow Marquee Track with Fade Masks */}
+        {/* Infinite Slow Marquee Track */}
         <div className="relative w-full overflow-hidden py-2">
-          {/* Left and Right Fade Masks (subtle on mobile so it doesn't obstruct cards) */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-6 sm:w-20 md:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-6 sm:w-20 md:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
-
           {/* Marquee Track */}
           <div className="animate-marquee-slow flex gap-6 min-w-max">
             {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
