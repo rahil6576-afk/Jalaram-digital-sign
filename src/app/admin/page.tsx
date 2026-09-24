@@ -380,14 +380,10 @@ function ModalWrapper({
 function SectionHeader({
   title,
   subtitle,
-  onSave,
-  saving,
   actionButton,
 }: {
   title: string;
   subtitle?: string;
-  onSave: () => void;
-  saving: boolean;
   actionButton?: React.ReactNode;
 }) {
   return (
@@ -396,22 +392,11 @@ function SectionHeader({
         <h2 className="text-xl font-bold text-gray-900">{title}</h2>
         {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
-        {actionButton}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onSave();
-          }}
-          disabled={saving}
-          className="flex items-center gap-1.5 py-2 px-4 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
-        >
-          {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-          Save
-        </button>
-      </div>
+      {actionButton && (
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+          {actionButton}
+        </div>
+      )}
     </div>
   );
 }
@@ -604,6 +589,13 @@ export default function AdminDashboard() {
     if (cleaned !== current) {
       updateSocials(k, cleaned);
     }
+    handleSave({
+      ...data,
+      socials: {
+        ...data.socials,
+        [k]: cleaned,
+      },
+    });
   };
 
   if (loading) {
@@ -768,13 +760,22 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Social Profiles"
                 subtitle="Configure official social media profile URLs (Instagram and Facebook)."
-                onSave={handleSave}
-                saving={saving}
               />
               <div className={sectionCard}>
-                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#6F20E8]" /> Official Social Profiles
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#6F20E8]" /> Official Social Profiles
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => handleSave()}
+                    disabled={saving}
+                    className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                  >
+                    {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                    Save
+                  </button>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(["instagram", "facebook"] as (keyof Socials)[]).map((key) => (
                     <div key={key}>
@@ -800,8 +801,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Hero Carousel Images"
                 subtitle="Click any row or action icon to view and edit the hero slide in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -812,7 +811,7 @@ export default function AdminDashboard() {
                     }}
                     className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-xs md:text-sm font-semibold rounded-xl text-[#6F20E8] transition-all border border-purple-200"
                   >
-                    <Plus className="w-4 h-4" /> Add Image
+                    <Plus className="w-4 h-4" /> Add
                   </button>
                 }
               />
@@ -902,8 +901,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Client Companies & Marquee Logos"
                 subtitle="All client entries displayed in a table. Click any entry or photo to view and edit in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -1026,8 +1023,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Portfolio Projects"
                 subtitle="All projects organized in a table. Click any row or action icon to view and edit details in a popup modal screen."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -1156,8 +1151,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Services"
                 subtitle="All services listed in a table. Click any entry or action icon to view and edit details in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -1287,8 +1280,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Team Members"
                 subtitle="All team members displayed in a table. Click any row or action icon to view and edit details in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -1400,8 +1391,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Client Reviews"
                 subtitle="All client reviews listed in a table. Click any entry or action icon to view and edit details in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
@@ -1504,8 +1493,6 @@ export default function AdminDashboard() {
               <SectionHeader
                 title="Frequently Asked Questions"
                 subtitle="All questions listed in a table. Click any entry or action icon to view and edit details in a popup modal."
-                onSave={handleSave}
-                saving={saving}
                 actionButton={
                   <button
                     type="button"
