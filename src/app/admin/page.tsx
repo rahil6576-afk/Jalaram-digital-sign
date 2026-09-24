@@ -303,10 +303,10 @@ function ModalWrapper({
               </div>
             )}
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-base sm:text-lg text-gray-900">{title}</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight">{title}</h3>
                 {isView && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-[#6F20E8] px-2 py-0.5 rounded-full border border-purple-200">
+                  <span className="inline-flex items-center justify-center shrink-0 text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-[#6F20E8] px-2.5 py-1 rounded-full border border-purple-200 leading-none align-middle shadow-xs">
                     View Mode
                   </span>
                 )}

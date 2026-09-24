@@ -24,8 +24,13 @@ export default function AdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to login");
+      let data: { error?: string; success?: boolean } = {};
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Unable to connect to authentication service. Please try again.");
+      }
+      if (!res.ok) throw new Error(data.error || "Failed to login. Please verify your credentials.");
       router.push("/admin");
       router.refresh();
     } catch (err: unknown) {
@@ -60,7 +65,7 @@ export default function AdminLoginPage() {
               alt="Jalaram Digital Sign"
               width={240}
               height={45}
-              className="h-12 w-auto object-contain"
+              className="h-12 w-auto object-contain mix-blend-multiply"
               priority
             />
           </div>

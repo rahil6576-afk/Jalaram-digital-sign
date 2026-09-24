@@ -102,7 +102,7 @@ export default function Navbar() {
                 width={240}
                 height={45}
                 priority
-                className="h-8 sm:h-9 md:h-11 lg:h-12 w-auto object-contain transition-transform duration-200 group-hover:opacity-90"
+                className="h-8 sm:h-9 md:h-11 lg:h-12 w-auto object-contain transition-transform duration-200 group-hover:opacity-90 mix-blend-multiply"
               />
             </Link>
 
@@ -180,7 +180,7 @@ export default function Navbar() {
                   width={180}
                   height={36}
                   priority
-                  className="h-8 w-auto object-contain"
+                  className="h-8 w-auto object-contain mix-blend-multiply"
                 />
               </Link>
               <button

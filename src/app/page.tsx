@@ -181,9 +181,9 @@ export default function Home() {
         
         {/* Infinite Slow Marquee Track with Fade Masks */}
         <div className="relative w-full overflow-hidden py-2">
-          {/* Left and Right Fade Masks */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+          {/* Left and Right Fade Masks (subtle on mobile so it doesn't obstruct cards) */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-6 sm:w-20 md:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-6 sm:w-20 md:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
           {/* Marquee Track */}
           <div className="animate-marquee-slow flex gap-6 min-w-max">
@@ -194,7 +194,7 @@ export default function Home() {
                 <Link
                   key={`${project.id || i}-${i}`}
                   href={`/portfolio/${projectSlug}`}
-                  className="group block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg border border-black/10 shrink-0 bg-gray-900 transition-all duration-300 hover:shadow-2xl"
+                  className="group block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 transition-all duration-300 hover:shadow-xl"
                 >
                   <Image
                     src={imgSrc}
@@ -203,7 +203,8 @@ export default function Home() {
                     loading="eager"
                     className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity group-hover:opacity-90" />
+                  {/* Subtle bottom gradient only behind text so installations remain bright and visible */}
+                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none transition-opacity group-hover:opacity-95" />
                   <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-1 group-hover:translate-y-0 transition-transform">
                     <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white mb-2 shadow-sm">
                       {project.category}

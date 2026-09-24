@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               alt="Jalaram Digital Sign"
               width={140}
               height={50}
-              className="h-9 w-auto object-contain"
+              className="h-9 w-auto object-contain mix-blend-multiply"
               priority
             />
           </div>

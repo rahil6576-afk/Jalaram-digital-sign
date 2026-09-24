@@ -28,7 +28,7 @@ export default function Footer() {
                 alt={`${siteData.business.name} Logo`}
                 width={280}
                 height={100}
-                className="max-w-[280px] w-full h-auto object-contain"
+                className="max-w-[280px] w-full h-auto object-contain mix-blend-multiply"
               />
             </Link>
             <p className="text-muted leading-relaxed max-w-sm">

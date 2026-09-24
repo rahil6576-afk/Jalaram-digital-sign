@@ -56,7 +56,7 @@ function PureLogoItem({ client }: { client: ClientItem }) {
           height={120}
           loading="eager"
           decoding="async"
-          className="h-18 sm:h-24 md:h-30 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain pointer-events-none select-none"
+          className="h-18 sm:h-24 md:h-30 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain pointer-events-none select-none mix-blend-multiply"
         />
       ) : (
         <span className="font-extrabold text-lg sm:text-2xl text-foreground/80 tracking-tight whitespace-nowrap hover:text-[#6F20E8] transition-colors pointer-events-none select-none">
