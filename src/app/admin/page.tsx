@@ -52,7 +52,6 @@ interface SiteData {
   services: Service[]; portfolio: PortfolioItem[]; team: TeamMember[];
   testimonials: Testimonial[]; faqs: FAQ[];
 }
-interface UploadedFile { name: string; url: string; size: number; createdAt: string; }
 
 type ActiveModal = {
   type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
@@ -70,7 +69,6 @@ const TABS = [
   { id: "team", label: "Team", icon: Users },
   { id: "testimonials", label: "Reviews", icon: MessageSquare },
   { id: "faqs", label: "FAQs", icon: HelpCircle },
-  { id: "media", label: "Media Library", icon: Upload },
 ];
 
 export const CATEGORY_OPTIONS = [
@@ -429,9 +427,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "loading" } | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [mediaUploading, setMediaUploading] = useState(false);
-  const mediaFileRef = useRef<HTMLInputElement>(null);
 
   // Active modal popup state for viewing & editing entries in a popup screen
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
@@ -494,29 +489,6 @@ export default function AdminDashboard() {
     };
     loadData();
   }, [showToast]);
-
-  const loadMedia = async () => {
-    try {
-      const res = await fetch("/api/admin/upload");
-      const json = await res.json();
-      setUploadedFiles(json.files || []);
-    } catch { /* ignore */ }
-  };
-
-  useEffect(() => {
-    let ignore = false;
-    if (activeTab === "media") {
-      fetch("/api/admin/upload")
-        .then((res) => res.json())
-        .then((json) => {
-          if (!ignore) setUploadedFiles(json.files || []);
-        })
-        .catch(() => {});
-    }
-    return () => {
-      ignore = true;
-    };
-  }, [activeTab]);
 
   const cleanSocialUrl = (url: string) => {
     if (!url) return "";
@@ -1575,131 +1547,6 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* ── MEDIA LIBRARY ─────────────────────────────────────────── */}
-          {activeTab === "media" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Media Library"
-                subtitle="Upload, organize, and copy image URLs for use across your website."
-                onSave={handleSave}
-                saving={saving}
-                actionButton={
-                  <button
-                    type="button"
-                    onClick={() => mediaFileRef.current?.click()}
-                    disabled={mediaUploading}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl disabled:opacity-50 transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    {mediaUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    Upload Images
-                  </button>
-                }
-              />
-              <input
-                ref={mediaFileRef}
-                type="file"
-                accept={ACCEPT_PHOTO_ATTR}
-                multiple
-                className="hidden"
-                onChange={async (e) => {
-                  const rawFiles = Array.from(e.target.files || []);
-                  if (!rawFiles.length) return;
-
-                  const validFiles: File[] = [];
-                  for (const file of rawFiles) {
-                    const check = validatePhoto(file);
-                    if (!check.valid) {
-                      showToast(check.error || "Invalid file", "error");
-                    } else {
-                      validFiles.push(file);
-                    }
-                  }
-
-                  if (!validFiles.length) {
-                    e.target.value = "";
-                    return;
-                  }
-
-                  setMediaUploading(true);
-                  for (const file of validFiles) {
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    await fetch("/api/admin/upload", { method: "POST", body: fd });
-                  }
-                  await loadMedia();
-                  setMediaUploading(false);
-                  showToast(`Uploaded ${validFiles.length} photo(s) successfully`, "success");
-                  e.target.value = "";
-                }}
-              />
-
-              {/* Drop zone */}
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={async (e) => {
-                  e.preventDefault();
-                  const rawFiles = Array.from(e.dataTransfer.files);
-                  if (!rawFiles.length) return;
-
-                  const validFiles: File[] = [];
-                  for (const file of rawFiles) {
-                    const check = validatePhoto(file);
-                    if (!check.valid) {
-                      showToast(check.error || "Invalid file", "error");
-                    } else {
-                      validFiles.push(file);
-                    }
-                  }
-
-                  if (!validFiles.length) return;
-
-                  setMediaUploading(true);
-                  for (const file of validFiles) {
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    await fetch("/api/admin/upload", { method: "POST", body: fd });
-                  }
-                  await loadMedia();
-                  setMediaUploading(false);
-                  showToast(`Uploaded ${validFiles.length} photo(s) successfully`, "success");
-                }}
-                className="border-2 border-dashed border-gray-300 hover:border-[#6F20E8] bg-gray-50/70 hover:bg-purple-50/20 rounded-2xl py-12 text-center transition-colors cursor-pointer"
-                onClick={() => mediaFileRef.current?.click()}
-              >
-                {mediaUploading ? (
-                  <><Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-[#6F20E8]" /><p className="text-sm text-gray-500 font-medium">Uploading…</p></>
-                ) : (
-                  <><Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" /><p className="text-sm font-semibold text-gray-700">Drag & drop photos here, or click to browse</p><p className="text-xs text-gray-500 mt-1">JPG, JPEG, PNG, or WEBP up to 15MB</p></>
-                )}
-              </div>
-
-              {/* File Grid */}
-              {uploadedFiles.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {uploadedFiles.map((file) => (
-                    <div key={file.name} className="group relative bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={file.url} alt={file.name} className="w-full h-28 object-cover" />
-                      <div className="p-2">
-                        <p className="text-[11px] text-gray-800 font-medium truncate" title={file.name}>{file.name}</p>
-                        <p className="text-[10px] text-gray-500 mt-0.5">{(file.size / 1024).toFixed(1)} KB</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => { navigator.clipboard.writeText(window.location.origin + file.url); showToast("URL copied to clipboard!", "success"); }}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-all shadow-md"
-                      >
-                        Copy URL
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-sm text-gray-500 py-4">No uploaded images yet.</p>
               )}
             </div>
           )}
