@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/context/SiteDataContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronRight, ChevronLeft, PhoneCall } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronLeft, PhoneCall, X } from "lucide-react";
 import Image from "next/image";
 import { formatWhatsAppUrl } from "@/lib/utils";
 import ClientLogoMarquee from "@/components/home/ClientLogoMarquee";
@@ -13,6 +13,8 @@ export default function Home() {
   const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
   const showcaseRef = useRef<HTMLDivElement>(null);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string>("");
 
   const heroImages = siteData?.heroImages?.length ? siteData.heroImages : ["/hoardings.webp"];
 
@@ -169,14 +171,7 @@ export default function Home() {
             </h2>
             <p className="text-gray-500 text-sm mt-1">Glimpse into our live outdoor, retail, and corporate installations across Gujarat.</p>
           </div>
-          <div>
-            <Link
-              href="/portfolio"
-              className="inline-flex items-center gap-2 text-foreground font-bold uppercase tracking-widest text-xs md:text-sm hover:text-accent transition-colors group"
-            >
-              View All Projects <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+
         </div>
         
         {/* Infinite Slow Marquee Track */}
@@ -184,35 +179,22 @@ export default function Home() {
           {/* Marquee Track */}
           <div className="animate-marquee-slow flex gap-6 min-w-max">
             {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
-              const projectSlug = project.slug || project.id || project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
               const imgSrc = project.image ? encodeURI(project.image) : "/hoardings.webp";
               return (
-                <Link
+                <button
                   key={`${project.id || i}-${i}`}
-                  href={`/portfolio/${projectSlug}`}
-                  className="group block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 transition-all duration-300 hover:shadow-xl"
+                  type="button"
+                  onClick={() => { setLightboxSrc(imgSrc); setLightboxAlt(project.title); }}
+                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 cursor-pointer"
                 >
                   <Image
                     src={imgSrc}
                     alt={project.title}
                     fill
                     loading="eager"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="object-cover pointer-events-none"
                   />
-                  {/* Subtle bottom gradient only behind text so installations remain bright and visible */}
-                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none transition-opacity group-hover:opacity-95" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-1 group-hover:translate-y-0 transition-transform">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white mb-2 shadow-sm">
-                      {project.category}
-                    </span>
-                    <h3 className="text-lg sm:text-xl font-bold text-white leading-snug line-clamp-1 drop-shadow-md">
-                      {project.title}
-                    </h3>
-                    <div className="flex items-center text-xs text-gray-300 mt-2">
-                      <span>{project.location}</span>
-                    </div>
-                  </div>
-                </Link>
+                </button>
               );
             })}
           </div>
@@ -377,6 +359,32 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* LIGHTBOX */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close lightbox"
+          >
+            <X className="w-7 h-7" />
+          </button>
+          <div
+            className="relative max-w-5xl max-h-[90vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={lightboxSrc}
+              alt={lightboxAlt}
+              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,25 +1,23 @@
-import { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
 import { siteData, getSiteData } from "@/data/site";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
-
-export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: `Our Services | ${siteData.business.name}`,
-  description: "Explore our range of digital printing, large format banners, LED signage, and visual branding services.",
-};
 
 export default function ServicesPage() {
   const currentData = getSiteData();
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string>("");
+
   return (
     <>
       {/* PAGE HERO */}
       <section className="pt-28 sm:pt-36 md:pt-40 pb-12 sm:pb-16 md:pb-20 bg-secondary-bg border-b border-black/5 relative overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image
-            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop"
+            src="/digital-printing.webp"
             alt="Services background"
             fill
             priority
@@ -48,43 +46,45 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {currentData.services.map((service, index) => (
-              <Link key={service.id} href={`/services/${service.slug}`} className="group block">
-                <div className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:border-accent/50 transition-all duration-300">
-                  <div className="aspect-video relative overflow-hidden">
-                    <Image
-                      src={service.image}
-                      alt={service.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                    <span className="absolute top-6 right-6 text-white/90 text-4xl font-bold tracking-tighter drop-shadow-md">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="absolute bottom-6 left-6 text-3xl font-bold text-white drop-shadow-md pr-12">{service.title}</h3>
-                  </div>
-                  
-                  <div className="p-8 md:p-10 flex flex-col flex-grow">
-                    <p className="text-gray-600 mb-8 leading-relaxed flex-grow text-lg">
-                      {service.shortDescription}
-                    </p>
-                    
-                    {/* Features List */}
-                    <ul className="mb-8 space-y-3">
-                      {service.features.map((feature, i) => (
-                        <li key={i} className="text-sm text-gray-600 font-medium flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-auto flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-accent group-hover:text-black transition-colors">
-                      View Details <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </div>
+              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:border-accent/50 transition-all duration-300">
+                {/* Clickable Image → opens lightbox ONLY */}
+                <div
+                  className="aspect-video relative overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    setLightboxSrc(service.image);
+                    setLightboxAlt(service.title);
+                  }}
+                >
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <span className="absolute top-6 right-6 text-white/90 text-4xl font-bold tracking-tighter drop-shadow-md">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="absolute bottom-6 left-6 text-3xl font-bold text-white drop-shadow-md pr-12">{service.title}</h3>
                 </div>
-              </Link>
+
+                {/* Card body — NOT clickable as a whole, just text content */}
+                <div className="p-8 md:p-10 flex flex-col flex-grow">
+                  <p className="text-gray-600 mb-8 leading-relaxed flex-grow text-lg">
+                    {service.shortDescription}
+                  </p>
+
+                  {/* Features List */}
+                  <ul className="space-y-3">
+                    {service.features.map((feature, i) => (
+                      <li key={i} className="text-sm text-gray-600 font-medium flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -108,6 +108,32 @@ export default function ServicesPage() {
           </Link>
         </div>
       </section>
+
+      {/* LIGHTBOX */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close"
+          >
+            <X className="w-7 h-7" />
+          </button>
+          <div
+            className="relative max-w-5xl max-h-[90vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={lightboxSrc}
+              alt={lightboxAlt}
+              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

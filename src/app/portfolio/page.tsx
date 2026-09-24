@@ -4,18 +4,20 @@ import { useState } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
 
 export default function PortfolioPage() {
   const siteData = useSiteData();
   const [filter, setFilter] = useState("All");
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string>("");
 
   const portfolioList = siteData?.portfolio || [];
   const categories = ["All", ...Array.from(new Set(portfolioList.map((p) => p.category)))];
 
-  const filteredProjects = filter === "All" 
-    ? portfolioList 
+  const filteredProjects = filter === "All"
+    ? portfolioList
     : portfolioList.filter(p => p.category === filter);
 
   return (
@@ -51,15 +53,15 @@ export default function PortfolioPage() {
       {/* PORTFOLIO GRID */}
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Filters — Horizontal swipeable without clipping on mobile */}
+          {/* Filters */}
           <div className="flex items-center gap-2 sm:gap-3 mb-8 sm:mb-12 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
                 className={`px-5 sm:px-6 py-2 sm:py-2.5 rounded-sm text-xs font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap shrink-0 min-h-[40px] ${
-                  filter === cat 
-                    ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-lg shadow-[#6F20E8]/30" 
+                  filter === cat
+                    ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-lg shadow-[#6F20E8]/30"
                     : "bg-card-bg border border-black/10 text-foreground hover:border-black/30 hover:bg-black/5"
                 }`}
               >
@@ -68,7 +70,7 @@ export default function PortfolioPage() {
             ))}
           </div>
 
-          {/* Grid */}
+          {/* Grid — images open lightbox only, no navigation */}
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
               {filteredProjects.map((project) => (
@@ -80,24 +82,30 @@ export default function PortfolioPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <Link href={`/portfolio/${project.slug}`} className="group block relative overflow-hidden aspect-[4/3] bg-card-bg shadow-2xl rounded-sm">
+                  <div
+                    className="block relative overflow-hidden aspect-[4/3] bg-card-bg shadow-2xl rounded-sm cursor-pointer"
+                    onClick={() => {
+                      setLightboxSrc(project.image);
+                      setLightboxAlt(project.title);
+                    }}
+                  >
                     <Image
                       src={project.image}
                       alt={project.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+                      className="object-cover pointer-events-none"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
-                    <div className="absolute bottom-0 left-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 w-full">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
+                    <div className="absolute bottom-0 left-0 p-8 w-full">
                       <span className="text-accent text-xs font-bold uppercase tracking-widest mb-3 block">
                         {project.category}
                       </span>
                       <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{project.title}</h3>
                       <div className="mt-4">
-                         <span className="text-sm text-gray-300 font-medium">{project.location}</span>
+                        <span className="text-sm text-gray-300 font-medium">{project.location}</span>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -136,6 +144,32 @@ export default function PortfolioPage() {
           </div>
         </div>
       </section>
+
+      {/* LIGHTBOX */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Close lightbox"
+          >
+            <X className="w-7 h-7" />
+          </button>
+          <div
+            className="relative max-w-5xl max-h-[90vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={lightboxSrc}
+              alt={lightboxAlt}
+              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
