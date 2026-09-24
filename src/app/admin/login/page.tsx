@@ -34,7 +34,12 @@ export default function AdminLoginPage() {
       router.push("/admin");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid credentials");
+      const msg = err instanceof Error ? err.message : "Invalid credentials";
+      if (msg.toLowerCase().includes("fetch") || msg.toLowerCase().includes("network")) {
+        setError("Network connection error: Server is unreachable. Please ensure the dev server is running and try again.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

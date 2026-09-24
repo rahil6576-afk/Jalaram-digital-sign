@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import TeamGrid from "@/components/team/TeamGrid";
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -44,28 +46,7 @@ export default function TeamPage() {
 
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {currentData.team.map((member) => (
-              <div key={member.id} className="group">
-                <div className="aspect-[3/4] bg-card-bg mb-6 relative overflow-hidden border border-black/5 shadow-xl rounded-sm">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out filter grayscale group-hover:grayscale-0"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-10 transition-opacity duration-500" />
-                </div>
-                <h3 className="text-2xl font-bold mb-1 text-gray-900">{member.name}</h3>
-                <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-sm font-bold uppercase tracking-widest mb-3">
-                  {member.role}
-                </p>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {member.bio}
-                </p>
-              </div>
-            ))}
-          </div>
+          <TeamGrid team={currentData.team} />
         </div>
       </section>
 
