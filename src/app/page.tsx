@@ -8,6 +8,7 @@ import { ArrowRight, ChevronRight, PhoneCall, X } from "lucide-react";
 import Image from "next/image";
 import { formatWhatsAppUrl } from "@/lib/utils";
 import ClientLogoMarquee from "@/components/home/ClientLogoMarquee";
+import HomeReviewsSection from "@/components/home/HomeReviewsSection";
 import HomeFaqSection from "@/components/home/HomeFaqSection";
 
 export default function Home() {
@@ -318,6 +319,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 6. REVIEWS & TESTIMONIALS SECTION (CLEAN STATIC GRID) */}
+      <HomeReviewsSection testimonials={siteData?.testimonials} />
 
       {/* 6.5 FAQ SECTION */}
       <HomeFaqSection
