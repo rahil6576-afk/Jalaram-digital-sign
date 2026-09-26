@@ -59,17 +59,76 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Max 15MB size check
-    const MAX_SIZE = 15 * 1024 * 1024;
+    // Max 5MB size check
+    const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
       return NextResponse.json(
-        { error: `File exceeds allowed size (${sizeMb}MB). Please upload files up to 15 MB.` },
+        { error: `File exceeds allowed size (${sizeMb}MB). Please upload files up to 5 MB.` },
+        { status: 400 }
+      );
+    }
+
+    // Minimum file size check (at least 100 bytes)
+    if (file.size < 100) {
+      return NextResponse.json(
+        { error: "Photo file is too small or empty. Please select a valid photo." },
         { status: 400 }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate photo dimensions and integrity
+    let dimensions = { width: 0, height: 0 };
+    try {
+      const sharp = (await import("sharp")).default;
+      const meta = await sharp(buffer).metadata();
+      if (!meta.width || !meta.height) {
+        return NextResponse.json(
+          { error: "Invalid photo file. Dimensions could not be read." },
+          { status: 400 }
+        );
+      }
+      if (meta.width < 50 || meta.height < 50) {
+        return NextResponse.json(
+          { error: `Photo size too small (${meta.width}×${meta.height}px). Minimum required photo size is 50×50px.` },
+          { status: 400 }
+        );
+      }
+      if (meta.width > 6000 || meta.height > 6000) {
+        return NextResponse.json(
+          { error: `Photo size exceeds maximum allowed dimensions (${meta.width}×${meta.height}px). Max dimension is 6000×6000px.` },
+          { status: 400 }
+        );
+      }
+      dimensions = { width: meta.width, height: meta.height };
+    } catch {
+      return NextResponse.json(
+        { error: "Corrupted or invalid photo file. Please upload a valid JPG, PNG, or WEBP photo." },
+        { status: 400 }
+      );
+    }
+
+    // If Cloudinary credentials are provided, upload directly to Cloudinary
+    const { isCloudinaryConfigured, uploadToCloudinary } = await import("@/lib/cloudinary");
+    if (isCloudinaryConfigured()) {
+      try {
+        const cloudResult = await uploadToCloudinary(buffer, "jalaram", file.name);
+        return NextResponse.json({
+          success: true,
+          url: cloudResult.secure_url,
+          name: cloudResult.public_id,
+          size: file.size,
+          dimensions,
+          provider: "cloudinary",
+        });
+      } catch (cloudErr) {
+        console.error("Cloudinary upload failed, falling back to local:", cloudErr);
+      }
+    }
+
+    // Local fallback when Cloudinary is not yet configured or on network fallback
     const sanitizedOriginalName = file.name
       .toLowerCase()
       .replace(/[^a-z0-9.]/g, "-")
@@ -87,6 +146,8 @@ export async function POST(request: NextRequest) {
       url: publicUrl,
       name: fileName,
       size: file.size,
+      dimensions,
+      provider: "local",
     });
   } catch (error) {
     console.error("Error saving uploaded file:", error);

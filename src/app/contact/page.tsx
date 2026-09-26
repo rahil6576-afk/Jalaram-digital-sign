@@ -2,24 +2,64 @@
 
 import { useState } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
-import { MapPin, Phone, Mail, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
-import Image from "next/image";
+import { MapPin, Phone, Mail, Clock, ArrowRight, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { formatExternalUrl } from "@/lib/utils";
 
 import PageHero from "@/components/common/PageHero";
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    company: "",
+    service: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const siteData = useSiteData();
   const contact = siteData.contactPage;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    setSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to submit enquiry. Please try again.");
+      }
+
+      setIsSubmitted(true);
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        company: "",
+        service: "",
+        message: "",
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again or call us directly.";
+      setErrorMsg(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
+      {/* High-contrast backdrop-blur-md glass pill badge over photo hero */}
       <PageHero
         badgeText={contact.heroTagline || "Contact Us • Fast Quotes & Consultation"}
         title={
@@ -36,9 +76,9 @@ export default function ContactPage() {
         }
         subtitle={contact.heroSubtitle || "Tell us what you need printed, branded or installed. Our team will help you find the right solution."}
         images={[
-          contact?.heroImage && !contact.heroImage.includes("unsplash") ? contact.heroImage : "/3d-led-board.webp",
-          "/hoardings.webp",
-          "/glow-signs.webp",
+          contact?.heroImage && !contact.heroImage.includes("unsplash") ? contact.heroImage : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398007/jalaram/jalaram_3d-led-board_1790398009053.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
         ]}
       />
 
@@ -166,29 +206,66 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {errorMsg && (
+                    <div className="p-4 rounded-sm bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Name</label>
-                      <input required type="text" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="John Doe" />
+                      <label className="text-sm font-medium text-gray-600">Name *</label>
+                      <input
+                        required
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        placeholder="John Doe"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Phone</label>
-                      <input required type="tel" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="+91 XXXXX XXXXX" />
+                      <label className="text-sm font-medium text-gray-600">Phone *</label>
+                      <input
+                        required
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        placeholder="+91 XXXXX XXXXX"
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-600">Email</label>
-                      <input required type="email" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="john@example.com" />
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        placeholder="john@example.com"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-gray-600">Company (Optional)</label>
-                      <input type="text" className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm" placeholder="Your Business" />
+                      <input
+                        type="text"
+                        value={formData.company}
+                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        placeholder="Your Business"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-600">Service of Interest</label>
-                    <select className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm">
+                    <select
+                      value={formData.service}
+                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                      className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm"
+                    >
                       <option value="">Select a service</option>
                       {siteData.services.map((s) => (
                         <option key={s.id} value={s.title}>{s.title}</option>
@@ -196,11 +273,30 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-600">Message</label>
-                    <textarea required rows={5} className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors resize-none rounded-sm" placeholder="Tell us about your project..." />
+                    <label className="text-sm font-medium text-gray-600">Message *</label>
+                    <textarea
+                      required
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors resize-none rounded-sm"
+                      placeholder="Tell us about your project..."
+                    />
                   </div>
-                  <button type="submit" className="w-full bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-8 py-4 sm:py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-[#6F20E8]/30 min-h-[50px]">
-                    Submit Enquiry <ArrowRight className="w-5 h-5" />
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-8 py-4 sm:py-5 rounded-sm font-bold transition-all text-sm uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-[#6F20E8]/30 min-h-[50px] disabled:opacity-70 cursor-pointer"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" /> Submitting Enquiry...
+                      </>
+                    ) : (
+                      <>
+                        Submit Enquiry <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
                   </button>
                 </form>
               )}

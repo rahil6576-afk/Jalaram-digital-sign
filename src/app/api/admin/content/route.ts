@@ -2,12 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import defaultSiteData from "@/data/site-content.json";
+import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 
 const RUNTIME_CONTENT_PATH = path.join(process.cwd(), "data", "site-content.json");
 const SEED_CONTENT_PATH = path.join(process.cwd(), "src", "data", "site-content.json");
 
 export async function GET() {
   try {
+    // 1. Try reading from Supabase if configured
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data, error } = await supabase
+          .from("site_content")
+          .select("content")
+          .eq("id", "main")
+          .maybeSingle();
+
+        if (!error && data?.content) {
+          return NextResponse.json(data.content);
+        }
+      }
+    }
+
+    // 2. Fall back to local file storage
     if (fs.existsSync(RUNTIME_CONTENT_PATH)) {
       const data = fs.readFileSync(RUNTIME_CONTENT_PATH, "utf-8");
       return NextResponse.json(JSON.parse(data));
@@ -39,14 +57,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure data directory exists
+    // 1. If Supabase is configured, persist to Supabase
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { error: dbError } = await supabase
+          .from("site_content")
+          .upsert(
+            {
+              id: "main",
+              content: updatedData,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "id" }
+          );
+
+        if (dbError) {
+          console.error("Supabase site_content update error:", dbError);
+        }
+      }
+    }
+
+    // 2. Also keep local JSON synchronized as reliable backup and offline cache
     const dir = path.dirname(RUNTIME_CONTENT_PATH);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-
-    // Write formatted JSON to runtime storage outside of watched src/ directory
-    // This prevents Turbopack/Next.js HMR from triggering a full page reload in the browser!
     fs.writeFileSync(RUNTIME_CONTENT_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
 
     return NextResponse.json({
@@ -57,7 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Error saving site content:", error);
     return NextResponse.json(
-      { error: "Failed to save updated site content to file." },
+      { error: "Failed to save updated site content." },
       { status: 500 }
     );
   }
@@ -66,9 +102,25 @@ export async function POST(request: NextRequest) {
 // Reset to initial seed data
 export async function DELETE() {
   try {
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        await supabase
+          .from("site_content")
+          .upsert(
+            {
+              id: "main",
+              content: defaultSiteData,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "id" }
+          );
+      }
+    }
+
     fs.writeFileSync(RUNTIME_CONTENT_PATH, JSON.stringify(defaultSiteData, null, 2), "utf-8");
     return NextResponse.json({ success: true, message: "Site content restored to default" });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to reset content" }, { status: 500 });
   }
 }

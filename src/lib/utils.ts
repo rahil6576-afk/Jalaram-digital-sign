@@ -22,7 +22,7 @@ export function formatExternalUrl(url: string | undefined | null): string {
 }
 
 export function formatWhatsAppUrl(rawPhone: string | undefined | null, message?: string): string {
-  const fallback = "919427033363";
+  const fallback = "918511133363";
   if (!rawPhone) {
     const textParam = message ? `?text=${encodeURIComponent(message)}` : "";
     return `https://wa.me/${fallback}${textParam}`;

@@ -66,9 +66,11 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   // Close mobile menu on route change
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setIsMobileMenuOpen(false);
-  }, [pathname]);
+  }
 
   if (pathname?.startsWith("/admin")) {
     return null;
@@ -97,7 +99,7 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Image
-                src="/images/jalaram-logo.png"
+                src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
                 alt={`${siteData.business.name} Logo`}
                 width={240}
                 height={45}
@@ -175,7 +177,7 @@ export default function Navbar() {
                 className="flex items-center"
               >
                 <Image
-                  src="/images/jalaram-logo.png"
+                  src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
                   alt={`${siteData.business.name} Logo`}
                   width={180}
                   height={36}

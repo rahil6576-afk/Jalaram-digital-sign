@@ -68,7 +68,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     );
   }
 
-  const serviceImage = service.image ? encodeURI(service.image) : "/flex-banner.webp";
+  const serviceImage = service.image ? encodeURI(service.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398036/jalaram/jalaram_flex-banner_1790398038042.webp";
   const featuresList = (service.features || []).filter(Boolean);
 
   return (

@@ -7,9 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/responsive-and-colors.test.mjs"
+    "test": "node --test tests/responsive-and-colors.test.mjs",
+    "db:migrate": "node scripts/migrate-to-supabase.mjs",
+    "migrate:images": "node scripts/migrate-images-to-cloudinary.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
+    "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
     "framer-motion": "^13.2.0",
     "lucide-react": "^1.46.0",
@@ -26,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

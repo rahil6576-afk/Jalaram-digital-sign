@@ -24,7 +24,7 @@ export default function Footer() {
           <div className="space-y-6">
             <Link href="/" className="inline-flex items-center">
               <Image
-                src="/images/jalaram-logo.png"
+                src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
                 alt={`${siteData.business.name} Logo`}
                 width={280}
                 height={100}

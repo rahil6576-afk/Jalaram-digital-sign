@@ -1,29 +1,22 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/context/SiteDataContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronRight, ChevronLeft, PhoneCall, X } from "lucide-react";
+import { ArrowRight, ChevronRight, PhoneCall, X } from "lucide-react";
 import Image from "next/image";
 import { formatWhatsAppUrl } from "@/lib/utils";
 import ClientLogoMarquee from "@/components/home/ClientLogoMarquee";
+import HomeFaqSection from "@/components/home/HomeFaqSection";
 
 export default function Home() {
   const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
-  const showcaseRef = useRef<HTMLDivElement>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [lightboxAlt, setLightboxAlt] = useState<string>("");
 
-  const heroImages = siteData?.heroImages?.length ? siteData.heroImages : ["/hoardings.webp"];
-
-  const scrollShowcase = (direction: 'left' | 'right') => {
-    if (showcaseRef.current) {
-      const amount = direction === 'left' ? -344 : 344;
-      showcaseRef.current.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-  };
+  const heroImages = (siteData?.heroImages?.length ? siteData.heroImages : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
 
   useEffect(() => {
     if (!heroImages.length) return;
@@ -49,7 +42,7 @@ export default function Home() {
               className="absolute inset-0"
             >
               <Image
-                src={heroImages[currentHeroImage % heroImages.length] || "/hoardings.webp"}
+                src={heroImages[currentHeroImage % heroImages.length] || "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"}
                 alt="Hero background"
                 fill
                 priority
@@ -179,7 +172,7 @@ export default function Home() {
           {/* Marquee Track */}
           <div className="animate-marquee-slow flex gap-6 min-w-max">
             {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
-              const imgSrc = project.image ? encodeURI(project.image) : "/hoardings.webp";
+              const imgSrc = project.image ? encodeURI(project.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
               return (
                 <button
                   key={`${project.id || i}-${i}`}
@@ -191,7 +184,8 @@ export default function Home() {
                     src={imgSrc}
                     alt={project.title}
                     fill
-                    loading="eager"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 320px, 384px"
                     className="object-cover pointer-events-none"
                   />
                 </button>
@@ -325,9 +319,12 @@ export default function Home() {
         </div>
       </section>
 
-
-
-
+      {/* 6.5 FAQ SECTION */}
+      <HomeFaqSection
+        faqs={siteData?.faqs}
+        whatsappNumber={siteData?.business?.whatsapp}
+        phoneNumber={siteData?.business?.phone}
+      />
 
       {/* 7. FINAL CTA */}
       <section className="py-20 sm:py-24 md:py-32 bg-gradient-to-br from-[#6F20E8] via-[#5B16C7] to-[#3B0764] relative overflow-hidden">

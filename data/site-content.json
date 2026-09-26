@@ -3,8 +3,8 @@
     "name": "Jalaram Digital Sign",
     "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat.",
     "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
-    "phone": "+91 94270 33363",
-    "whatsapp": "919427033363",
+    "phone": "+91 85111 33363",
+    "whatsapp": "918511133363",
     "email": "info@jalaramdigitalsign.com",
     "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
     "hours": "Mon - Sat: 9:00 AM - 8:00 PM"
@@ -18,31 +18,163 @@
       "id": "client-1",
       "name": "BJP",
       "tag": "Government & Civic Campaigns",
-      "logo": "/client-bjp.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397706/jalaram/jalaram_client-bjp_1790397706955.webp"
     },
     {
       "id": "client-2",
       "name": "NFSU College",
       "tag": "National Forensic Sciences University",
-      "logo": "/client-nsfu.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397707/jalaram/jalaram_client-nsfu_1790397708478.webp"
     },
     {
       "id": "client-3",
       "name": "Jay Gotli Mukhwas",
       "tag": "Food & FMCG Brand",
-      "logo": "/client-mukhwas.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mukhwas_1790397709166.webp"
     },
     {
       "id": "client-4",
       "name": "Mount Carmel School",
       "tag": "Educational Institution",
-      "logo": "/client-mount-carmel.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mount-carmel_1790397709976.webp"
     },
     {
       "id": "client-5",
       "name": "Xavier School",
       "tag": "Academic Institution",
-      "logo": "/client-st-xavier.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397709/jalaram/jalaram_client-st-xavier_1790397710778.webp"
+    },
+    {
+      "id": "client-sag",
+      "name": "Sports Authority of Gujarat",
+      "tag": "Government of Gujarat",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-sports-authority-gujarat_1790397711410.webp"
+    },
+    {
+      "id": "client-advance-hospital",
+      "name": "Advance Hospital",
+      "tag": "Healthcare & Multispeciality",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-advance-hospital_1790397711967.webp"
+    },
+    {
+      "id": "client-indian-army",
+      "name": "Indian Army (Bharatiya Sena)",
+      "tag": "Ministry of Defence",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bharatiya-sena_1790397712522.webp"
+    },
+    {
+      "id": "client-bsf",
+      "name": "Border Security Force (BSF)",
+      "tag": "Ministry of Home Affairs",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bsf_1790397713065.webp"
+    },
+    {
+      "id": "client-dholera-sir",
+      "name": "Dholera SIR",
+      "tag": "Special Investment Region",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-dholera-sir_1790397713617.webp"
+    },
+    {
+      "id": "client-geer-foundation",
+      "name": "GEER Foundation",
+      "tag": "Forest & Environment Dept., Gujarat",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-geer-foundation_1790397714121.webp"
+    },
+    {
+      "id": "client-gspc",
+      "name": "Gujarat State Petroleum Corp. (GSPC)",
+      "tag": "Energy & Gas Infrastructure",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-gspc_1790397714723.webp"
+    },
+    {
+      "id": "client-the-leela",
+      "name": "The Leela Gandhinagar",
+      "tag": "Luxury Hospitality & Hotels",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-the-leela_1790397715255.webp"
+    },
+    {
+      "id": "client-jaliyan-jewellers",
+      "name": "Jaliyan Jewellers",
+      "tag": "Fine Jewellery & Gold",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397714/jalaram/jalaram_client-jaliyan-jewellers_1790397715789.webp"
+    },
+    {
+      "id": "client-gujarat-police",
+      "name": "Gujarat Police",
+      "tag": "Law Enforcement & Public Safety",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-gujarat-police_1790397716761.webp"
+    },
+    {
+      "id": "client-raksha-shakti",
+      "name": "Rashtriya Raksha University",
+      "tag": "National Security & Police University",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-raksha-shakti_1790397717304.webp"
+    },
+    {
+      "id": "client-rivera",
+      "name": "Rivera",
+      "tag": "Real Estate & Infrastructure",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397716/jalaram/jalaram_client-rivera_1790397717852.webp"
+    },
+    {
+      "id": "client-sai",
+      "name": "Sports Authority of India (SAI)",
+      "tag": "Ministry of Youth Affairs & Sports",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sai_1790397718455.webp"
+    },
+    {
+      "id": "client-sbi",
+      "name": "State Bank of India (SBI)",
+      "tag": "Premier Banking & Financial Institution",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sbi_1790397719376.webp"
+    },
+    {
+      "id": "client-tata-aia",
+      "name": "Tata AIA Life Insurance",
+      "tag": "Life Insurance & Wealth Solutions",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397718/jalaram/jalaram_client-tata-aia_1790397719911.webp"
+    },
+    {
+      "id": "client-indian-air-force",
+      "name": "Indian Air Force (Bharatiya Vayu Sena)",
+      "tag": "Armed Forces of India",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-indian-air-force_1790397720577.webp"
+    },
+    {
+      "id": "client-ugvcl",
+      "name": "UGVCL (Uttar Gujarat Vij Company)",
+      "tag": "Power Distribution Utility",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-ugvcl_1790397721245.webp"
+    },
+    {
+      "id": "client-chandra",
+      "name": "Chandra",
+      "tag": "Premium Consumer Brand",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397720/jalaram/jalaram_client-chandra_1790397721777.webp"
+    },
+    {
+      "id": "client-kabir-world",
+      "name": "Kabir World",
+      "tag": "A Venture of Kabir Technologies",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397720/jalaram/jalaram_client-kabir-world_1790397722404.webp"
+    },
+    {
+      "id": "client-jayantilal-chikkiwala",
+      "name": "Jayantilal Chikkiwala",
+      "tag": "Traditional Confectionery & Sweets",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397721/jalaram/jalaram_client-jayantilal-chikkiwala_1790397722946.webp"
+    },
+    {
+      "id": "client-safal-icon",
+      "name": "Safal Icon",
+      "tag": "Commercial Real Estate & Spaces",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397722/jalaram/jalaram_client-safal-icon_1790397723462.webp"
+    },
+    {
+      "id": "client-span-infrastructure",
+      "name": "Span Infrastructure",
+      "tag": "Infrastructure & Commercial Builders",
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397723/jalaram/jalaram_client-span-infrastructure_1790397724170.webp"
     }
   ],
   "homePage": {
@@ -97,16 +229,16 @@
     "ctaHeadline": "Ready to work with us?"
   },
   "contactPage": {
-    "heroImage": "/3d-led-board.webp",
+    "heroImage": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
     "heroTagline": "Contact Us • Fast Quotes & Consultation",
     "heroHeadline": "LET'S MAKE YOUR BRAND IMPOSSIBLE TO MISS.",
     "heroSubtitle": "Tell us what you need printed, branded or installed. Our team will help you find the right solution.",
     "mapImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
   },
   "heroImages": [
-    "/hoardings.webp",
-    "/flex-banner.webp",
-    "/3d-led-board.webp"
+    "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
+    "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
+    "https://res.cloudinary.com/v61ii2hr/image/upload/v1790339917/jalaram/hoardings_1790339916707.webp"
   ],
   "bannerSizes": [
     {
@@ -259,7 +391,7 @@
       "title": "Digital Printing",
       "shortDescription": "High-resolution digital prints for everyday promotional needs.",
       "description": "Our high-speed digital printing services offer crisp, vibrant results for brochures, flyers, business cards, and promotional materials. Perfect for short runs and fast turnaround times.",
-      "image": "/digital-printing.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340347/jalaram/jalaram_digital-printing_1790340347919.webp",
       "category": "Printing",
       "features": [
         "Fast Turnaround",
@@ -276,7 +408,7 @@
       "title": "Flex & Banner Printing",
       "shortDescription": "Durable, high-impact banners for outdoor and indoor visibility.",
       "description": "Make your message impossible to miss. We produce bold, high-resolution banners built for storefronts, promotions, events, and outdoor visibility.",
-      "image": "/flex-banner.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
       "category": "Large Format",
       "features": [
         "Weather Resistant",
@@ -293,7 +425,7 @@
       "title": "LED & Illuminated Signage",
       "shortDescription": "Stand out day and night with custom illuminated signs.",
       "description": "Premium LED signage designed to make your business visible 24/7. From backlit boards to 3D glowing letters, we build signs that demand attention.",
-      "image": "/3d-led-board.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
       "category": "Signage",
       "features": [
         "Energy Efficient",
@@ -310,7 +442,7 @@
       "title": "Vinyl Printing",
       "shortDescription": "Versatile vinyl graphics for windows, walls, and vehicles.",
       "description": "Custom vinyl prints for a variety of applications including window decals, wall graphics, and vehicle branding. Precision cut and professionally installed.",
-      "image": "/vinyl-printing.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
       "category": "Printing",
       "features": [
         "Indoor & Outdoor",
@@ -329,9 +461,9 @@
       "title": "Highway & Urban Hoardings",
       "category": "Hoardings",
       "description": "Massive roadside billboards and high-impact structural hoardings designed for maximum brand exposure across Gandhinagar and major highway corridors.",
-      "image": "/hoardings.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp",
       "images": [
-        "/hoardings.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp"
       ],
       "location": "Gandhinagar - SG Highway",
       "featured": true,
@@ -343,9 +475,9 @@
       "title": "High-Resolution Flex Banners",
       "category": "Flex Banner",
       "description": "Vibrant, weather-resistant flex and star flex banners with reinforced grommets for storefront promotions, grand openings, and large-scale public events.",
-      "image": "/flex-banner.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
       "images": [
-        "/flex-banner.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -357,9 +489,9 @@
       "title": "Commercial Vinyl Printing",
       "category": "Vinyl Printing",
       "description": "Precision-cut, high-grade self-adhesive vinyl for storefront branding, corporate wall murals, floor graphics, and commercial vehicle fleet wraps.",
-      "image": "/vinyl-printing.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
       "images": [
-        "/vinyl-printing.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp"
       ],
       "location": "Ahmedabad",
       "featured": true,
@@ -371,9 +503,9 @@
       "title": "Radium & Reflective Work",
       "category": "Raduim Work",
       "description": "High-intensity radium and micro-prismatic retro-reflective sheet cutting for glow-in-the-dark night visibility, safety boards, and traffic signage.",
-      "image": "/radium-work.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp",
       "images": [
-        "/radium-work.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -385,9 +517,9 @@
       "title": "Flatbed UV Printing",
       "category": "UV Printing",
       "description": "Direct-to-substrate UV printing on acrylic, wood, glass, ACP, and sunboard delivering ultra-sharp resolution, vivid color depth, and scratch-resistant durability.",
-      "image": "/UV-flatbed-printer-close-1080x600.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
       "images": [
-        "/UV-flatbed-printer-close-1080x600.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp"
       ],
       "location": "Ahmedabad",
       "featured": true,
@@ -399,9 +531,9 @@
       "title": "1-Way Vision Glass Graphics",
       "category": "1Way Vision Print",
       "description": "Perforated window film graphics offering full-color exterior branding and privacy while maintaining crystal-clear outward visibility from indoors.",
-      "image": "/1-way-vision-print.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp",
       "images": [
-        "/1-way-vision-print.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -413,9 +545,9 @@
       "title": "3D Laser-Cut Acrylic Boards",
       "category": "Acrylic Board",
       "description": "Custom laser-cut acrylic letters, embossed 3D logo plaques, clear reception backdrops, and premium polished corporate identity boards.",
-      "image": "/acrylic-board.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp",
       "images": [
-        "/acrylic-board.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -427,9 +559,9 @@
       "title": "Illuminated Glow Sign Boards",
       "category": "Glow Sign",
       "description": "Backlit aluminum-cased glow sign boxes with high-lumen internal LED lighting and weather-proof flex faces for 24/7 retail and corporate recognition.",
-      "image": "/glow-signs.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp",
       "images": [
-        "/glow-signs.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp"
       ],
       "location": "Gandhinagar",
       "featured": true,
@@ -441,9 +573,9 @@
       "title": "LED Display & Channel Boards",
       "category": "Board LED Board",
       "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence.",
-      "image": "/3d-led-board.webp",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
       "images": [
-        "/3d-led-board.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp"
       ],
       "location": "Ahmedabad",
       "featured": true,
@@ -483,8 +615,29 @@
     {
       "id": "1",
       "name": "Vikram Mehta",
-      "business": "Local Business",
-      "quote": "Outstanding quality and incredibly fast turnaround. The signage transformed our storefront completely.",
+      "business": "Apex Retail Solutions",
+      "quote": "Outstanding quality and incredibly fast turnaround. The signage transformed our storefront completely and brought in noticeable foot traffic from day one.",
+      "rating": 5
+    },
+    {
+      "id": "2",
+      "name": "Harish Patel",
+      "business": "Gandhinagar Trade Center",
+      "quote": "We ordered outdoor hoardings and LED letter signage for our commercial complex. The color clarity, material sturdiness, and installation speed exceeded our expectations.",
+      "rating": 5
+    },
+    {
+      "id": "3",
+      "name": "Sneha Joshi",
+      "business": "GreenLeaf Restaurant & Cafe",
+      "quote": "The 3D acrylic backlit signage they designed and mounted for our cafe entrance looks phenomenal at night. Exceptional craftsmanship and polite team.",
+      "rating": 5
+    },
+    {
+      "id": "4",
+      "name": "Amit Trivedi",
+      "business": "Shreeji Developers",
+      "quote": "Working with Jalaram Digital Sign for our real estate sites across Gandhinagar and Ahmedabad. Reliable, prompt delivery, and unmatched weather durability.",
       "rating": 5
     }
   ],

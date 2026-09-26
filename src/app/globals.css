@@ -128,7 +128,7 @@ body {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   perspective: 1000px;
-  animation: marquee-left 26s linear infinite;
+  animation: marquee-left 80s linear infinite;
 }
 
 .animate-marquee-right {
@@ -138,7 +138,7 @@ body {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   perspective: 1000px;
-  animation: marquee-right 30s linear infinite;
+  animation: marquee-right 88s linear infinite;
 }
 
 /* Ensure smooth uninterrupted playback without random pause-freezing */

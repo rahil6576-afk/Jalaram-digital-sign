@@ -36,10 +36,10 @@ export default function PortfolioPage() {
         }
         subtitle="Explore our recent projects, from large-scale signage installations to precision print jobs."
         images={[
-          "/hoardings.webp",
-          "/3d-led-board.webp",
-          "/glow-signs.webp",
-          "/acrylic-board.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398007/jalaram/jalaram_3d-led-board_1790398009053.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398009/jalaram/jalaram_acrylic-board_1790398010851.webp",
         ]}
       />
 
@@ -127,7 +127,7 @@ export default function PortfolioPage() {
               Request a Free Quote <ArrowRight className="w-5 h-5" />
             </Link>
             <a
-              href={`https://wa.me/${siteData?.business.whatsapp || "919427033363"}`}
+              href={`https://wa.me/${siteData?.business.whatsapp || "918511133363"}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/25 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold transition-all text-sm uppercase tracking-widest backdrop-blur-md min-h-[48px] w-full sm:w-auto"

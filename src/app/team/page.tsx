@@ -30,9 +30,9 @@ export default function TeamPage() {
         }
         subtitle="Great visual work comes from people who care about every detail."
         images={[
-          "/UV-flatbed-printer-close-1080x600.webp",
-          "/digital-printing.webp",
-          "/glow-signs.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
         ]}
       />
 
@@ -63,7 +63,7 @@ export default function TeamPage() {
               Contact Our Team <ArrowRight className="w-5 h-5" />
             </Link>
             <a
-              href={`https://wa.me/${currentData.business.whatsapp || "919427033363"}`}
+              href={`https://wa.me/${currentData.business.whatsapp || "918511133363"}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/25 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold transition-all text-sm uppercase tracking-widest backdrop-blur-md min-h-[48px] w-full sm:w-auto"

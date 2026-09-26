@@ -16,7 +16,7 @@ const SiteDataContext = createContext<SiteDataContextType>({
   refreshSiteData: async () => {},
 });
 
-const STORAGE_KEY = "jalaram_site_content_v2";
+const STORAGE_KEY = "jalaram_site_content_v3";
 
 export function SiteDataProvider({
   children,
@@ -25,6 +25,7 @@ export function SiteDataProvider({
   children: React.ReactNode;
   initialData?: SiteData;
 }) {
+  // Always initialize with server-safe initialData to guarantee identical SSR hydration
   const [siteData, setSiteData] = useState<SiteData>(initialData || (defaultSiteData as SiteData));
 
   // Sync to state and localStorage
@@ -38,7 +39,7 @@ export function SiteDataProvider({
     }
   }, []);
 
-  // Fetch fresh content from server API (reads directly from disk)
+  // Fetch fresh content from server API (reads directly from Supabase / disk)
   const refreshSiteData = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/content?t=${Date.now()}`, { cache: "no-store" });
@@ -54,13 +55,16 @@ export function SiteDataProvider({
   }, [updateLocalSiteData]);
 
   useEffect(() => {
-    // 1. Check if localStorage has newer saved data from admin
+    // 1. On client mount, check cached storage if valid and up-to-date
     try {
       const cached = localStorage.getItem(STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && parsed.business) {
+        // Only use cache if it has at least the default number of clients
+        if (parsed?.business && Array.isArray(parsed?.clients) && parsed.clients.length >= (defaultSiteData.clients?.length || 0)) {
           setSiteData(parsed);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
         }
       }
     } catch {

@@ -27,10 +27,10 @@ export default function ServicesPage() {
         }
         subtitle="Comprehensive visual branding and printing solutions designed to get your business noticed."
         images={[
-          "/digital-printing.webp",
-          "/vinyl-printing.webp",
-          "/flex-banner.webp",
-          "/UV-flatbed-printer-close-1080x600.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398057/jalaram/jalaram_vinyl-printing_1790398058572.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398036/jalaram/jalaram_flex-banner_1790398038042.webp",
+          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
         ]}
       />
 

@@ -25,6 +25,14 @@ import {
   LayoutGrid,
   ShieldCheck,
   LogOut,
+  Inbox,
+  Mail,
+  Phone,
+  MessageCircle,
+  Calendar,
+  Search,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -49,6 +57,18 @@ interface TeamMember {
 interface Testimonial { id: string; name: string; business: string; quote: string; rating: number; }
 interface FAQ { id: string; question: string; answer: string; }
 interface ClientCompany { id: string; name: string; tag: string; logo: string; }
+export interface InquiryItem {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  company?: string;
+  service?: string;
+  message: string;
+  status: "new" | "in-progress" | "contacted" | "completed";
+  notes?: string;
+  createdAt: string;
+}
 interface SiteData {
   business: Business; socials: Socials; heroImages: string[];
   clients?: ClientCompany[];
@@ -72,6 +92,7 @@ const TABS = [
   { id: "team", label: "Team", icon: Users },
   { id: "testimonials", label: "Reviews", icon: MessageSquare },
   { id: "faqs", label: "FAQs", icon: HelpCircle },
+  { id: "inquiries", label: "Inquiries", icon: Inbox },
 ];
 
 export const CATEGORY_OPTIONS = [
@@ -103,7 +124,10 @@ function Toast({ message, type, onDismiss }: { message: string; type: "success" 
 }
 
 // ── Photo Validation Config ────────────────────────────────────────────────
-const MAX_PHOTO_SIZE_BYTES = 15 * 1024 * 1024; // 15MB
+const MAX_PHOTO_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MIN_PHOTO_SIZE_BYTES = 100; // 100 bytes
+const MIN_PHOTO_DIMENSION = 50; // 50px
+const MAX_PHOTO_DIMENSION = 6000; // 6000px
 const ALLOWED_PHOTO_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
 const ALLOWED_PHOTO_MIMES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const ACCEPT_PHOTO_ATTR = ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
@@ -119,15 +143,57 @@ function validatePhoto(file: File): { valid: boolean; error?: string } {
     };
   }
 
+  if (file.size < MIN_PHOTO_SIZE_BYTES) {
+    return {
+      valid: false,
+      error: `Photo file "${file.name}" is empty or corrupted (under 100 bytes).`,
+    };
+  }
+
   if (file.size > MAX_PHOTO_SIZE_BYTES) {
     const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
     return {
       valid: false,
-      error: `File "${file.name}" (${sizeMb}MB) exceeds allowed file size. Please upload files up to 15 MB.`,
+      error: `Photo file "${file.name}" (${sizeMb} MB) exceeds allowed size limit. Maximum photo size is 5 MB.`,
     };
   }
 
   return { valid: true };
+}
+
+// Helper to pre-validate image dimensions before upload
+function checkPhotoDimensions(file: File): Promise<{ valid: boolean; width: number; height: number; error?: string }> {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (w < MIN_PHOTO_DIMENSION || h < MIN_PHOTO_DIMENSION) {
+        resolve({
+          valid: false,
+          width: w,
+          height: h,
+          error: `Photo dimensions too small (${w} × ${h} px). Minimum required size is ${MIN_PHOTO_DIMENSION} × ${MIN_PHOTO_DIMENSION} px.`,
+        });
+      } else if (w > MAX_PHOTO_DIMENSION || h > MAX_PHOTO_DIMENSION) {
+        resolve({
+          valid: false,
+          width: w,
+          height: h,
+          error: `Photo dimensions too large (${w} × ${h} px). Maximum allowed size is ${MAX_PHOTO_DIMENSION} × ${MAX_PHOTO_DIMENSION} px.`,
+        });
+      } else {
+        resolve({ valid: true, width: w, height: h });
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve({ valid: false, width: 0, height: 0, error: "Failed to read photo image data. The file may be corrupted." });
+    };
+    img.src = objectUrl;
+  });
 }
 
 // ── ImageInput (Responsive upload button + ReadOnly view mode) ─────────────────
@@ -151,14 +217,25 @@ function ImageInput({
   const handleUpload = async (file: File) => {
     if (readOnly) return;
     setErrorMsg(null);
+
+    // 1. File size and format check
     const check = validatePhoto(file);
     if (!check.valid) {
-      setErrorMsg(check.error || "File exceeds allowed size. Please upload files up to 15 MB.");
+      setErrorMsg(check.error || "File exceeds allowed size. Please upload files up to 5 MB.");
       return;
     }
 
+    // 2. Photo pixel dimension check
+    const dimCheck = await checkPhotoDimensions(file);
+    if (!dimCheck.valid) {
+      setErrorMsg(dimCheck.error || "Invalid photo dimensions.");
+      return;
+    }
+
+    setPhotoDims({ w: dimCheck.width, h: dimCheck.height });
     setFileSizeStr((file.size / (1024 * 1024)).toFixed(2) + " MB");
     setUploading(true);
+
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -166,6 +243,9 @@ function ImageInput({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       onChange(data.url);
+      if (data.dimensions?.width && data.dimensions?.height) {
+        setPhotoDims({ w: data.dimensions.width, h: data.dimensions.height });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Upload failed. Please try again or paste a URL.";
       setErrorMsg(msg);
@@ -225,10 +305,10 @@ function ImageInput({
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-gray-500 gap-1">
-        <span>Photo Size: Max 15MB · Formats: JPG, PNG, WEBP</span>
+        <span>Photo Size: Max 5MB · Min 50×50px · Formats: JPG, PNG, WEBP</span>
         {photoDims && (
-          <span className="font-semibold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded border border-purple-200 inline-flex items-center gap-1 w-fit">
-            <span>Photo Size:</span> {photoDims.w} × {photoDims.h} px {fileSizeStr ? `(${fileSizeStr})` : ""}
+          <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1 w-fit">
+            <span>✓ Valid Photo:</span> {photoDims.w} × {photoDims.h} px {fileSizeStr ? `(${fileSizeStr})` : ""}
           </span>
         )}
       </div>
@@ -240,6 +320,7 @@ function ImageInput({
             src={value}
             alt="Preview"
             onLoad={(e) => setPhotoDims({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
+            onError={() => setErrorMsg("Unable to load photo preview. Please verify URL or file.")}
             className="max-h-56 w-auto max-w-full object-contain rounded-lg shadow-sm"
           />
           {photoDims && (
@@ -429,10 +510,96 @@ export default function AdminDashboard() {
 
   // Delete confirmation popup state
   const [deletePrompt, setDeletePrompt] = useState<{
-    type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
+    type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero" | "inquiry";
     idOrIndex: string | number;
     name: string;
   } | null>(null);
+
+  // Inquiries State & Management
+  const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(false);
+  const [inquiriesFilter, setInquiriesFilter] = useState<string>("all");
+  const [inquiriesSearch, setInquiriesSearch] = useState<string>("");
+  const [inquiriesStats, setInquiriesStats] = useState({ total: 0, new: 0, inProgress: 0, contacted: 0, completed: 0 });
+
+  const fetchInquiries = useCallback(async () => {
+    setInquiriesLoading(true);
+    try {
+      const res = await fetch("/api/inquiries");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.inquiries)) {
+        setInquiries(json.inquiries);
+        if (json.stats) setInquiriesStats(json.stats);
+      }
+    } catch (err) {
+      console.error("Error fetching inquiries:", err);
+    } finally {
+      setInquiriesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchInquiries();
+  }, [fetchInquiries]);
+
+  const handleUpdateInquiryStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      setInquiries((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, status: newStatus as InquiryItem["status"] } : i))
+      );
+      showToast("Inquiry status updated", "success");
+      fetchInquiries();
+    } catch {
+      showToast("Failed to update inquiry status", "error");
+    }
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    try {
+      const res = await fetch(`/api/inquiries?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete inquiry");
+      setInquiries((prev) => prev.filter((i) => i.id !== id));
+      showToast("Inquiry deleted successfully", "success");
+      fetchInquiries();
+    } catch {
+      showToast("Failed to delete inquiry", "error");
+    }
+  };
+
+  const exportInquiriesCSV = () => {
+    if (!inquiries.length) {
+      showToast("No inquiries to export", "error");
+      return;
+    }
+    const headers = ["ID", "Date", "Name", "Phone", "Email", "Company", "Service", "Status", "Message"];
+    const rows = inquiries.map((i) => [
+      i.id,
+      new Date(i.createdAt).toLocaleString(),
+      `"${(i.name || "").replace(/"/g, '""')}"`,
+      `"${(i.phone || "").replace(/"/g, '""')}"`,
+      `"${(i.email || "").replace(/"/g, '""')}"`,
+      `"${(i.company || "").replace(/"/g, '""')}"`,
+      `"${(i.service || "").replace(/"/g, '""')}"`,
+      i.status,
+      `"${(i.message || "").replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `jalaram_inquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Exported inquiries to CSV", "success");
+  };
 
   // Backward compatibility / convenience setters that open/close the modal
   const setExpandedPortfolio = (id: string | null) => setActiveModal(id ? { type: "portfolio", idOrIndex: id } : null);
@@ -535,6 +702,7 @@ export default function AdminDashboard() {
       // This synchronizes all open browser tabs and components instantly with ZERO page reload!
       try {
         localStorage.setItem("jalaram_site_content_v2", JSON.stringify(sanitizedData));
+        // eslint-disable-next-line react-hooks/purity
         localStorage.setItem("jalaram_site_content_v2_time", Date.now().toString());
         window.dispatchEvent(new CustomEvent("site-content-updated", { detail: sanitizedData }));
       } catch {
@@ -551,8 +719,16 @@ export default function AdminDashboard() {
 
   // Execute deletion after user confirms in popup
   const executeDelete = async () => {
-    if (!deletePrompt || !data) return;
+    if (!deletePrompt) return;
     const { type, idOrIndex } = deletePrompt;
+
+    if (type === "inquiry") {
+      await handleDeleteInquiry(String(idOrIndex));
+      setDeletePrompt(null);
+      return;
+    }
+
+    if (!data) return;
     let updated: SiteData = { ...data };
 
     if (type === "portfolio") {
@@ -576,7 +752,7 @@ export default function AdminDashboard() {
     await handleSave(updated);
   };
 
-  const updateBusiness = (k: keyof Business, v: string) =>
+  const _updateBusiness = (k: keyof Business, v: string) =>
     setData((p) => p ? { ...p, business: { ...p.business, [k]: v } } : p);
 
   const updateSocials = (k: keyof Socials, v: string) =>
@@ -632,7 +808,7 @@ export default function AdminDashboard() {
           </button>
           <Link href="/admin" className="flex items-center">
             <Image
-              src="/images/jalaram-logo.png"
+              src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
               alt="Jalaram Digital Sign"
               width={160}
               height={34}
@@ -681,7 +857,7 @@ export default function AdminDashboard() {
             <div className="flex flex-col gap-1.5">
               <Link href="/admin" className="flex items-center">
                 <Image
-                  src="/images/jalaram-logo.png"
+                  src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
                   alt="Jalaram Digital Sign"
                   width={180}
                   height={38}
@@ -716,14 +892,25 @@ export default function AdminDashboard() {
                     setActiveTab(t.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-left ${
+                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-left ${
                     isActive
                       ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-md shadow-[#6F20E8]/25 font-bold"
                       : "text-gray-600 hover:text-gray-900 hover:bg-purple-50/60"
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{t.label}</span>
+                  <div className="flex items-center gap-3 truncate">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{t.label}</span>
+                  </div>
+                  {t.id === "inquiries" && inquiriesStats.new > 0 && (
+                    <span
+                      className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                        isActive ? "bg-white text-[#6F20E8]" : "bg-amber-500 text-white"
+                      }`}
+                    >
+                      {inquiriesStats.new}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -799,19 +986,28 @@ export default function AdminDashboard() {
           {activeTab === "hero" && (
             <div className="space-y-6">
               <SectionHeader
-                title="Hero Carousel Images"
-                subtitle="Click any row or action icon to view and edit the hero slide in a popup modal."
+                title={`Hero Carousel Banners (${data.heroImages.length}/7)`}
+                subtitle="Manage up to 7 hero carousel banners. Click any row or action icon to view and edit the hero slide in a popup modal."
                 actionButton={
                   <button
                     type="button"
+                    disabled={data.heroImages.length >= 7}
                     onClick={() => {
+                      if (data.heroImages.length >= 7) {
+                        showToast("Maximum limit of 7 hero banners reached", "error");
+                        return;
+                      }
                       const newIdx = data.heroImages.length;
                       setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
                       setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
                     }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-xs md:text-sm font-semibold rounded-xl text-[#6F20E8] transition-all border border-purple-200"
+                    className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all border ${
+                      data.heroImages.length >= 7
+                        ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                        : "bg-purple-50 hover:bg-purple-100 text-[#6F20E8] border-purple-200 cursor-pointer"
+                    }`}
                   >
-                    <Plus className="w-4 h-4" /> Add
+                    <Plus className="w-4 h-4" /> {data.heroImages.length >= 7 ? "Max 7 Reached" : "Add Banner"}
                   </button>
                 }
               />
@@ -925,7 +1121,7 @@ export default function AdminDashboard() {
               <div className="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs text-purple-900 font-medium flex items-center gap-2.5 shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-[#6F20E8] shrink-0" />
                 <span>
-                  <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>15 MB</strong> in size. Logos are displayed seamlessly without background boxes.
+                  <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>5 MB</strong> in size. Logos are displayed seamlessly without background boxes.
                 </span>
               </div>
 
@@ -1159,6 +1355,8 @@ export default function AdminDashboard() {
                         id: genId(),
                         slug: `service-${genId()}`,
                         title: "",
+                        shortDescription: "",
+                        description: "",
                         image: "",
                         category: "Flex Banner",
                         features: [],
@@ -1214,9 +1412,13 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
+                          <td className="py-3 px-4">
                             <div className="font-bold text-gray-900 leading-tight">{svc.title || "Untitled Service"}</div>
-                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
+                            {svc.shortDescription ? (
+                              <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{svc.shortDescription}</p>
+                            ) : (
+                              <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
+                            )}
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
@@ -1224,8 +1426,8 @@ export default function AdminDashboard() {
                             </span>
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs">
-                            <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 whitespace-nowrap">
-                              {svc.features?.length || 0} feature(s)
+                            <span className="font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 whitespace-nowrap inline-flex items-center gap-1">
+                              • {svc.features?.length || 0} bullet point(s)
                             </span>
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">
@@ -1288,6 +1490,7 @@ export default function AdminDashboard() {
                         id: genId(),
                         name: "",
                         role: "",
+                        bio: "",
                         image: "",
                         socialLinks: {},
                         sortOrder: data.team.length + 1,
@@ -1339,9 +1542,13 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
+                          <td className="py-3 px-4">
                             <div className="font-bold text-gray-900 leading-tight">{m.name || "Untitled Member"}</div>
-                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
+                            {m.bio ? (
+                              <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{m.bio}</p>
+                            ) : (
+                              <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
+                            )}
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">
                             <span className="inline-flex items-center font-semibold text-xs text-[#6F20E8] bg-purple-50 px-3 py-1 rounded-full border border-purple-200 shadow-sm whitespace-nowrap">
@@ -1389,19 +1596,28 @@ export default function AdminDashboard() {
           {activeTab === "testimonials" && (
             <div className="space-y-6">
               <SectionHeader
-                title="Client Reviews"
-                subtitle="All client reviews listed in a table. Click any entry or action icon to view and edit details in a popup modal."
+                title={`Client Reviews (${data.testimonials.length}/30)`}
+                subtitle="All client reviews listed in a table (up to 30 maximum). Click any entry or action icon to view and edit details in a popup modal."
                 actionButton={
                   <button
                     type="button"
+                    disabled={data.testimonials.length >= 30}
                     onClick={() => {
+                      if (data.testimonials.length >= 30) {
+                        showToast("You can have a maximum of 30 client reviews.", "error");
+                        return;
+                      }
                       const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
                       setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
                       setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
                     }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md ${
+                      data.testimonials.length >= 30
+                        ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                        : "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-[#6F20E8]/20"
+                    }`}
                   >
-                    <Plus className="w-4 h-4" /> Add Review
+                    <Plus className="w-4 h-4" /> {data.testimonials.length >= 30 ? "Limit Reached (30)" : "Add Review"}
                   </button>
                 }
               />
@@ -1574,6 +1790,359 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── INQUIRIES & LEADS MANAGEMENT ────────────────────────── */}
+          {activeTab === "inquiries" && (
+            <div className="space-y-6">
+              <SectionHeader
+                title="Customer Inquiries & Leads"
+                subtitle="Review all quotation requests and inquiries submitted through the website. Connect directly via WhatsApp or Phone."
+                actionButton={
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={fetchInquiries}
+                      disabled={inquiriesLoading}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
+                      title="Reload inquiries"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${inquiriesLoading ? "animate-spin text-[#6F20E8]" : ""}`} />
+                      <span>Refresh</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exportInquiriesCSV}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20 cursor-pointer"
+                      title="Download inquiries as spreadsheet (.csv)"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Export CSV</span>
+                    </button>
+                  </div>
+                }
+              />
+
+              {/* 4 Metric Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Inquiries</p>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{inquiriesStats.total}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">All time submissions</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#6F20E8] flex items-center justify-center">
+                    <Inbox className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-amber-200 bg-amber-50/20 p-5 shadow-sm flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">New / Pending</p>
+                      {inquiriesStats.new > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      )}
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">{inquiriesStats.new}</p>
+                    <p className="text-[11px] text-amber-700/80 mt-0.5">Requires response</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-blue-200 bg-blue-50/20 p-5 shadow-sm flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">In Progress</p>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1">{inquiriesStats.inProgress}</p>
+                    <p className="text-[11px] text-blue-700/80 mt-0.5">Under discussion / proofing</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                    <Calendar className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-emerald-200 bg-emerald-50/20 p-5 shadow-sm flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Completed</p>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">
+                      {inquiriesStats.contacted + inquiriesStats.completed}
+                    </p>
+                    <p className="text-[11px] text-emerald-700/80 mt-0.5">Contacted or finished</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <Check className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Search & Status Filter Controls */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="relative w-full md:w-96">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={inquiriesSearch}
+                    onChange={(e) => setInquiriesSearch(e.target.value)}
+                    placeholder="Search by customer, phone, company, service..."
+                    className="w-full pl-10 pr-9 py-2.5 bg-gray-50 border border-gray-200 focus:border-[#6F20E8] focus:bg-white rounded-xl text-xs md:text-sm text-gray-900 focus:outline-none transition-all"
+                  />
+                  {inquiriesSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setInquiriesSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+                  {[
+                    { id: "all", label: "All", count: inquiries.length },
+                    { id: "new", label: "New", count: inquiriesStats.new },
+                    { id: "in-progress", label: "In Progress", count: inquiriesStats.inProgress },
+                    { id: "contacted", label: "Contacted", count: inquiriesStats.contacted },
+                    { id: "completed", label: "Completed", count: inquiriesStats.completed },
+                  ].map((filter) => {
+                    const isSelected = inquiriesFilter === filter.id;
+                    return (
+                      <button
+                        key={filter.id}
+                        type="button"
+                        onClick={() => setInquiriesFilter(filter.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isSelected
+                            ? "bg-[#6F20E8] text-white shadow-sm font-bold"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                        }`}
+                      >
+                        <span>{filter.label}</span>
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                            isSelected ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {filter.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Inquiries List View */}
+              {(() => {
+                const q = inquiriesSearch.toLowerCase().trim();
+                const filtered = inquiries.filter((inq) => {
+                  const matchesFilter = inquiriesFilter === "all" || inq.status === inquiriesFilter;
+                  const matchesSearch =
+                    !q ||
+                    inq.name.toLowerCase().includes(q) ||
+                    inq.phone.toLowerCase().includes(q) ||
+                    (inq.email && inq.email.toLowerCase().includes(q)) ||
+                    (inq.company && inq.company.toLowerCase().includes(q)) ||
+                    (inq.service && inq.service.toLowerCase().includes(q)) ||
+                    inq.message.toLowerCase().includes(q);
+                  return matchesFilter && matchesSearch;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                      <div className="w-16 h-16 rounded-2xl bg-purple-50 text-[#6F20E8] flex items-center justify-center mx-auto mb-4">
+                        <Inbox className="w-8 h-8" />
+                      </div>
+                      <h3 className="text-base font-bold text-gray-900 mb-1">No Inquiries Found</h3>
+                      <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                        {inquiriesSearch || inquiriesFilter !== "all"
+                          ? "No inquiries match your current search or filter criteria."
+                          : "When customers submit the contact or quotation form on your website, inquiries will appear here."}
+                      </p>
+                      {(inquiriesSearch || inquiriesFilter !== "all") && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setInquiriesSearch("");
+                            setInquiriesFilter("all");
+                          }}
+                          className="mt-4 text-xs font-bold text-[#6F20E8] hover:underline"
+                        >
+                          Reset filters
+                        </button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-4">
+                    {filtered.map((inq) => {
+                      const cleanPhone = inq.phone.replace(/[^0-9]/g, "");
+                      const formattedPhone = cleanPhone.startsWith("91") ? cleanPhone : "91" + cleanPhone;
+                      const waText = encodeURIComponent(
+                        `Hello ${inq.name}, thank you for reaching out to Jalaram Digital Sign regarding "${inq.service || "your requirement"}". We reviewed your inquiry and would be happy to discuss details and provide a quote.`
+                      );
+                      const waUrl = `https://wa.me/${formattedPhone}?text=${waText}`;
+
+                      const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+                        new: { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
+                        "in-progress": { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
+                        contacted: { bg: "bg-purple-50", text: "text-purple-800", border: "border-purple-200" },
+                        completed: { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
+                      };
+
+                      const currentStatusColor = statusColors[inq.status] || statusColors.new;
+
+                      return (
+                        <div
+                          key={inq.id}
+                          className={`bg-white rounded-2xl border transition-all p-5 sm:p-6 shadow-sm hover:shadow-md ${
+                            inq.status === "new" ? "border-amber-300 ring-1 ring-amber-200/50" : "border-gray-200"
+                          }`}
+                        >
+                          {/* Card Header */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3.5">
+                              <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#6F20E8] to-[#9B51E0] text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+                                {inq.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .slice(0, 2)
+                                  .join("")
+                                  .toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="font-bold text-base text-gray-900">{inq.name}</h3>
+                                  {inq.company && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[11px] font-semibold">
+                                      <Building2 className="w-3 h-3 text-gray-400" />
+                                      {inq.company}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px] text-gray-400 mt-0.5">
+                                  <Calendar className="w-3 h-3" />
+                                  <span>
+                                    {new Date(inq.createdAt).toLocaleDateString("en-IN", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status Selector & Actions */}
+                            <div className="flex items-center gap-2 self-end sm:self-center">
+                              <div className="flex items-center gap-1.5">
+                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider hidden sm:inline">
+                                  Status:
+                                </label>
+                                <select
+                                  value={inq.status}
+                                  onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value)}
+                                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer focus:outline-none ${currentStatusColor.bg} ${currentStatusColor.text} ${currentStatusColor.border}`}
+                                >
+                                  <option value="new">🟡 New</option>
+                                  <option value="in-progress">🔵 In Progress</option>
+                                  <option value="contacted">🟣 Contacted</option>
+                                  <option value="completed">🟢 Completed</option>
+                                </select>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setDeletePrompt({
+                                    type: "inquiry",
+                                    idOrIndex: inq.id,
+                                    name: `inquiry from ${inq.name}`,
+                                  })
+                                }
+                                className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors cursor-pointer"
+                                title="Delete Inquiry"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Service Badge & Message Content */}
+                          <div className="py-4 space-y-3">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Requested Service:
+                              </span>
+                              <span className="px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-[#6F20E8] text-xs font-bold">
+                                {inq.service || "General Inquiry"}
+                              </span>
+                            </div>
+
+                            <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100 text-sm text-gray-800 leading-relaxed">
+                              <p className="whitespace-pre-wrap">{inq.message}</p>
+                            </div>
+                          </div>
+
+                          {/* Quick Contact & Action Buttons */}
+                          <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {/* WhatsApp Direct Link */}
+                              <a
+                                href={waUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-sm shadow-[#25D366]/20 cursor-pointer"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span>WhatsApp Client</span>
+                              </a>
+
+                              {/* Phone Link */}
+                              <a
+                                href={`tel:${inq.phone.replace(/\s/g, "")}`}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gray-100 hover:bg-purple-50 hover:text-[#6F20E8] text-gray-700 text-xs font-semibold border border-gray-200 transition-all cursor-pointer"
+                              >
+                                <Phone className="w-3.5 h-3.5 text-gray-500" />
+                                <span>{inq.phone}</span>
+                              </a>
+
+                              {/* Email Link (if provided) */}
+                              {inq.email && (
+                                <a
+                                  href={`mailto:${inq.email}`}
+                                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gray-100 hover:bg-purple-50 hover:text-[#6F20E8] text-gray-700 text-xs font-semibold border border-gray-200 transition-all cursor-pointer"
+                                >
+                                  <Mail className="w-3.5 h-3.5 text-gray-500" />
+                                  <span>{inq.email}</span>
+                                </a>
+                              )}
+                            </div>
+
+                            {inq.status === "new" && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateInquiryStatus(inq.id, "contacted")}
+                                className="text-xs font-bold text-[#6F20E8] hover:text-[#5815BD] bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl border border-purple-200 transition-colors cursor-pointer"
+                              >
+                                Mark as Contacted ✓
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -1886,8 +2455,49 @@ export default function AdminDashboard() {
               />
 
               <div>
+                <label className={labelCls}>Short Description (Summary)</label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
+                  value={svc.shortDescription || ""}
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    setData((p) => p ? {
+                      ...p,
+                      services: p.services.map((x) => x.id === svc.id ? { ...x, shortDescription: e.target.value } : x)
+                    } : p);
+                  }}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                  placeholder="e.g. High-impact durable hoardings and flex boards for outdoor advertising."
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Full Description (About Service)</label>
+                <textarea
+                  rows={3}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
+                  value={svc.description || ""}
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    setData((p) => p ? {
+                      ...p,
+                      services: p.services.map((x) => x.id === svc.id ? { ...x, description: e.target.value } : x)
+                    } : p);
+                  }}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                  placeholder="Comprehensive details, material specs, installation and delivery options for this service..."
+                />
+              </div>
+
+              <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className={labelCls}>Key Features / Bullet Points</label>
+                  <div>
+                    <label className={labelCls}>Bullet Points / Key Features</label>
+                    <p className="text-[11px] text-gray-400">List bullet points highlighting this service&apos;s core capabilities</p>
+                  </div>
                   {!isReadOnly && (
                     <button
                       type="button"
@@ -1895,17 +2505,18 @@ export default function AdminDashboard() {
                         ...p,
                         services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
                       } : p)}
-                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
+                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200"
                     >
-                      <Plus className="w-3 h-3" /> Add Feature
+                      <Plus className="w-3 h-3" /> Add Bullet Point
                     </button>
                   )}
                 </div>
                 {svc.features.length === 0 && isReadOnly && (
-                  <p className="text-xs text-gray-400 italic">No features listed</p>
+                  <p className="text-xs text-gray-400 italic">No bullet points listed</p>
                 )}
                 {svc.features.map((feat, fi) => (
-                  <div key={fi} className="flex gap-2 mb-2">
+                  <div key={fi} className="flex items-center gap-2 mb-2">
+                    <span className="text-[#6F20E8] font-black text-base select-none shrink-0">•</span>
                     <input
                       type="text"
                       disabled={isReadOnly}
@@ -1924,7 +2535,7 @@ export default function AdminDashboard() {
                         } : p);
                       }}
                       className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
-                      placeholder="Feature description"
+                      placeholder={`Bullet point ${fi + 1}`}
                     />
                     {!isReadOnly && (
                       <button
@@ -1933,7 +2544,8 @@ export default function AdminDashboard() {
                           ...p,
                           services: p.services.map((x) => x.id === svc.id ? { ...x, features: x.features.filter((_, k) => k !== fi) } : x)
                         } : p)}
-                        className="text-red-500 hover:text-red-600 px-2"
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        title="Remove bullet point"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -2031,6 +2643,22 @@ export default function AdminDashboard() {
                   setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p);
                 }}
               />
+
+              <div>
+                <label className={labelCls}>Description / Bio</label>
+                <textarea
+                  rows={3}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
+                  value={m.bio || ""}
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, bio: e.target.value } : x) } : p);
+                  }}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                  placeholder="Short description, experience, or role details for this team member..."
+                />
+              </div>
             </div>
           </ModalWrapper>
         );

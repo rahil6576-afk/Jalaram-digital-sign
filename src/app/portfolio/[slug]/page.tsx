@@ -67,7 +67,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
     );
   }
 
-  const coverImage = project.image ? encodeURI(project.image) : "/hoardings.webp";
+  const coverImage = project.image ? encodeURI(project.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
   const galleryImages = (project.images || []).filter(Boolean);
 
   return (

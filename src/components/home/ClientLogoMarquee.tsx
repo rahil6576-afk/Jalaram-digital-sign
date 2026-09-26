@@ -2,50 +2,20 @@
 
 import React from "react";
 import { ShieldCheck } from "lucide-react";
+import defaultSiteData from "@/data/site-content.json";
 import type { ClientItem } from "@/data/site";
 
 interface ClientLogoMarqueeProps {
   clients?: ClientItem[];
 }
 
-const DEFAULT_CLIENTS: ClientItem[] = [
-  {
-    id: "client-1",
-    name: "BJP",
-    tag: "Government & Civic Campaigns",
-    logo: "/client-bjp.webp",
-  },
-  {
-    id: "client-2",
-    name: "NFSU College",
-    tag: "National Forensic Sciences University",
-    logo: "/client-nsfu.webp",
-  },
-  {
-    id: "client-3",
-    name: "Jay Gotli Mukhwas",
-    tag: "Food & FMCG Brand",
-    logo: "/client-mukhwas.webp",
-  },
-  {
-    id: "client-4",
-    name: "Mount Carmel School",
-    tag: "Educational Institution",
-    logo: "/client-mount-carmel.webp",
-  },
-  {
-    id: "client-5",
-    name: "Xavier School",
-    tag: "Academic Institution",
-    logo: "/client-st-xavier.webp",
-  },
-];
+const DEFAULT_CLIENTS: ClientItem[] = (defaultSiteData.clients || []) as ClientItem[];
 
 function PureLogoItem({ client }: { client: ClientItem }) {
   return (
     <div
       title={client.name + (client.tag ? ` (${client.tag})` : "")}
-      className="shrink-0 mx-6 sm:mx-10 md:mx-14 flex items-center justify-center select-none"
+      className="shrink-0 mx-6 sm:mx-10 md:mx-14 flex items-center justify-center select-none py-1"
     >
       {client.logo ? (
         /* eslint-disable-next-line @next/next/no-img-element */
@@ -56,7 +26,7 @@ function PureLogoItem({ client }: { client: ClientItem }) {
           height={120}
           loading="eager"
           decoding="async"
-          className="h-18 sm:h-24 md:h-30 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain pointer-events-none select-none mix-blend-multiply"
+          className="h-16 sm:h-20 md:h-24 w-auto max-w-[190px] sm:max-w-[240px] md:max-w-[280px] object-contain pointer-events-none select-none transition-transform duration-300 hover:scale-105"
         />
       ) : (
         <span className="font-extrabold text-lg sm:text-2xl text-foreground/80 tracking-tight whitespace-nowrap hover:text-[#6F20E8] transition-colors pointer-events-none select-none">
@@ -70,11 +40,11 @@ function PureLogoItem({ client }: { client: ClientItem }) {
 export default function ClientLogoMarquee({ clients }: ClientLogoMarqueeProps) {
   const activeClients = clients && clients.length > 0 ? clients : DEFAULT_CLIENTS;
 
-  // Repeat items to ensure seamless loop width across any screen resolution
-  const row1Items = [...activeClients, ...activeClients, ...activeClients, ...activeClients];
+  // Repeat items (2x) to match seamless -50% CSS translate loop
+  const row1Items = [...activeClients, ...activeClients];
   // Reversed array for second row to create dynamic dual-motion
   const reversed = [...activeClients].reverse();
-  const row2Items = [...reversed, ...reversed, ...reversed, ...reversed];
+  const row2Items = [...reversed, ...reversed];
 
   return (
     <section className="py-14 sm:py-20 bg-white border-b border-black/5 overflow-hidden relative marquee-group">

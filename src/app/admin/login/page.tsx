@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4 bg-white rounded-2xl px-6 py-4 border border-gray-200/80 shadow-sm">
             <Image
-              src="/images/jalaram-logo.png"
+              src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
               alt="Jalaram Digital Sign"
               width={240}
               height={45}

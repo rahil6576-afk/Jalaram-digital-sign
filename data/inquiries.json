@@ -1,0 +1,62 @@
+[
+  {
+    "id": "inq-1790336837501",
+    "name": "Dharmesh Rawal",
+    "phone": "+91 98980 11223",
+    "email": "dharmesh@rawaltextiles.com",
+    "company": "Rawal Textiles",
+    "service": "Outdoor Highway Hoardings",
+    "message": "Need quote for 2 hoardings on SG Highway.",
+    "status": "new",
+    "notes": "",
+    "createdAt": "2026-09-25T11:47:17.501Z"
+  },
+  {
+    "id": "inq-17430112001",
+    "name": "Rajesh Mehta",
+    "phone": "+91 98250 12345",
+    "email": "rajesh.mehta@gujaratpharma.com",
+    "company": "Gujarat Pharma Chem",
+    "service": "3D Laser-Cut Acrylic Boards",
+    "message": "We need 3D backlit acrylic reception signage and entrance logos for our new corporate office in GIFT City Gandhinagar. Looking for quotes and material options.",
+    "status": "new",
+    "notes": "Interested in premium finish with warm LED backlighting.",
+    "createdAt": "2026-09-25T09:15:00.000Z"
+  },
+  {
+    "id": "inq-17430112002",
+    "name": "Bhavin Patel",
+    "phone": "+91 99099 54321",
+    "email": "bhavin@patelbrothersretail.in",
+    "company": "Patel Brothers Supermarket",
+    "service": "Illuminated Glow Sign Boards",
+    "message": "Looking for a 24ft x 4ft front glowing LED sign board for our retail supermarket branch in Sector 16. Fast turnaround required.",
+    "status": "contacted",
+    "notes": "Sent catalog on WhatsApp. Customer will share exact storefront measurements.",
+    "createdAt": "2026-09-24T14:30:00.000Z"
+  },
+  {
+    "id": "inq-17430112003",
+    "name": "Nehal Shah",
+    "phone": "+91 97240 98765",
+    "email": "events@gujaratfestivals.org",
+    "company": "Gujarat Events & Expo",
+    "service": "Outdoor Highway Hoardings",
+    "message": "Need bulk flex printing and mounting for an upcoming 3-day exhibition near Mahatma Mandir. 15 hoardings in total.",
+    "status": "in-progress",
+    "notes": "Initial artwork proofs submitted for approval.",
+    "createdAt": "2026-09-23T11:00:00.000Z"
+  },
+  {
+    "id": "inq-17430112004",
+    "name": "Kavita Desai",
+    "phone": "+91 94265 88990",
+    "email": "kavita.desai@auraboutique.com",
+    "company": "Aura Designer Studio",
+    "service": "1-Way Vision Glass Graphics",
+    "message": "Need one-way vision branding film for our showroom glass facade (3 panels, approx 8ft height each).",
+    "status": "completed",
+    "notes": "Installation completed and payment received. Very satisfied customer.",
+    "createdAt": "2026-09-21T16:45:00.000Z"
+  }
+]

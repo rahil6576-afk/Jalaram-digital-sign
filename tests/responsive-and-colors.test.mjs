@@ -38,7 +38,7 @@ function formatExternalUrl(url) {
 }
 
 function formatWhatsAppUrl(rawPhone, message) {
-  const fallback = "919427033363";
+  const fallback = "918511133363";
   if (!rawPhone) {
     const textParam = message ? `?text=${encodeURIComponent(message)}` : "";
     return `https://wa.me/${fallback}${textParam}`;
@@ -142,22 +142,22 @@ test("Mobile Accessibility: Floating WhatsApp has safe mobile screen margin", ()
 // SUITE 3: CROSS-DEVICE URL & WHATSAPP GENERATORS (ANDROID & IOS & DESKTOP)
 // ─────────────────────────────────────────────────────────────────────────────
 test("WhatsApp Helper: Sanitizes 10-digit phone numbers and prepends country code", () => {
-  const url = formatWhatsAppUrl("9427033363");
-  assert.ok(url.startsWith("https://wa.me/919427033363"), `Expected 91 prefix, got ${url}`);
+  const url = formatWhatsAppUrl("8511133363");
+  assert.ok(url.startsWith("https://wa.me/918511133363"), `Expected 91 prefix, got ${url}`);
 });
 
 test("WhatsApp Helper: Strips spaces, plus signs and dashes from formatted phone", () => {
-  const url = formatWhatsAppUrl("+91 94270-33363");
-  assert.ok(url.startsWith("https://wa.me/919427033363"), `Expected clean digits, got ${url}`);
+  const url = formatWhatsAppUrl("+91 85111-33363");
+  assert.ok(url.startsWith("https://wa.me/918511133363"), `Expected clean digits, got ${url}`);
 });
 
 test("WhatsApp Helper: Falls back to default business number if phone is empty", () => {
   const url = formatWhatsAppUrl("");
-  assert.ok(url.startsWith("https://wa.me/919427033363"), `Expected fallback, got ${url}`);
+  assert.ok(url.startsWith("https://wa.me/918511133363"), `Expected fallback, got ${url}`);
 });
 
 test("WhatsApp Helper: Encodes custom inquiry message correctly", () => {
-  const url = formatWhatsAppUrl("919427033363", "Inquiry for LED Signage: Size 10x5");
+  const url = formatWhatsAppUrl("918511133363", "Inquiry for LED Signage: Size 10x5");
   assert.ok(url.includes("text=Inquiry%20for%20LED%20Signage%3A%20Size%2010x5"));
 });
 
@@ -250,10 +250,13 @@ test("Logo Marquee: Default clients array contains requested 5 institutions and 
   assert.ok(names.some((n) => n.includes("mount carmel")), "Clients must include Mount Carmel School");
   assert.ok(names.some((n) => n.includes("xavier")), "Clients must include Xavier School");
 
-  // Verify all logo files exist in public/
+  // Verify all logo files exist in public/ if local
   const publicDir = path.join(rootDir, "public");
   for (const client of content.clients) {
     if (client.logo) {
+      if (client.logo.startsWith("http://") || client.logo.startsWith("https://")) {
+        continue; // Cloudinary CDN URL
+      }
       const cleanPath = client.logo.replace(/^\//, "");
       const logoFilePath = path.join(publicDir, cleanPath);
       assert.ok(fs.existsSync(logoFilePath), `Logo file "${cleanPath}" must exist in public directory`);

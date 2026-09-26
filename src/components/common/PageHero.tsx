@@ -23,7 +23,7 @@ export default function PageHero({
 }: PageHeroProps) {
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
 
-  const heroImages = images && images.length > 0 ? images : ["/hoardings.webp"];
+  const heroImages = (images && images.length > 0 ? images : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
 
   useEffect(() => {
     if (heroImages.length <= 1) return;
