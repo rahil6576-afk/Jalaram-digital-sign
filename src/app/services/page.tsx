@@ -46,15 +46,15 @@ export default function ServicesPage() {
                     className="object-cover pointer-events-none"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  <span className="absolute top-6 right-6 text-white/90 text-4xl font-bold tracking-tighter drop-shadow-md">
+                  <span className="absolute top-4 sm:top-6 right-4 sm:right-6 text-white/90 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter drop-shadow-md">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="absolute bottom-6 left-6 text-3xl font-bold text-white drop-shadow-md pr-12">{service.title}</h3>
+                  <h3 className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-md pr-8 sm:pr-12">{service.title}</h3>
                 </div>
 
                 {/* Card body — Informational text content, non-clickable */}
-                <div className="p-8 md:p-10 flex flex-col flex-grow">
-                  <p className="text-gray-600 mb-8 leading-relaxed flex-grow text-lg">
+                <div className="p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col flex-grow">
+                  <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed flex-grow text-base sm:text-lg">
                     {service.shortDescription}
                   </p>
 

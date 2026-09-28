@@ -105,12 +105,12 @@ export default function Navbar() {
                 width={240}
                 height={45}
                 priority
-                className="h-8 sm:h-9 md:h-11 lg:h-12 w-auto object-contain transition-transform duration-200 group-hover:opacity-90 mix-blend-multiply"
+                className="h-8 sm:h-9 md:h-10 lg:h-11 w-auto object-contain transition-transform duration-200 group-hover:opacity-90 mix-blend-multiply"
               />
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-5 lg:gap-8">
+            {/* Desktop Nav (shown on lg screens 1024px+ to prevent collision on tablets) */}
+            <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
                 return (
@@ -118,7 +118,7 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     prefetch={true}
-                    className={`text-xs lg:text-sm uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                    className={`text-xs xl:text-sm uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
                       active
                         ? "text-black font-bold underline underline-offset-8 decoration-2 decoration-accent scale-105"
                         : "text-gray-600 font-medium hover:text-black"
@@ -130,21 +130,21 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:block">
+            {/* Desktop CTA (shown on lg screens 1024px+) */}
+            <div className="hidden lg:block">
               <Link
                 href="/contact"
                 prefetch={true}
-                className="bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-5 lg:px-6 py-2.5 rounded-sm font-semibold transition-all text-xs lg:text-sm uppercase tracking-wide shadow-md shadow-[#6F20E8]/20 inline-block"
+                className="bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-5 xl:px-6 py-2 xl:py-2.5 rounded-sm font-semibold transition-all text-xs xl:text-sm uppercase tracking-wide shadow-md shadow-[#6F20E8]/20 inline-block"
               >
                 Get a Quote
               </Link>
             </div>
 
-            {/* Mobile Menu Button — Minimum 44x44px touch target */}
+            {/* Mobile & Tablet Menu Button — Minimum 44x44px touch target */}
             <button
               type="button"
-              className="md:hidden z-50 w-11 h-11 flex items-center justify-center -mr-2 text-foreground rounded-lg active:bg-gray-100 touch-manipulation focus:outline-none"
+              className="lg:hidden z-50 w-11 h-11 flex items-center justify-center -mr-2 text-foreground rounded-lg active:bg-gray-100 touch-manipulation focus:outline-none"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
               aria-expanded={isMobileMenuOpen}
@@ -159,7 +159,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Full-Screen Mobile Navigation Drawer — Sibling to header so it is NOT constrained by header's transform */}
+      {/* Full-Screen Mobile & Tablet Navigation Drawer — Sibling to header so it is NOT constrained by header's transform */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -167,37 +167,39 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-white flex flex-col md:hidden overflow-y-auto"
+            className="fixed inset-0 z-[100] bg-white flex flex-col lg:hidden overflow-y-auto"
             style={{ overscrollBehavior: "contain" }}
           >
             {/* Dedicated Mobile Header with Logo & Close Button */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
-              <Link
-                href="/"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center"
-              >
-                <Image
-                  src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
-                  alt={`${siteData.business.name} Logo`}
-                  width={180}
-                  height={36}
-                  priority
-                  className="h-8 w-auto object-contain mix-blend-multiply"
-                />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-11 h-11 flex items-center justify-center rounded-lg bg-gray-100 active:bg-gray-200 text-gray-800 transition-colors"
-                aria-label="Close Navigation"
-              >
-                <X className="w-6 h-6" />
-              </button>
+            <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5 border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
+              <div className="flex items-center justify-between w-full max-w-xl mx-auto">
+                <Link
+                  href="/"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center"
+                >
+                  <Image
+                    src="https://res.cloudinary.com/v61ii2hr/image/upload/v1790398040/jalaram/jalaram_jalaram-logo_1790398041779.png"
+                    alt={`${siteData.business.name} Logo`}
+                    width={180}
+                    height={36}
+                    priority
+                    className="h-8 sm:h-9 w-auto object-contain mix-blend-multiply"
+                  />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-11 h-11 flex items-center justify-center rounded-lg bg-gray-100 active:bg-gray-200 text-gray-800 transition-colors"
+                  aria-label="Close Navigation"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            {/* Mobile Nav Links without arrows */}
-            <nav className="flex-1 px-5 py-6 flex flex-col gap-2">
+            {/* Mobile & Tablet Nav Links */}
+            <nav className="flex-1 px-5 sm:px-8 py-6 flex flex-col gap-2 max-w-xl mx-auto w-full">
               <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 px-3 mb-1">
                 Menu Navigation
               </p>

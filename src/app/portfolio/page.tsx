@@ -182,9 +182,9 @@ export default function PortfolioPage() {
                       )}
 
                       {/* Card Content & Slide Dots */}
-                      <div className="absolute bottom-0 left-0 p-6 sm:p-7 w-full z-10">
+                      <div className="absolute bottom-0 left-0 p-5 sm:p-6 lg:p-7 w-full z-10">
                         {photos.length > 1 && (
-                          <div className="flex items-center gap-1.5 mb-2.5">
+                          <div className="flex items-center gap-1.5 mb-2 sm:mb-2.5">
                             {photos.map((_, pIdx) => (
                               <button
                                 key={pIdx}
@@ -201,7 +201,7 @@ export default function PortfolioPage() {
                             ))}
                           </div>
                         )}
-                        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1.5 drop-shadow-md leading-snug">
+                        <h3 className="text-lg sm:text-xl md:text-xl lg:text-2xl font-bold text-white mb-1 drop-shadow-md leading-snug">
                           {project.title}
                         </h3>
                         {project.location && (

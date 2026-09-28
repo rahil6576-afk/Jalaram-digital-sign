@@ -222,14 +222,14 @@ export default function Home() {
                     const actualIdx = portfolioItems.findIndex((p) => p.id === project.id);
                     setLightboxIndex(actualIdx >= 0 ? actualIdx : 0);
                   }}
-                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
+                  className="block relative w-64 sm:w-72 md:w-80 lg:w-96 h-48 sm:h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
                 >
                   <Image
                     src={imgSrc}
                     alt={project.title}
                     fill
                     loading="lazy"
-                    sizes="(max-width: 768px) 320px, 384px"
+                    sizes="(max-width: 768px) 288px, 384px"
                     className="object-cover pointer-events-none"
                   />
                 </button>
@@ -267,8 +267,8 @@ export default function Home() {
             </motion.p>
           </div>
 
-          {/* Mobile: 2-col compact grid with images | Desktop: 3-col rich cards with images */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+          {/* Mobile & Tablet: 2-col balanced grid | Desktop: 3-col rich cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
             {siteData.services.slice(0, 6).map((service, index) => {
               const serviceImg = service.image || "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340347/jalaram/jalaram_digital-printing_1790340347919.webp";
               return (
@@ -281,14 +281,14 @@ export default function Home() {
                   className="w-full"
                 >
                   <div className="group block h-full select-none cursor-default">
-                    {/* MOBILE: compact card with service photo banner */}
-                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl overflow-hidden flex flex-col relative h-full">
+                    {/* MOBILE (< sm): compact card with service photo banner */}
+                    <div className="sm:hidden bg-card-bg border border-black/8 rounded-xl overflow-hidden flex flex-col relative h-full">
                       <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
                         <Image
                           src={serviceImg}
                           alt={service.title}
                           fill
-                          sizes="(max-width: 768px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 50vw, 33vw"
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -307,18 +307,18 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* DESKTOP: full card with showcase image banner */}
-                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 relative overflow-hidden flex-col h-full group">
+                    {/* TABLET & DESKTOP (sm+): full card with showcase image banner */}
+                    <div className="hidden sm:flex bg-card-bg rounded-2xl border border-black/8 relative overflow-hidden flex-col h-full group">
                       <div className="relative w-full aspect-[16/10] bg-gray-900 overflow-hidden">
                         <Image
                           src={serviceImg}
                           alt={service.title}
                           fill
-                          sizes="(max-width: 1200px) 50vw, 33vw"
+                          sizes="(max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                        <span className="absolute top-4 right-4 text-white text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25">
+                        <span className="absolute top-3 sm:top-4 right-3 sm:right-4 text-white text-xs font-bold tracking-wider px-2.5 sm:px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25">
                           0{index + 1}
                         </span>
                         {service.category && (
@@ -328,14 +328,14 @@ export default function Home() {
                         )}
                       </div>
 
-                      <div className="p-7 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold mb-2 text-foreground">{service.title}</h3>
-                        <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow line-clamp-3">
+                      <div className="p-5 md:p-6 lg:p-7 flex flex-col flex-1">
+                        <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">{service.title}</h3>
+                        <p className="text-gray-600 text-xs sm:text-sm mb-5 leading-relaxed flex-grow line-clamp-3">
                           {service.shortDescription}
                         </p>
-                        <div className="mt-auto pt-4 border-t border-black/5 flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          <span>{service.category || "Professional Signage"}</span>
-                          <span className="text-[11px] font-bold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">Service</span>
+                        <div className="mt-auto pt-3 sm:pt-4 border-t border-black/5 flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          <span className="truncate pr-2">{service.category || "Professional Signage"}</span>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 shrink-0">Service</span>
                         </div>
                       </div>
                     </div>
@@ -349,13 +349,13 @@ export default function Home() {
       </section>
 
       {/* 5. PROCESS SECTION */}
-      <section className="py-24 md:py-32 overflow-hidden">
+      <section className="py-20 sm:py-24 md:py-32 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
             <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-4 block">
               From Idea to Installation
@@ -365,8 +365,9 @@ export default function Home() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 relative">
-            <div className="hidden md:block absolute top-[28px] left-0 w-full h-[1px] bg-black/10 z-0" />
+          {/* Process Grid: 1 col on mobile, 2 on small tablet, 3 on tablet/iPad portrait, 5 on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8 relative">
+            <div className="hidden lg:block absolute top-[28px] left-0 w-full h-[1px] bg-black/10 z-0" />
             {[
               { num: "01", title: "Discuss", desc: "Understand your exact requirements and goals." },
               { num: "02", title: "Design", desc: "Prepare or refine high-resolution artwork." },
@@ -380,15 +381,17 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="relative pt-8 z-10"
+                className="relative pt-2 sm:pt-4 lg:pt-8 z-10"
               >
-                <div className="hidden md:flex absolute top-0 left-0 w-14 h-14 bg-card-bg border border-black/10 rounded-full items-center justify-center">
+                <div className="hidden lg:flex absolute top-0 left-0 w-14 h-14 bg-card-bg border border-black/10 rounded-full items-center justify-center">
                    <span className="text-accent font-mono text-lg font-bold">{step.num}</span>
                 </div>
-                <div className="md:mt-12">
-                  <span className="md:hidden text-accent font-mono text-xl mb-4 block">{step.num}</span>
-                  <h4 className="text-xl font-bold mb-3">{step.title}</h4>
-                  <p className="text-gray-600 text-sm leading-relaxed pr-4">{step.desc}</p>
+                <div className="lg:mt-12 bg-white/70 sm:bg-transparent p-4 sm:p-0 rounded-xl sm:rounded-none border border-black/5 sm:border-0">
+                  <div className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full bg-purple-50 border border-purple-200 text-accent font-mono text-base font-bold mb-3">
+                    {step.num}
+                  </div>
+                  <h4 className="text-lg sm:text-xl font-bold mb-2">{step.title}</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
                 </div>
               </motion.div>
             ))}
