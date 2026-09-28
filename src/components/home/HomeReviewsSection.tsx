@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quote, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useMemo } from "react";
+import { Star, Quote, CheckCircle2 } from "lucide-react";
 import type { TestimonialItem } from "@/data/site";
 
 interface HomeReviewsSectionProps {
@@ -10,144 +9,77 @@ interface HomeReviewsSectionProps {
 }
 
 export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSectionProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // Ensure we have a duplicated array so translation of -50% loops seamlessly forever
+  const fullTrack = useMemo(() => {
+    if (!testimonials || testimonials.length === 0) return [];
+    // Repeat enough times so halfTrack contains at least 8-12 cards
+    const multiplier = Math.max(2, Math.ceil(8 / testimonials.length));
+    const half = Array.from({ length: multiplier }).flatMap(() => testimonials);
+    return [...half, ...half];
+  }, [testimonials]);
 
-  const totalReviews = testimonials.length;
-
-  const nextSlide = useCallback(() => {
-    if (totalReviews <= 1) return;
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % totalReviews);
-  }, [totalReviews]);
-
-  const prevSlide = useCallback(() => {
-    if (totalReviews <= 1) return;
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + totalReviews) % totalReviews);
-  }, [totalReviews]);
-
-  // Auto-move carousel one review at a time every 4.5 seconds
-  useEffect(() => {
-    if (isPaused || totalReviews <= 1) return;
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [isPaused, nextSlide, totalReviews]);
-
-  if (!testimonials || totalReviews === 0) return null;
-
-  const currentReview = testimonials[currentIndex];
-
-  const variants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 100 : -100,
-      opacity: 0,
-      scale: 0.97,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        x: { type: "spring" as const, stiffness: 280, damping: 28 },
-        opacity: { duration: 0.35 },
-      },
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? -100 : 100,
-      opacity: 0,
-      scale: 0.97,
-      transition: {
-        x: { type: "spring" as const, stiffness: 280, damping: 28 },
-        opacity: { duration: 0.25 },
-      },
-    }),
-  };
+  if (!testimonials || testimonials.length === 0) return null;
 
   return (
-    <section
-      ref={containerRef}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      className="py-20 sm:py-28 bg-gradient-to-b from-white via-purple-50/25 to-white border-t border-black/5 relative overflow-hidden"
-    >
+    <section className="py-20 sm:py-28 bg-gradient-to-b from-white via-purple-50/25 to-white border-t border-black/5 relative overflow-hidden">
       {/* Decorative ambient blurs */}
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-[#6F20E8]/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-0 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header with Next/Prev Arrow Controls at the top right */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-4xl mx-auto mb-10 sm:mb-14">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4 shadow-sm">
-              <Star className="w-3.5 h-3.5 fill-[#6F20E8]" />
-              <span>Rated 4.9/5 by 500+ Businesses</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-[1.1] mb-3">
-              WHAT OUR{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6F20E8] via-[#8A3FFC] to-[#A855F7]">
-                CLIENTS SAY.
-              </span>
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 font-light leading-relaxed max-w-lg">
-              Real experiences from commercial developers, retail brands, and institutions.
-            </p>
+      {/* Section Header */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-10 sm:mb-14">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4 shadow-sm">
+            <Star className="w-3.5 h-3.5 fill-[#6F20E8]" />
+            <span>Rated 4.9/5 by 500+ Businesses</span>
           </div>
-
-          {/* Clean Left / Right Arrow buttons beside header - No bottom bars */}
-          {totalReviews > 1 && (
-            <div className="flex items-center gap-2.5 self-start md:self-end shrink-0">
-              <button
-                type="button"
-                onClick={prevSlide}
-                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
-                title="Previous review"
-                aria-label="Previous review"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                onClick={nextSlide}
-                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
-                title="Next review"
-                aria-label="Next review"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          )}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-[1.1] mb-3">
+            WHAT OUR{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6F20E8] via-[#8A3FFC] to-[#A855F7]">
+              CLIENTS SAY.
+            </span>
+          </h2>
+          <p className="text-sm sm:text-base text-gray-600 font-light leading-relaxed max-w-lg mx-auto">
+            Real experiences from commercial developers, retail brands, and institutions across Gujarat.
+          </p>
         </div>
+      </div>
 
-        {/* Single Review Card moving one by one */}
-        <div className="max-w-4xl mx-auto relative">
-          <div className="overflow-hidden min-h-[300px] sm:min-h-[260px] flex items-stretch">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentIndex}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="w-full bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-8 sm:p-12 shadow-md hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group"
+      {/* Continuous Infinite Marquee Track with subtle edge gradient fades */}
+      <div className="relative w-full overflow-hidden py-4">
+        {/* Left and Right edge fade gradient overlays */}
+        <div className="absolute top-0 bottom-0 left-0 w-12 sm:w-28 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-0 bottom-0 right-0 w-12 sm:w-28 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+
+        {/* Marquee Track moving continuously and infinitely */}
+        <div className="animate-marquee-reviews flex gap-5 sm:gap-7 min-w-max px-4">
+          {fullTrack.map((review, idx) => {
+            const initials = review.name
+              ? review.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()
+              : "CL";
+
+            return (
+              <div
+                key={`${review.id || idx}-${idx}`}
+                className="w-[320px] sm:w-[380px] md:w-[440px] shrink-0 bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group cursor-default select-none"
               >
-                {/* Decorative background quote */}
-                <Quote className="absolute top-6 right-8 w-24 h-24 text-[#6F20E8]/8 group-hover:text-[#6F20E8]/15 transition-colors pointer-events-none select-none" />
+                {/* Decorative background quote mark */}
+                <Quote className="absolute top-5 right-6 w-20 h-20 text-[#6F20E8]/6 group-hover:text-[#6F20E8]/12 transition-colors pointer-events-none" />
 
                 <div>
                   {/* Rating Stars & Verified Badge */}
-                  <div className="flex items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <div className="flex items-center gap-1">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < (currentReview.rating || 5)
+                          className={`w-4 h-4 ${
+                            i < (review.rating || 5)
                               ? "fill-amber-400 text-amber-400 drop-shadow-sm"
                               : "fill-gray-200 text-gray-200"
                           }`}
@@ -155,42 +87,35 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
                       ))}
                     </div>
 
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Verified Client Review</span>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-semibold">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span>Verified Client</span>
                     </div>
                   </div>
 
                   {/* Review Quote */}
-                  <blockquote className="text-gray-900 text-lg sm:text-xl md:text-2xl font-medium leading-relaxed mb-8 tracking-tight relative z-10">
-                    &ldquo;{currentReview.quote}&rdquo;
+                  <blockquote className="text-gray-800 text-base sm:text-lg font-medium leading-relaxed mb-6 tracking-tight relative z-10">
+                    &ldquo;{review.quote}&rdquo;
                   </blockquote>
                 </div>
 
                 {/* Author Information */}
-                <div className="flex items-center gap-4 pt-6 border-t border-black/5 mt-auto relative z-10">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-base sm:text-lg flex items-center justify-center shrink-0 shadow-lg shadow-[#6F20E8]/25">
-                    {currentReview.name
-                      ? currentReview.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()
-                      : "CL"}
+                <div className="flex items-center gap-3.5 pt-4 border-t border-black/5 mt-auto relative z-10">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-md shadow-[#6F20E8]/20">
+                    {initials}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-snug">
-                      {currentReview.name}
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-base text-gray-900 leading-snug truncate">
+                      {review.name}
                     </h3>
-                    <p className="text-sm text-gray-500 font-medium">
-                      {currentReview.business || "Business Owner"}
+                    <p className="text-xs text-gray-500 font-medium truncate">
+                      {review.business || "Business Owner"}
                     </p>
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

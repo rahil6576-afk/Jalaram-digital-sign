@@ -162,3 +162,18 @@ body {
   animation-play-state: paused;
 }
 
+/* Infinite Reviews Testimonials Marquee (Continuous & Smooth Infinite Speed) */
+.animate-marquee-reviews {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  animation: marquee-left 50s linear infinite;
+}
+
+.animate-marquee-reviews:hover {
+  animation-play-state: paused;
+}
+
