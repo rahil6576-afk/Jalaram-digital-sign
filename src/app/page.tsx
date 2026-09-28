@@ -345,6 +345,17 @@ export default function Home() {
             })}
           </div>
 
+          {/* View More Services button linking to /services */}
+          <div className="mt-10 sm:mt-14 text-center">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2.5 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-xs sm:text-sm shadow-lg shadow-[#6F20E8]/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <span>View All Services ({siteData.services.length})</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
         </div>
       </section>
 
