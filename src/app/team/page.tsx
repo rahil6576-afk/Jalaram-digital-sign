@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { siteData, getSiteData } from "@/data/site";
+import { siteData, getLiveSiteData } from "@/data/site";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description: "Meet the people behind the premium printing and signage solutions.",
 };
 
-export default function TeamPage() {
-  const currentData = getSiteData();
+export default async function TeamPage() {
+  const currentData = await getLiveSiteData();
   return (
     <>
       <PageHero

@@ -1,20 +1,20 @@
-import { siteData, getSiteData } from "@/data/site";
+import { siteData, getLiveSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata() {
-  const data = getSiteData();
+export async function generateMetadata() {
+  const data = await getLiveSiteData();
   return {
     title: `About Us | ${data.business.name}`,
     description: data.aboutPage.heroSubtitle,
   };
 }
 
-export default function AboutPage() {
-  const data = getSiteData();
+export default async function AboutPage() {
+  const data = await getLiveSiteData();
   const about = data.aboutPage;
   return (
     <>

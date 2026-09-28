@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { siteData, getSiteData } from "@/data/site";
+import { siteData, getSiteData, getLiveSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -12,7 +12,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const data = getSiteData();
+  const data = await getLiveSiteData();
   const slug = decodeURIComponent(resolvedParams.slug || "").toLowerCase().trim();
   const project = data.portfolio.find((p) =>
     (p.slug || "").toLowerCase().trim() === slug ||
@@ -41,7 +41,7 @@ export async function generateStaticParams() {
 
 export default async function PortfolioDetailPage({ params }: Props) {
   const resolvedParams = await params;
-  const data = getSiteData();
+  const data = await getLiveSiteData();
   const slug = decodeURIComponent(resolvedParams.slug || "").toLowerCase().trim();
   
   const project = data.portfolio.find((p) =>

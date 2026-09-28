@@ -730,9 +730,9 @@ export default function AdminDashboard() {
       // Immediately propagate updates to localStorage and custom events
       // This synchronizes all open browser tabs and components instantly with ZERO page reload!
       try {
+        localStorage.setItem("jalaram_site_content_v3", JSON.stringify(sanitizedData));
+        localStorage.setItem("jalaram_site_content_v3_time", Date.now().toString());
         localStorage.setItem("jalaram_site_content_v2", JSON.stringify(sanitizedData));
-        // eslint-disable-next-line react-hooks/purity
-        localStorage.setItem("jalaram_site_content_v2_time", Date.now().toString());
         window.dispatchEvent(new CustomEvent("site-content-updated", { detail: sanitizedData }));
       } catch {
         // safe fallback if storage is restricted

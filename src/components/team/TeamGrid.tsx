@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useSiteData } from "@/context/SiteDataContext";
 import type { TeamMember } from "@/data/site";
 
 interface TeamGridProps {
-  team: TeamMember[];
+  team?: TeamMember[];
 }
 
 function TeamMemberCard({ member, index }: { member: TeamMember; index: number }) {
@@ -43,11 +44,13 @@ function TeamMemberCard({ member, index }: { member: TeamMember; index: number }
   );
 }
 
-
 export default function TeamGrid({ team }: TeamGridProps) {
+  const siteData = useSiteData();
+  const activeTeam = (siteData?.team && siteData.team.length > 0) ? siteData.team : (team || []);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      {team.map((member, index) => (
+      {activeTeam.map((member, index) => (
         <TeamMemberCard key={member.id} member={member} index={index} />
       ))}
     </div>

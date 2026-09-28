@@ -39,5 +39,30 @@ export function getSiteData(): SiteData {
       // safe fallback
     }
   }
-  return siteContentJson;
+  return siteContentJson as SiteData;
+}
+
+// Async server-side helper that queries live content from Supabase first
+export async function getLiveSiteData(): Promise<SiteData> {
+  try {
+    const { getSupabaseAdmin, isSupabaseConfigured } = await import("@/lib/supabase");
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data, error } = await supabase
+          .from("site_content")
+          .select("content")
+          .eq("id", "main")
+          .maybeSingle();
+
+        if (!error && data?.content && (data.content as SiteData).business) {
+          return data.content as SiteData;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Could not read live site data from Supabase:", err);
+  }
+
+  return getSiteData();
 }

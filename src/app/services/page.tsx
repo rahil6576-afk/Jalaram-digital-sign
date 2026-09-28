@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { siteData, getSiteData } from "@/data/site";
+import { useSiteData } from "@/context/SiteDataContext";
 import Link from "next/link";
 import { ArrowRight, X } from "lucide-react";
 import Image from "next/image";
 import PageHero from "@/components/common/PageHero";
 
 export default function ServicesPage() {
-  const currentData = getSiteData();
+  const currentData = useSiteData();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [lightboxAlt, setLightboxAlt] = useState<string>("");
 

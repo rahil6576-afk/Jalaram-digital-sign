@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { siteData, getSiteData } from "@/data/site";
+import { siteData, getLiveSiteData } from "@/data/site";
 import { SiteDataProvider } from "@/context/SiteDataContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -29,12 +29,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialData = getSiteData();
+  const initialData = await getLiveSiteData();
 
   return (
     <html lang="en" className={`${inter.variable} antialiased scroll-smooth w-full overflow-x-hidden`} suppressHydrationWarning>

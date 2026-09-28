@@ -7,8 +7,17 @@ import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase";
 const RUNTIME_CONTENT_PATH = path.join(process.cwd(), "data", "site-content.json");
 const SEED_CONTENT_PATH = path.join(process.cwd(), "src", "data", "site-content.json");
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
+    const noCacheHeaders = {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    };
+
     // 1. Try reading from Supabase if configured
     if (isSupabaseConfigured()) {
       const supabase = getSupabaseAdmin();
@@ -20,7 +29,7 @@ export async function GET() {
           .maybeSingle();
 
         if (!error && data?.content) {
-          return NextResponse.json(data.content);
+          return NextResponse.json(data.content, { headers: noCacheHeaders });
         }
       }
     }
@@ -28,13 +37,13 @@ export async function GET() {
     // 2. Fall back to local file storage
     if (fs.existsSync(RUNTIME_CONTENT_PATH)) {
       const data = fs.readFileSync(RUNTIME_CONTENT_PATH, "utf-8");
-      return NextResponse.json(JSON.parse(data));
+      return NextResponse.json(JSON.parse(data), { headers: noCacheHeaders });
     }
     if (fs.existsSync(SEED_CONTENT_PATH)) {
       const data = fs.readFileSync(SEED_CONTENT_PATH, "utf-8");
-      return NextResponse.json(JSON.parse(data));
+      return NextResponse.json(JSON.parse(data), { headers: noCacheHeaders });
     }
-    return NextResponse.json(defaultSiteData);
+    return NextResponse.json(defaultSiteData, { headers: noCacheHeaders });
   } catch (error) {
     console.error("Error reading site content:", error);
     return NextResponse.json(defaultSiteData);

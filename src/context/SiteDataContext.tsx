@@ -60,11 +60,8 @@ export function SiteDataProvider({
       const cached = localStorage.getItem(STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        // Only use cache if it has at least the default number of clients
-        if (parsed?.business && Array.isArray(parsed?.clients) && parsed.clients.length >= (defaultSiteData.clients?.length || 0)) {
+        if (parsed?.business) {
           setSiteData(parsed);
-        } else {
-          localStorage.removeItem(STORAGE_KEY);
         }
       }
     } catch {
