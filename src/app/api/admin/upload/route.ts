@@ -4,9 +4,13 @@ import path from "path";
 
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 
-// Ensure directory exists
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+// Ensure directory exists safely without crashing in read-only serverless environments
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+} catch {
+  // Ignored in read-only environments like Vercel
 }
 
 // GET: List all uploaded images
@@ -113,10 +117,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Cloudinary credentials are provided, upload directly to Cloudinary (with 25s timeout fallback)
-    const { isCloudinaryConfigured, uploadToCloudinary } = await import("@/lib/cloudinary");
-    if (isCloudinaryConfigured()) {
-      try {
+    const sanitizedOriginalName = file.name
+      .toLowerCase()
+      .replace(/[^a-z0-9.]/g, "-")
+      .replace(/-+/g, "-");
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Tier 1: Cloudinary Upload (with 25s timeout fallback)
+    // ─────────────────────────────────────────────────────────────────────────────
+    try {
+      const { isCloudinaryConfigured, uploadToCloudinary } = await import("@/lib/cloudinary");
+      if (isCloudinaryConfigured()) {
         const uploadPromise = uploadToCloudinary(buffer, "jalaram", file.name);
         const timeoutPromise = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("Cloudinary upload timed out")), 25000)
@@ -131,36 +142,106 @@ export async function POST(request: NextRequest) {
           dimensions,
           provider: "cloudinary",
         });
-      } catch (cloudErr) {
-        console.error("Cloudinary upload failed or timed out, falling back to local:", cloudErr);
       }
+    } catch (cloudErr) {
+      console.warn("Cloudinary upload failed or timed out, trying Supabase Storage:", cloudErr);
     }
 
-    // Local fallback when Cloudinary is not yet configured, timed out, or had network error
-    if (!fs.existsSync(UPLOADS_DIR)) {
-      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Tier 2: Supabase Storage Upload (public bucket 'uploads')
+    // ─────────────────────────────────────────────────────────────────────────────
+    try {
+      const { getSupabaseAdmin, isSupabaseConfigured } = await import("@/lib/supabase");
+      if (isSupabaseConfigured()) {
+        const supabase = getSupabaseAdmin();
+        if (supabase) {
+          const storageFileName = `${Date.now()}-${sanitizedOriginalName}`;
+          const { data: uploadData, error: uploadErr } = await supabase.storage
+            .from("uploads")
+            .upload(storageFileName, buffer, {
+              contentType: file.type || "image/jpeg",
+              upsert: true,
+            });
+
+          if (!uploadErr && uploadData?.path) {
+            const { data: pubData } = supabase.storage
+              .from("uploads")
+              .getPublicUrl(storageFileName);
+
+            if (pubData?.publicUrl) {
+              return NextResponse.json({
+                success: true,
+                url: pubData.publicUrl,
+                name: storageFileName,
+                size: file.size,
+                dimensions,
+                provider: "supabase",
+              });
+            }
+          } else if (uploadErr) {
+            console.warn("Supabase Storage error, checking fallback:", uploadErr.message);
+          }
+        }
+      }
+    } catch (supaErr) {
+      console.warn("Supabase upload exception:", supaErr);
     }
 
-    const sanitizedOriginalName = file.name
-      .toLowerCase()
-      .replace(/[^a-z0-9.]/g, "-")
-      .replace(/-+/g, "-");
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Tier 3: Local Disk Upload (works in local dev environments where disk is writable)
+    // ─────────────────────────────────────────────────────────────────────────────
+    try {
+      if (!fs.existsSync(UPLOADS_DIR)) {
+        fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+      }
 
-    const fileName = `${Date.now()}-${sanitizedOriginalName}`;
-    const filePath = path.join(UPLOADS_DIR, fileName);
+      const fileName = `${Date.now()}-${sanitizedOriginalName}`;
+      const filePath = path.join(UPLOADS_DIR, fileName);
 
-    fs.writeFileSync(filePath, buffer);
+      fs.writeFileSync(filePath, buffer);
 
-    const publicUrl = `/uploads/${fileName}`;
+      const publicUrl = `/uploads/${fileName}`;
 
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      name: fileName,
-      size: file.size,
-      dimensions,
-      provider: "local",
-    });
+      return NextResponse.json({
+        success: true,
+        url: publicUrl,
+        name: fileName,
+        size: file.size,
+        dimensions,
+        provider: "local",
+      });
+    } catch (localErr) {
+      console.warn("Local storage write failed (e.g. read-only filesystem on Vercel):", localErr);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Tier 4: Base64 WebP Fallback (100% resilient; works in zero-storage/read-only environments)
+    // ─────────────────────────────────────────────────────────────────────────────
+    try {
+      const sharp = (await import("sharp")).default;
+      const optimizedBuffer = await sharp(buffer)
+        .resize({ width: Math.min(dimensions.width, 1600), withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toBuffer();
+
+      const base64Url = `data:image/webp;base64,${optimizedBuffer.toString("base64")}`;
+
+      return NextResponse.json({
+        success: true,
+        url: base64Url,
+        name: file.name,
+        size: optimizedBuffer.length,
+        dimensions,
+        provider: "base64",
+      });
+    } catch (base64Err) {
+      console.error("Base64 optimization failed:", base64Err);
+    }
+
+    return NextResponse.json(
+      { error: "Unable to store uploaded photo. Please try again or provide an image URL." },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Error saving uploaded file:", error);
     const msg = error instanceof Error ? error.message : "Failed to upload file";

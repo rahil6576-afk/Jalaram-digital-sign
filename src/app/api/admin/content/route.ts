@@ -78,12 +78,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Also keep local JSON synchronized as reliable backup and offline cache
-    const dir = path.dirname(RUNTIME_CONTENT_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    // 2. Also keep local JSON synchronized as reliable backup and offline cache (when filesystem is writable)
+    try {
+      const dir = path.dirname(RUNTIME_CONTENT_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(RUNTIME_CONTENT_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
+    } catch {
+      // In read-only serverless platforms like Vercel, Supabase persists the data
     }
-    fs.writeFileSync(RUNTIME_CONTENT_PATH, JSON.stringify(updatedData, null, 2), "utf-8");
 
     return NextResponse.json({
       success: true,
