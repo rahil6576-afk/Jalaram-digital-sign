@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quote, CheckCircle2, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { Star, Quote, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import type { TestimonialItem } from "@/data/site";
 
 interface HomeReviewsSectionProps {
@@ -29,109 +29,44 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
     setCurrentIndex((prev) => (prev - 1 + totalReviews) % totalReviews);
   }, [totalReviews]);
 
-  // Auto-move carousel every 5 seconds when not paused
+  // Auto-move carousel one review at a time every 4.5 seconds
   useEffect(() => {
     if (isPaused || totalReviews <= 1) return;
     const interval = setInterval(() => {
       nextSlide();
-    }, 5000);
+    }, 4500);
     return () => clearInterval(interval);
   }, [isPaused, nextSlide, totalReviews]);
 
   if (!testimonials || totalReviews === 0) return null;
 
-  // Primary review and optional secondary review for wide screens
-  const primaryReview = testimonials[currentIndex];
-  const secondaryIndex = (currentIndex + 1) % totalReviews;
-  const secondaryReview = totalReviews > 1 ? testimonials[secondaryIndex] : null;
+  const currentReview = testimonials[currentIndex];
 
   const variants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 80 : -80,
+      x: dir > 0 ? 100 : -100,
       opacity: 0,
-      scale: 0.98,
+      scale: 0.97,
     }),
     center: {
       x: 0,
       opacity: 1,
       scale: 1,
       transition: {
-        x: { type: "spring" as const, stiffness: 300, damping: 30 },
+        x: { type: "spring" as const, stiffness: 280, damping: 28 },
         opacity: { duration: 0.35 },
       },
     },
     exit: (dir: number) => ({
-      x: dir > 0 ? -80 : 80,
+      x: dir > 0 ? -100 : 100,
       opacity: 0,
-      scale: 0.98,
+      scale: 0.97,
       transition: {
-        x: { type: "spring" as const, stiffness: 300, damping: 30 },
+        x: { type: "spring" as const, stiffness: 280, damping: 28 },
         opacity: { duration: 0.25 },
       },
     }),
   };
-
-  const renderReviewCard = (review: TestimonialItem, isSecondary = false) => (
-    <div
-      key={review.id || review.name}
-      className={`bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-7 sm:p-9 md:p-10 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group h-full ${
-        isSecondary ? "hidden md:flex" : "flex"
-      }`}
-    >
-      {/* Decorative background quote */}
-      <Quote className="absolute top-6 right-8 w-20 h-20 text-[#6F20E8]/8 group-hover:text-[#6F20E8]/15 transition-colors pointer-events-none select-none" />
-
-      <div>
-        {/* Rating Stars & Verified Badge */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                  i < (review.rating || 5)
-                    ? "fill-amber-400 text-amber-400 drop-shadow-sm"
-                    : "fill-gray-200 text-gray-200"
-                }`}
-              />
-            ))}
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] sm:text-xs font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Verified Project</span>
-          </div>
-        </div>
-
-        {/* Review Quote */}
-        <blockquote className="text-gray-800 text-base sm:text-lg md:text-xl font-medium leading-relaxed mb-8 tracking-tight relative z-10 min-h-[72px]">
-          &ldquo;{review.quote}&rdquo;
-        </blockquote>
-      </div>
-
-      {/* Author Information */}
-      <div className="flex items-center gap-4 pt-6 border-t border-black/5 mt-auto relative z-10">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-base flex items-center justify-center shrink-0 shadow-md shadow-[#6F20E8]/20">
-          {review.name
-            ? review.name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase()
-            : "CL"}
-        </div>
-        <div className="truncate">
-          <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-snug truncate">
-            {review.name}
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">
-            {review.business || "Business Owner"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <section
@@ -145,91 +80,31 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
       <div className="absolute bottom-10 right-0 w-96 h-96 bg-purple-400/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
+        {/* Section Header with Next/Prev Arrow Controls at the top right */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-4xl mx-auto mb-10 sm:mb-14">
+          <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4 shadow-sm">
               <Star className="w-3.5 h-3.5 fill-[#6F20E8]" />
               <span>Rated 4.9/5 by 500+ Businesses</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter text-foreground leading-[1.1] mb-5">
-              WHAT OUR <br className="hidden sm:inline" />
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-[1.1] mb-3">
+              WHAT OUR{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6F20E8] via-[#8A3FFC] to-[#A855F7]">
                 CLIENTS SAY.
               </span>
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto font-light leading-relaxed">
-              Real experiences from commercial developers, retail brands, and institutions who trust us with their visual presence.
+            <p className="text-sm sm:text-base text-gray-600 font-light leading-relaxed max-w-lg">
+              Real experiences from commercial developers, retail brands, and institutions.
             </p>
-          </motion.div>
-        </div>
-
-        {/* Moving Reviews Carousel Container */}
-        <div className="max-w-6xl mx-auto relative px-2 sm:px-4">
-          <div className="overflow-hidden min-h-[380px] sm:min-h-[340px] flex items-stretch">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={currentIndex}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch"
-              >
-                {primaryReview && renderReviewCard(primaryReview, false)}
-                {secondaryReview && renderReviewCard(secondaryReview, true)}
-              </motion.div>
-            </AnimatePresence>
           </div>
 
-          {/* Carousel Navigation Bar (Left/Right Arrows + Indicators + Pause toggle) */}
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-black/5">
-            {/* Slide Position Counter */}
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 order-2 sm:order-1">
-              <span>Review {currentIndex + 1} of {totalReviews}</span>
-              <button
-                type="button"
-                onClick={() => setIsPaused((p) => !p)}
-                className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors ml-1"
-                title={isPaused ? "Resume autoplay" : "Pause autoplay"}
-                aria-label={isPaused ? "Resume autoplay" : "Pause autoplay"}
-              >
-                {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-              </button>
-            </div>
-
-            {/* Pagination Dots */}
-            <div className="flex items-center gap-2 order-1 sm:order-2">
-              {testimonials.map((_, dotIdx) => (
-                <button
-                  key={dotIdx}
-                  type="button"
-                  onClick={() => {
-                    setDirection(dotIdx > currentIndex ? 1 : -1);
-                    setCurrentIndex(dotIdx);
-                  }}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    dotIdx === currentIndex
-                      ? "w-8 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] shadow-sm shadow-[#6F20E8]/40"
-                      : "w-2.5 bg-gray-200 hover:bg-gray-300"
-                  }`}
-                  aria-label={`Go to review ${dotIdx + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Prev / Next Action Arrows */}
-            <div className="flex items-center gap-2 order-3">
+          {/* Clean Left / Right Arrow buttons beside header - No bottom bars */}
+          {totalReviews > 1 && (
+            <div className="flex items-center gap-2.5 self-start md:self-end shrink-0">
               <button
                 type="button"
                 onClick={prevSlide}
-                className="w-10 h-10 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
                 title="Previous review"
                 aria-label="Previous review"
               >
@@ -238,13 +113,83 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
               <button
                 type="button"
                 onClick={nextSlide}
-                className="w-10 h-10 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
                 title="Next review"
                 aria-label="Next review"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
+          )}
+        </div>
+
+        {/* Single Review Card moving one by one */}
+        <div className="max-w-4xl mx-auto relative">
+          <div className="overflow-hidden min-h-[300px] sm:min-h-[260px] flex items-stretch">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="w-full bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-8 sm:p-12 shadow-md hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group"
+              >
+                {/* Decorative background quote */}
+                <Quote className="absolute top-6 right-8 w-24 h-24 text-[#6F20E8]/8 group-hover:text-[#6F20E8]/15 transition-colors pointer-events-none select-none" />
+
+                <div>
+                  {/* Rating Stars & Verified Badge */}
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-1.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < (currentReview.rating || 5)
+                              ? "fill-amber-400 text-amber-400 drop-shadow-sm"
+                              : "fill-gray-200 text-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Verified Client Review</span>
+                    </div>
+                  </div>
+
+                  {/* Review Quote */}
+                  <blockquote className="text-gray-900 text-lg sm:text-xl md:text-2xl font-medium leading-relaxed mb-8 tracking-tight relative z-10">
+                    &ldquo;{currentReview.quote}&rdquo;
+                  </blockquote>
+                </div>
+
+                {/* Author Information */}
+                <div className="flex items-center gap-4 pt-6 border-t border-black/5 mt-auto relative z-10">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-base sm:text-lg flex items-center justify-center shrink-0 shadow-lg shadow-[#6F20E8]/25">
+                    {currentReview.name
+                      ? currentReview.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()
+                      : "CL"}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-snug">
+                      {currentReview.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 font-medium">
+                      {currentReview.business || "Business Owner"}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>

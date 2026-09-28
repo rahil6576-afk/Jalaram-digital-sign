@@ -16,16 +16,84 @@ export default function ContactPage() {
     service: "",
     message: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const siteData = useSiteData();
   const contact = siteData.contactPage;
 
+  const validate = (name: string, value: string) => {
+    let error = "";
+    if (name === "name") {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        error = "Full name is required.";
+      } else if (trimmed.length < 2) {
+        error = "Name must be at least 2 characters.";
+      } else if (!/^[a-zA-Z\s.'-]+$/.test(trimmed)) {
+        error = "Name should contain letters only.";
+      }
+    } else if (name === "phone") {
+      const clean = value.replace(/\D/g, "");
+      if (!clean) {
+        error = "Phone number is required.";
+      } else if (clean.length < 10 || clean.length > 13) {
+        error = "Please enter a valid 10-digit mobile number.";
+      } else if (clean.length === 10 && !/^[6-9]/.test(clean)) {
+        error = "Mobile number should start with 6, 7, 8, or 9.";
+      }
+    } else if (name === "email") {
+      const trimmed = value.trim();
+      if (trimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) {
+        error = "Please enter a valid email address (e.g. name@domain.com).";
+      }
+    } else if (name === "message") {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        error = "Message is required.";
+      } else if (trimmed.length < 10) {
+        error = `Please write at least 10 characters (${trimmed.length}/10).`;
+      }
+    }
+    return error;
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const error = validate(field, formData[field as keyof typeof formData]);
+    setFieldErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (touched[field]) {
+      const error = validate(field, value);
+      setFieldErrors((prev) => ({ ...prev, [field]: error }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
     setErrorMsg(null);
+
+    const errors: Record<string, string> = {
+      name: validate("name", formData.name),
+      phone: validate("phone", formData.phone),
+      email: validate("email", formData.email),
+      message: validate("message", formData.message),
+    };
+
+    const hasErrors = Object.values(errors).some(Boolean);
+    if (hasErrors) {
+      setFieldErrors(errors);
+      setTouched({ name: true, phone: true, email: true, message: true });
+      setErrorMsg("Please fix the highlighted fields below before submitting.");
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const res = await fetch("/api/inquiries", {
@@ -49,6 +117,8 @@ export default function ContactPage() {
         service: "",
         message: "",
       });
+      setFieldErrors({});
+      setTouched({});
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong. Please try again or call us directly.";
       setErrorMsg(msg);
@@ -247,74 +317,139 @@ export default function ContactPage() {
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Name *</label>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                        <span>Full Name <span className="text-red-500">*</span></span>
+                      </label>
                       <input
-                        required
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        onBlur={() => handleBlur("name")}
+                        className={`w-full bg-background border px-5 py-4 text-gray-900 transition-colors rounded-sm focus:outline-none ${
+                          touched.name && fieldErrors.name
+                            ? "border-red-500 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                            : touched.name && !fieldErrors.name && formData.name.trim()
+                            ? "border-emerald-500/80 focus:border-accent"
+                            : "border-black/10 focus:border-accent"
+                        }`}
                         placeholder="John Doe"
                       />
+                      {touched.name && fieldErrors.name && (
+                        <p className="text-xs text-red-600 font-medium flex items-center gap-1.5 mt-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{fieldErrors.name}</span>
+                        </p>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Phone *</label>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700 flex items-center justify-between">
+                        <span>Mobile Phone <span className="text-red-500">*</span></span>
+                      </label>
                       <input
-                        required
                         type="tel"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
-                        placeholder="+91 XXXXX XXXXX"
+                        onChange={(e) => handleChange("phone", e.target.value)}
+                        onBlur={() => handleBlur("phone")}
+                        className={`w-full bg-background border px-5 py-4 text-gray-900 transition-colors rounded-sm focus:outline-none ${
+                          touched.phone && fieldErrors.phone
+                            ? "border-red-500 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                            : touched.phone && !fieldErrors.phone && formData.phone.trim()
+                            ? "border-emerald-500/80 focus:border-accent"
+                            : "border-black/10 focus:border-accent"
+                        }`}
+                        placeholder="+91 98765 43210"
                       />
+                      {touched.phone && fieldErrors.phone && (
+                        <p className="text-xs text-red-600 font-medium flex items-center gap-1.5 mt-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{fieldErrors.phone}</span>
+                        </p>
+                      )}
                     </div>
                   </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Email</label>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700">Email Address (Optional)</label>
                       <input
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        onBlur={() => handleBlur("email")}
+                        className={`w-full bg-background border px-5 py-4 text-gray-900 transition-colors rounded-sm focus:outline-none ${
+                          touched.email && fieldErrors.email
+                            ? "border-red-500 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                            : "border-black/10 focus:border-accent"
+                        }`}
                         placeholder="john@example.com"
                       />
+                      {touched.email && fieldErrors.email && (
+                        <p className="text-xs text-red-600 font-medium flex items-center gap-1.5 mt-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{fieldErrors.email}</span>
+                        </p>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-600">Company (Optional)</label>
+
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-gray-700">Company Name (Optional)</label>
                       <input
                         type="text"
                         value={formData.company}
                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                         className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors rounded-sm"
-                        placeholder="Your Business"
+                        placeholder="Your Business or Brand"
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-600">Service of Interest</label>
+
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">Service of Interest</label>
                     <select
                       value={formData.service}
                       onChange={(e) => setFormData({ ...formData, service: e.target.value })}
                       className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm"
                     >
-                      <option value="">Select a service</option>
+                      <option value="">Select a service category</option>
                       {siteData.services.map((s) => (
                         <option key={s.id} value={s.title}>{s.title}</option>
                       ))}
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-600">Message *</label>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">
+                        Project Details &amp; Message <span className="text-red-500">*</span>
+                      </label>
+                      <span className={`text-xs font-semibold ${
+                        formData.message.trim().length >= 10 ? "text-emerald-600" : "text-gray-400"
+                      }`}>
+                        {formData.message.trim().length}/10 min
+                      </span>
+                    </div>
                     <textarea
-                      required
                       rows={5}
                       value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors resize-none rounded-sm"
-                      placeholder="Tell us about your project..."
+                      onChange={(e) => handleChange("message", e.target.value)}
+                      onBlur={() => handleBlur("message")}
+                      className={`w-full bg-background border px-5 py-4 text-gray-900 transition-colors resize-none rounded-sm focus:outline-none ${
+                        touched.message && fieldErrors.message
+                          ? "border-red-500 bg-red-50/20 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                          : touched.message && !fieldErrors.message && formData.message.trim()
+                          ? "border-emerald-500/80 focus:border-accent"
+                          : "border-black/10 focus:border-accent"
+                      }`}
+                      placeholder="Tell us about your project requirements, banner size, quantities, or signage needs..."
                     />
+                    {touched.message && fieldErrors.message && (
+                      <p className="text-xs text-red-600 font-medium flex items-center gap-1.5 mt-1">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{fieldErrors.message}</span>
+                      </p>
+                    )}
                   </div>
                   <button
                     type="submit"

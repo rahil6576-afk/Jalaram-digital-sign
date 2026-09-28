@@ -217,25 +217,25 @@ export default function PortfolioPage() {
               </button>
             )}
 
-            {/* Image Container */}
+            {/* Image Container - Expanded for maximum visibility */}
             <div
-              className="relative max-w-5xl max-h-[82vh] w-full flex flex-col items-center justify-center"
+              className="relative max-w-[94vw] max-h-[90vh] w-full flex flex-col items-center justify-center my-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={currentSrc}
                 alt={currentProject.title}
-                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10"
+                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-white/15 mx-auto"
               />
-              <div className="mt-4 text-center">
-                <h3 className="text-white text-base sm:text-lg font-bold drop-shadow-md">
+              <div className="mt-3 text-center px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+                <h3 className="text-white text-sm sm:text-base font-bold drop-shadow-md">
                   {currentProject.title}
                 </h3>
                 {currentProject.location && (
-                  <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
-                    {currentProject.location}
-                  </p>
+                  <span className="text-gray-300 text-xs sm:text-sm font-medium">
+                    • {currentProject.location}
+                  </span>
                 )}
               </div>
             </div>

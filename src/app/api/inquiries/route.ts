@@ -116,21 +116,47 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, phone, email, company, service, message } = body;
 
-    if (!name || !phone || !message) {
+    const trimmedName = String(name || "").trim();
+    const cleanPhone = String(phone || "").replace(/\D/g, "");
+    const trimmedMsg = String(message || "").trim();
+    const trimmedEmail = email ? String(email).trim() : "";
+
+    if (!trimmedName || trimmedName.length < 2) {
       return NextResponse.json(
-        { error: "Name, phone number, and message are required." },
+        { error: "Please enter a valid full name (minimum 2 characters)." },
+        { status: 400 }
+      );
+    }
+
+    if (!cleanPhone || cleanPhone.length < 10) {
+      return NextResponse.json(
+        { error: "Please enter a valid 10-digit mobile number." },
+        { status: 400 }
+      );
+    }
+
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmedEmail)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    if (!trimmedMsg || trimmedMsg.length < 10) {
+      return NextResponse.json(
+        { error: "Please enter at least 10 characters describing your requirement." },
         { status: 400 }
       );
     }
 
     const newInquiry: InquiryItem = {
       id: `inq-${Date.now()}`,
-      name: String(name).trim(),
+      name: trimmedName,
       phone: String(phone).trim(),
-      email: email ? String(email).trim() : "",
+      email: trimmedEmail,
       company: company ? String(company).trim() : "",
       service: service ? String(service).trim() : "General Inquiry",
-      message: String(message).trim(),
+      message: trimmedMsg,
       status: "new",
       notes: "",
       createdAt: new Date().toISOString(),
