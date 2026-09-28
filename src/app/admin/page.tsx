@@ -40,7 +40,12 @@ interface Business {
   name: string; description: string; address: string; phone: string;
   whatsapp: string; email: string; mapsLink: string; hours: string;
 }
-interface Socials { instagram: string; facebook: string; }
+interface Socials {
+  instagram: string;
+  facebook: string;
+  youtube?: string;
+  linkedin?: string;
+}
 interface Service {
   id: string; slug: string; title: string; shortDescription?: string;
   description?: string; image: string; category: string; features: string[];
@@ -701,7 +706,10 @@ export default function AdminDashboard() {
         socials: {
           instagram: cleanSocialUrl(payload.socials?.instagram || ""),
           facebook: cleanSocialUrl(payload.socials?.facebook || ""),
+          youtube: cleanSocialUrl(payload.socials?.youtube || ""),
+          linkedin: cleanSocialUrl(payload.socials?.linkedin || ""),
         },
+        heroImages: (payload.heroImages || []).filter((h) => typeof h === "string" && h.trim() !== ""),
         clients: (payload.clients || []).filter((c) => c.name.trim() !== ""),
       };
 
@@ -789,7 +797,7 @@ export default function AdminDashboard() {
 
   const handleSocialBlur = (k: keyof Socials) => {
     if (!data) return;
-    const current = data.socials[k];
+    const current = data.socials[k] || "";
     const cleaned = cleanSocialUrl(current);
     if (cleaned !== current) {
       updateSocials(k, cleaned);
@@ -993,15 +1001,17 @@ export default function AdminDashboard() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(["instagram", "facebook"] as (keyof Socials)[]).map((key) => (
+                  {(["instagram", "facebook", "youtube", "linkedin"] as (keyof Socials)[]).map((key) => (
                     <div key={key}>
-                      <label className={labelCls}>{key.charAt(0).toUpperCase() + key.slice(1)} URL</label>
+                      <label className={labelCls}>
+                        {key === "youtube" ? "YouTube Channel URL" : key === "linkedin" ? "LinkedIn Profile URL" : key.charAt(0).toUpperCase() + key.slice(1) + " URL"}
+                      </label>
                       <input
                         type="text"
-                        value={data.socials[key]}
+                        value={data.socials[key] || ""}
                         onChange={(e) => updateSocials(key, e.target.value)}
                         onBlur={() => handleSocialBlur(key)}
-                        placeholder="https://..."
+                        placeholder={`https://${key}.com/...`}
                         className={field}
                       />
                     </div>
@@ -1018,26 +1028,37 @@ export default function AdminDashboard() {
                 title={`Hero Carousel Banners (${data.heroImages.length}/7)`}
                 subtitle="Manage up to 7 hero carousel banners. Click any row or action icon to view and edit the hero slide in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    disabled={data.heroImages.length >= 7}
-                    onClick={() => {
-                      if (data.heroImages.length >= 7) {
-                        showToast("Maximum limit of 7 hero banners reached", "error");
-                        return;
-                      }
-                      const newIdx = data.heroImages.length;
-                      setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
-                      setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
-                    }}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all border ${
-                      data.heroImages.length >= 7
-                        ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                        : "bg-purple-50 hover:bg-purple-100 text-[#6F20E8] border-purple-200 cursor-pointer"
-                    }`}
-                  >
-                    <Plus className="w-4 h-4" /> {data.heroImages.length >= 7 ? "Max 7 Reached" : "Add Banner"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      disabled={data.heroImages.length >= 7}
+                      onClick={() => {
+                        if (data.heroImages.length >= 7) {
+                          showToast("Maximum limit of 7 hero banners reached", "error");
+                          return;
+                        }
+                        const newIdx = data.heroImages.length;
+                        setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
+                        setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
+                      }}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all border ${
+                        data.heroImages.length >= 7
+                          ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                          : "bg-purple-50 hover:bg-purple-100 text-[#6F20E8] border-purple-200 cursor-pointer"
+                      }`}
+                    >
+                      <Plus className="w-4 h-4" /> {data.heroImages.length >= 7 ? "Max 7 Reached" : "Add Banner"}
+                    </button>
+                  </div>
                 }
               />
 
@@ -2950,8 +2971,7 @@ export default function AdminDashboard() {
       {/* 7. Hero Image Slide Modal */}
       {activeModal?.type === "hero" && (() => {
         const idx = Number(activeModal.idOrIndex);
-        const url = data.heroImages[idx];
-        if (url === undefined) return null;
+        const url = data.heroImages[idx] ?? "";
         const isReadOnly = activeModal.mode === "view";
         return (
           <ModalWrapper
@@ -2963,12 +2983,21 @@ export default function AdminDashboard() {
             mode={activeModal.mode || "edit"}
             onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
-              if (!url || !url.trim()) {
+              const currentSlideUrl = (data.heroImages[idx] || "").trim();
+              if (!currentSlideUrl) {
                 setModalError("Image URL or uploaded photo is required for the slide.");
                 return;
               }
               setModalError(null);
-              await handleSave();
+              const imgs = [...data.heroImages];
+              imgs[idx] = currentSlideUrl;
+              const filtered = imgs.filter((x) => typeof x === "string" && x.trim() !== "");
+              const updatedData: SiteData = {
+                ...data,
+                heroImages: filtered,
+              };
+              setData(updatedData);
+              await handleSave(updatedData);
               closeModal();
             }}
             saving={saving}

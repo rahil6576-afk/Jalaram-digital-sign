@@ -17,7 +17,8 @@ export default function Home() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [lightboxAlt, setLightboxAlt] = useState<string>("");
 
-  const heroImages = (siteData?.heroImages?.length ? siteData.heroImages : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
+  const validHeroImages = (siteData?.heroImages || []).filter((img) => typeof img === "string" && img.trim().length > 0);
+  const heroImages = (validHeroImages.length > 0 ? validHeroImages : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
 
   useEffect(() => {
     if (!heroImages.length) return;
