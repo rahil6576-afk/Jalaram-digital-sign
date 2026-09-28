@@ -200,7 +200,7 @@ export default function Home() {
                     const actualIdx = portfolioItems.findIndex((p) => p.id === project.id);
                     setLightboxIndex(actualIdx >= 0 ? actualIdx : 0);
                   }}
-                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
+                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
                 >
                   <Image
                     src={imgSrc}
@@ -260,7 +260,7 @@ export default function Home() {
                 >
                   <Link href={`/services/${service.slug}`} className="group block h-full">
                     {/* MOBILE: compact card with service photo banner */}
-                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl shadow-sm overflow-hidden flex flex-col card-hover relative h-full">
+                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl overflow-hidden flex flex-col card-hover relative h-full">
                       <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
                         <Image
                           src={serviceImg}
@@ -286,7 +286,7 @@ export default function Home() {
                     </div>
 
                     {/* DESKTOP: full card with showcase image banner */}
-                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 card-hover relative overflow-hidden shadow-lg flex-col h-full group">
+                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 card-hover relative overflow-hidden flex-col h-full group">
                       <div className="relative w-full aspect-[16/10] bg-gray-900 overflow-hidden">
                         <Image
                           src={serviceImg}
@@ -296,11 +296,11 @@ export default function Home() {
                           className="object-cover group-hover:scale-108 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                        <span className="absolute top-4 right-4 text-white text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25 shadow-md">
+                        <span className="absolute top-4 right-4 text-white text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25">
                           0{index + 1}
                         </span>
                         {service.category && (
-                          <span className="absolute bottom-3 left-4 text-white/90 text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-[#6F20E8]/80 backdrop-blur-sm shadow-sm">
+                          <span className="absolute bottom-3 left-4 text-white/90 text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-[#6F20E8]/80 backdrop-blur-sm">
                             {service.category}
                           </span>
                         )}
@@ -360,7 +360,7 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="relative pt-8 z-10"
               >
-                <div className="hidden md:flex absolute top-0 left-0 w-14 h-14 bg-card-bg border border-black/10 rounded-full items-center justify-center shadow-lg">
+                <div className="hidden md:flex absolute top-0 left-0 w-14 h-14 bg-card-bg border border-black/10 rounded-full items-center justify-center">
                    <span className="text-accent font-mono text-lg font-bold">{step.num}</span>
                 </div>
                 <div className="md:mt-12">
@@ -507,7 +507,7 @@ export default function Home() {
               <img
                 src={currentSrc}
                 alt={currentProject.title}
-                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-white/15 mx-auto"
+                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl border border-white/15 mx-auto"
               />
               <div className="mt-3 text-center px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
                 <h3 className="text-white text-sm sm:text-base font-bold drop-shadow-md">

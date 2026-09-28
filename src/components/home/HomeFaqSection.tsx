@@ -62,7 +62,7 @@ export default function HomeFaqSection({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-2xl border border-black/10 overflow-hidden shadow-sm hover:border-[#6F20E8]/30 transition-all duration-200"
+                className="bg-white rounded-2xl border border-black/10 overflow-hidden hover:border-[#6F20E8]/30 transition-all duration-200"
               >
                 <button
                   type="button"

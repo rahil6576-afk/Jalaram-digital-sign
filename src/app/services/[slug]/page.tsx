@@ -111,7 +111,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
             <div className="lg:col-span-2 space-y-12">
-              <div className="aspect-video relative overflow-hidden rounded-2xl shadow-2xl mb-12 bg-gray-100">
+              <div className="aspect-video relative overflow-hidden rounded-2xl mb-12 bg-gray-100">
                 <Image
                   src={serviceImage}
                   alt={service.title}
@@ -134,7 +134,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                   <h3 className="text-2xl md:text-3xl font-bold tracking-tighter mb-6">Key Features</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {featuresList.map((feature, i) => (
-                      <div key={i} className="flex items-center gap-4 bg-card-bg p-6 rounded-xl border border-black/5 shadow-sm">
+                      <div key={i} className="flex items-center gap-4 bg-card-bg p-6 rounded-xl border border-black/5">
                         <CheckCircle2 className="w-6 h-6 text-accent shrink-0" />
                         <span className="text-gray-900 font-medium">{feature}</span>
                       </div>
@@ -146,7 +146,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
             {/* SIDEBAR */}
             <div className="lg:col-span-1">
-              <div className="bg-card-bg p-8 md:p-10 rounded-2xl border border-black/5 sticky top-32 shadow-xl">
+              <div className="bg-card-bg p-8 md:p-10 rounded-2xl border border-black/5 sticky top-32">
                 <h4 className="text-2xl font-bold mb-4">Start Your Project</h4>
                 <p className="text-gray-600 text-sm mb-8 leading-relaxed">
                   Get a custom quote for your {service.title.toLowerCase()} requirements. We respond within 24 hours.

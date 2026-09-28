@@ -88,7 +88,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
         {/* Section Header with Next/Prev Arrow Controls at the top right */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-4xl mx-auto mb-10 sm:mb-14">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4">
               <Star className="w-3.5 h-3.5 fill-[#6F20E8]" />
               <span>Rated 4.9/5 by 500+ Businesses</span>
             </div>
@@ -109,7 +109,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
               <button
                 type="button"
                 onClick={prevSlide}
-                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
                 title="Previous review"
                 aria-label="Previous review"
               >
@@ -118,7 +118,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
               <button
                 type="button"
                 onClick={nextSlide}
-                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="w-11 h-11 rounded-full border border-gray-200 hover:border-[#6F20E8] bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
                 title="Next review"
                 aria-label="Next review"
               >
@@ -139,7 +139,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="w-full bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-8 sm:p-12 shadow-md hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between group"
+                className="w-full bg-white rounded-3xl border border-black/8 hover:border-[#6F20E8]/40 p-8 sm:p-12 transition-all duration-300 relative overflow-hidden flex flex-col justify-between group"
               >
                 {/* Decorative background quote */}
                 <Quote className="absolute top-6 right-8 w-24 h-24 text-[#6F20E8]/8 group-hover:text-[#6F20E8]/15 transition-colors pointer-events-none select-none" />
@@ -153,7 +153,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
                           key={i}
                           className={`w-5 h-5 ${
                             i < (currentReview.rating || 5)
-                              ? "fill-amber-400 text-amber-400 drop-shadow-sm"
+                              ? "fill-amber-400 text-amber-400"
                               : "fill-gray-200 text-gray-200"
                           }`}
                         />
@@ -174,7 +174,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
 
                 {/* Author Information */}
                 <div className="flex items-center gap-4 pt-6 border-t border-black/5 mt-auto relative z-10">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-base sm:text-lg flex items-center justify-center shrink-0 shadow-lg shadow-[#6F20E8]/25">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-[#6F20E8] to-[#A855F7] text-white font-bold text-base sm:text-lg flex items-center justify-center shrink-0">
                     {initials}
                   </div>
                   <div>

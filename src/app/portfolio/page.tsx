@@ -91,7 +91,7 @@ export default function PortfolioPage() {
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
                   <div
-                    className="block relative overflow-hidden aspect-[4/3] bg-card-bg shadow-2xl rounded-sm cursor-pointer"
+                    className="block relative overflow-hidden aspect-[4/3] bg-card-bg rounded-sm cursor-pointer"
                     onClick={() => setLightboxIndex(idx)}
                   >
                     <Image
@@ -102,7 +102,7 @@ export default function PortfolioPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
                     <div className="absolute bottom-0 left-0 p-8 w-full">
-                      <span className="inline-block px-2.5 py-0.5 bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-widest mb-3 rounded-full shadow-lg">
+                      <span className="inline-block px-2.5 py-0.5 bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-widest mb-3 rounded-full">
                         {project.category}
                       </span>
                       <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{project.title}</h3>
@@ -226,7 +226,7 @@ export default function PortfolioPage() {
               <img
                 src={currentSrc}
                 alt={currentProject.title}
-                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl shadow-2xl border border-white/15 mx-auto"
+                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl border border-white/15 mx-auto"
               />
               <div className="mt-3 text-center px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
                 <h3 className="text-white text-sm sm:text-base font-bold drop-shadow-md">

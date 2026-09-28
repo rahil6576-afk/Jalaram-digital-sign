@@ -18,7 +18,7 @@ function TeamMemberCard({ member, index }: { member: TeamMember; index: number }
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="group select-none"
     >
-      <div className="aspect-[3/4] bg-card-bg mb-6 relative overflow-hidden border border-black/5 shadow-xl rounded-sm">
+      <div className="aspect-[3/4] bg-card-bg mb-6 relative overflow-hidden border border-black/5 rounded-sm">
         {/* Photo — grayscale by default, full colour on hover */}
         <div className="absolute inset-0 w-full h-full">
           <Image

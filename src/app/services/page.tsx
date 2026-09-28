@@ -39,7 +39,7 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {currentData.services.map((service, index) => (
-              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:border-accent/50 transition-all duration-300">
+              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col hover:border-accent/50 transition-all duration-300">
                 {/* Clickable Image → opens lightbox ONLY */}
                 <div
                   className="aspect-video relative overflow-hidden cursor-pointer"

@@ -51,7 +51,7 @@ export default async function AboutPage() {
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative aspect-square md:aspect-[4/3] bg-card-bg overflow-hidden rounded-sm group shadow-2xl">
+            <div className="relative aspect-square md:aspect-[4/3] bg-card-bg overflow-hidden rounded-sm group">
               <Image
                 src={about.storyImage}
                 alt="Printing Workshop"
@@ -100,7 +100,7 @@ export default async function AboutPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {about.qualityPoints.map((item, i) => (
-              <div key={i} className="bg-card-bg p-8 md:p-10 border border-black/5 rounded-sm shadow-xl hover:border-accent/50 transition-colors duration-300">
+              <div key={i} className="bg-card-bg p-8 md:p-10 border border-black/5 rounded-sm hover:border-accent/50 transition-colors duration-300">
                 <CheckCircle2 className="w-10 h-10 text-accent mb-6" />
                 <h3 className="text-xl font-bold mb-4 text-foreground">{item.title}</h3>
                 <p className="text-gray-600 font-light leading-relaxed">{item.desc}</p>
