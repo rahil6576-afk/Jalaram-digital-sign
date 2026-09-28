@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import PageHero from "@/components/common/PageHero";
 
 export default function PortfolioPage() {
   const siteData = useSiteData();
   const [filter, setFilter] = useState("All");
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxAlt, setLightboxAlt] = useState<string>("");
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const portfolioList = siteData?.portfolio || [];
   const categories = ["All", ...Array.from(new Set(portfolioList.map((p) => p.category)))];
@@ -20,6 +19,22 @@ export default function PortfolioPage() {
   const filteredProjects = filter === "All"
     ? portfolioList
     : portfolioList.filter(p => p.category === filter);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxIndex(null);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + filteredProjects.length) % filteredProjects.length));
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % filteredProjects.length));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, filteredProjects.length]);
 
   return (
     <>
@@ -63,10 +78,10 @@ export default function PortfolioPage() {
             ))}
           </div>
 
-          {/* Grid — images open lightbox only, no navigation */}
+          {/* Grid — images open lightbox with arrow navigation */}
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project, idx) => (
                 <motion.div
                   key={project.id}
                   layout
@@ -77,10 +92,7 @@ export default function PortfolioPage() {
                 >
                   <div
                     className="block relative overflow-hidden aspect-[4/3] bg-card-bg shadow-2xl rounded-sm cursor-pointer"
-                    onClick={() => {
-                      setLightboxSrc(project.image);
-                      setLightboxAlt(project.title);
-                    }}
+                    onClick={() => setLightboxIndex(idx)}
                   >
                     <Image
                       src={project.image}
@@ -138,31 +150,98 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      {/* LIGHTBOX */}
-      {lightboxSrc && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightboxSrc(null)}
-        >
-          <button
-            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
-            onClick={() => setLightboxSrc(null)}
-            aria-label="Close lightbox"
-          >
-            <X className="w-7 h-7" />
-          </button>
+      {/* PORTFOLIO LIGHTBOX WITH NEXT/PREV ARROWS */}
+      {lightboxIndex !== null && filteredProjects[lightboxIndex] && (() => {
+        const currentProject = filteredProjects[lightboxIndex];
+        const currentSrc = currentProject.image ? encodeURI(currentProject.image) : "";
+        const prevIndex = (lightboxIndex - 1 + filteredProjects.length) % filteredProjects.length;
+        const nextIndex = (lightboxIndex + 1) % filteredProjects.length;
+
+        return (
           <div
-            className="relative max-w-5xl max-h-[90vh] w-full"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] bg-black/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            onClick={() => setLightboxIndex(null)}
           >
-            <img
-              src={lightboxSrc}
-              alt={lightboxAlt}
-              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
-            />
+            {/* Top Toolbar */}
+            <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 flex items-center justify-between text-white z-30 pointer-events-none">
+              <div className="flex items-center gap-3 pointer-events-auto">
+                {currentProject.category && (
+                  <span className="px-3 py-1 rounded-full bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-wider shadow-md">
+                    {currentProject.category}
+                  </span>
+                )}
+                <span className="text-xs sm:text-sm font-medium text-gray-300">
+                  {lightboxIndex + 1} / {filteredProjects.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="pointer-events-auto text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
+                onClick={() => setLightboxIndex(null)}
+                aria-label="Close lightbox"
+                title="Close (Esc)"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Previous Arrow Button */}
+            {filteredProjects.length > 1 && (
+              <button
+                type="button"
+                className="absolute left-3 sm:left-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(prevIndex);
+                }}
+                aria-label="Previous image"
+                title="Previous image (Left Arrow)"
+              >
+                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+
+            {/* Next Arrow Button */}
+            {filteredProjects.length > 1 && (
+              <button
+                type="button"
+                className="absolute right-3 sm:right-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(nextIndex);
+                }}
+                aria-label="Next image"
+                title="Next image (Right Arrow)"
+              >
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+
+            {/* Image Container */}
+            <div
+              className="relative max-w-5xl max-h-[82vh] w-full flex flex-col items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentSrc}
+                alt={currentProject.title}
+                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10"
+              />
+              <div className="mt-4 text-center">
+                <h3 className="text-white text-base sm:text-lg font-bold drop-shadow-md">
+                  {currentProject.title}
+                </h3>
+                {currentProject.location && (
+                  <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
+                    {currentProject.location}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 }

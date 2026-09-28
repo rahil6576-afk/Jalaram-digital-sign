@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSiteData } from "@/context/SiteDataContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronRight, PhoneCall, X } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronLeft, PhoneCall, X } from "lucide-react";
 import Image from "next/image";
 import { formatWhatsAppUrl } from "@/lib/utils";
 import ClientLogoMarquee from "@/components/home/ClientLogoMarquee";
@@ -14,8 +14,9 @@ import HomeFaqSection from "@/components/home/HomeFaqSection";
 export default function Home() {
   const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxAlt, setLightboxAlt] = useState<string>("");
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const portfolioItems = (siteData?.portfolio || []).filter((p) => Boolean(p.image));
 
   const validHeroImages = (siteData?.heroImages || []).filter((img) => typeof img === "string" && img.trim().length > 0);
   const heroImages = (validHeroImages.length > 0 ? validHeroImages : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
@@ -27,6 +28,22 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(interval);
   }, [heroImages.length]);
+
+  // Keyboard navigation for portfolio lightbox
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxIndex(null);
+      if (e.key === "ArrowLeft") {
+        setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + portfolioItems.length) % portfolioItems.length));
+      }
+      if (e.key === "ArrowRight") {
+        setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % portfolioItems.length));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxIndex, portfolioItems.length]);
 
   return (
     <>
@@ -179,8 +196,11 @@ export default function Home() {
                 <button
                   key={`${project.id || i}-${i}`}
                   type="button"
-                  onClick={() => { setLightboxSrc(imgSrc); setLightboxAlt(project.title); }}
-                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 cursor-pointer"
+                  onClick={() => {
+                    const actualIdx = portfolioItems.findIndex((p) => p.id === project.id);
+                    setLightboxIndex(actualIdx >= 0 ? actualIdx : 0);
+                  }}
+                  className="block relative w-72 sm:w-80 md:w-96 h-56 sm:h-64 md:h-72 rounded-2xl overflow-hidden shadow-md border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
                 >
                   <Image
                     src={imgSrc}
@@ -225,49 +245,82 @@ export default function Home() {
             </motion.p>
           </div>
 
-          {/* Mobile: 2-col compact grid | Desktop: 2-col then 3-col */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-8">
-            {siteData.services.slice(0, 6).map((service, index) => (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="w-full"
-              >
-                <Link href={`/services/${service.slug}`} className="group block h-full">
-                  {/* MOBILE: compact box card */}
-                  <div className="md:hidden bg-card-bg border border-black/5 rounded-xl shadow-sm p-4 flex flex-col gap-2 card-hover relative overflow-hidden h-full">
-                    <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
-                      <ChevronRight className="w-3.5 h-3.5 text-black group-hover:text-white transition-colors" />
+          {/* Mobile: 2-col compact grid with images | Desktop: 3-col rich cards with images */}
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+            {siteData.services.slice(0, 6).map((service, index) => {
+              const serviceImg = service.image || "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340347/jalaram/jalaram_digital-printing_1790340347919.webp";
+              return (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="w-full"
+                >
+                  <Link href={`/services/${service.slug}`} className="group block h-full">
+                    {/* MOBILE: compact card with service photo banner */}
+                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl shadow-sm overflow-hidden flex flex-col card-hover relative h-full">
+                      <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
+                        <Image
+                          src={serviceImg}
+                          alt={service.title}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <span className="absolute top-2 right-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/20">
+                          0{index + 1}
+                        </span>
+                      </div>
+                      <div className="p-3 flex flex-col flex-1 justify-between gap-1">
+                        <div>
+                          <h3 className="text-xs font-bold leading-tight line-clamp-1">{service.title}</h3>
+                          <p className="text-[11px] text-gray-500 leading-snug line-clamp-2 mt-1">{service.shortDescription}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-accent mt-2 pt-1 border-t border-black/5">
+                          Explore <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-xs font-bold leading-tight pr-5">{service.title}</h3>
-                    <p className="text-[11px] text-gray-500 leading-snug line-clamp-2">{service.shortDescription}</p>
-                    <span className="absolute top-2 right-2.5 text-black/5 text-xl font-bold tracking-tighter">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
 
-                  {/* DESKTOP: full card */}
-                  <div className="hidden md:flex bg-card-bg p-8 md:p-10 h-full border border-black/5 card-hover relative overflow-hidden shadow-xl flex-col">
-                    <span className="absolute top-8 right-8 text-black/5 text-6xl font-bold tracking-tighter group-hover:text-black/10 transition-colors">
-                      0{index + 1}
-                    </span>
-                    <div className="mb-8 w-12 h-12 rounded-full bg-black/5 flex items-center justify-center group-hover:bg-accent transition-colors shadow-lg">
-                      <ChevronRight className="w-6 h-6 text-black group-hover:text-white transition-colors" />
+                    {/* DESKTOP: full card with showcase image banner */}
+                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 card-hover relative overflow-hidden shadow-lg flex-col h-full group">
+                      <div className="relative w-full aspect-[16/10] bg-gray-900 overflow-hidden">
+                        <Image
+                          src={serviceImg}
+                          alt={service.title}
+                          fill
+                          sizes="(max-width: 1200px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-108 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <span className="absolute top-4 right-4 text-white text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25 shadow-md">
+                          0{index + 1}
+                        </span>
+                        {service.category && (
+                          <span className="absolute bottom-3 left-4 text-white/90 text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-[#6F20E8]/80 backdrop-blur-sm shadow-sm">
+                            {service.category}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-7 flex flex-col flex-1">
+                        <h3 className="text-xl font-bold mb-2 group-hover:text-accent transition-colors">{service.title}</h3>
+                        <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow line-clamp-3">
+                          {service.shortDescription}
+                        </p>
+                        <div className="mt-auto pt-4 border-t border-black/5 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black transition-colors">
+                          <span>Explore Service</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300 text-accent" />
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-2xl font-bold mb-4 pr-12">{service.title}</h3>
-                    <p className="text-gray-600 mb-8 leading-relaxed flex-grow">
-                      {service.shortDescription}
-                    </p>
-                    <div className="mt-auto flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-accent group-hover:text-black transition-colors">
-                      Explore <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
 
         </div>
@@ -378,31 +431,98 @@ export default function Home() {
         </div>
       </section>
 
-      {/* LIGHTBOX */}
-      {lightboxSrc && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightboxSrc(null)}
-        >
-          <button
-            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
-            onClick={() => setLightboxSrc(null)}
-            aria-label="Close lightbox"
-          >
-            <X className="w-7 h-7" />
-          </button>
+      {/* PORTFOLIO LIGHTBOX WITH NEXT/PREV ARROWS */}
+      {lightboxIndex !== null && portfolioItems[lightboxIndex] && (() => {
+        const currentProject = portfolioItems[lightboxIndex];
+        const currentSrc = currentProject.image ? encodeURI(currentProject.image) : "";
+        const prevIndex = (lightboxIndex - 1 + portfolioItems.length) % portfolioItems.length;
+        const nextIndex = (lightboxIndex + 1) % portfolioItems.length;
+
+        return (
           <div
-            className="relative max-w-5xl max-h-[90vh] w-full"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] bg-black/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            onClick={() => setLightboxIndex(null)}
           >
-            <img
-              src={lightboxSrc}
-              alt={lightboxAlt}
-              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
-            />
+            {/* Top Toolbar */}
+            <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 flex items-center justify-between text-white z-30 pointer-events-none">
+              <div className="flex items-center gap-3 pointer-events-auto">
+                {currentProject.category && (
+                  <span className="px-3 py-1 rounded-full bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-wider shadow-md">
+                    {currentProject.category}
+                  </span>
+                )}
+                <span className="text-xs sm:text-sm font-medium text-gray-300">
+                  {lightboxIndex + 1} / {portfolioItems.length}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="pointer-events-auto text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
+                onClick={() => setLightboxIndex(null)}
+                aria-label="Close lightbox"
+                title="Close (Esc)"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Previous Arrow Button */}
+            {portfolioItems.length > 1 && (
+              <button
+                type="button"
+                className="absolute left-3 sm:left-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(prevIndex);
+                }}
+                aria-label="Previous image"
+                title="Previous image (Left Arrow)"
+              >
+                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+
+            {/* Next Arrow Button */}
+            {portfolioItems.length > 1 && (
+              <button
+                type="button"
+                className="absolute right-3 sm:right-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(nextIndex);
+                }}
+                aria-label="Next image"
+                title="Next image (Right Arrow)"
+              >
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+              </button>
+            )}
+
+            {/* Image Container */}
+            <div
+              className="relative max-w-5xl max-h-[82vh] w-full flex flex-col items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={currentSrc}
+                alt={currentProject.title}
+                className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl border border-white/10"
+              />
+              <div className="mt-4 text-center">
+                <h3 className="text-white text-base sm:text-lg font-bold drop-shadow-md">
+                  {currentProject.title}
+                </h3>
+                {currentProject.location && (
+                  <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
+                    {currentProject.location}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </>
   );
 }

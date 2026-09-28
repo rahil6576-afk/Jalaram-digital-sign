@@ -207,17 +207,19 @@ test("Responsive Typography: Key pages scale headings on mobile without cutoffs"
 // ─────────────────────────────────────────────────────────────────────────────
 // SUITE 5: SOCIAL MEDIA COMPLETENESS & HERO SUBHEADER CONTRAST
 // ─────────────────────────────────────────────────────────────────────────────
-test("Social Media: Footer and Contact render Instagram, Facebook, YouTube, and LinkedIn", () => {
+test("Social Media: Footer and Contact render Instagram, Facebook, YouTube, LinkedIn, and Twitter", () => {
   const footerContent = fs.readFileSync(path.join(srcDir, "components", "layout", "Footer.tsx"), "utf-8");
   const contactContent = fs.readFileSync(path.join(srcDir, "app", "contact", "page.tsx"), "utf-8");
   assert.ok(footerContent.includes('"Instagram"'), "Footer must include Instagram");
   assert.ok(footerContent.includes('"Facebook"'), "Footer must include Facebook");
   assert.ok(footerContent.includes('"YouTube"'), "Footer must include YouTube");
   assert.ok(footerContent.includes('"LinkedIn"'), "Footer must include LinkedIn");
+  assert.ok(footerContent.includes('"Twitter"'), "Footer must include Twitter");
   assert.ok(contactContent.includes('"Instagram"'), "Contact must include Instagram");
   assert.ok(contactContent.includes('"Facebook"'), "Contact must include Facebook");
   assert.ok(contactContent.includes('"YouTube"'), "Contact must include YouTube");
   assert.ok(contactContent.includes('"LinkedIn"'), "Contact must include LinkedIn");
+  assert.ok(contactContent.includes('"Twitter"'), "Contact must include Twitter");
 });
 
 test("Hero Subheaders: Photo hero pages use high-contrast backdrop-blur badges or high-contrast pill styling", () => {

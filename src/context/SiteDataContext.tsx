@@ -95,9 +95,18 @@ export function SiteDataProvider({
     };
     window.addEventListener("storage", handleStorageChange);
 
+    // 5. Refetch automatically when user returns/focuses back to the tab
+    const handleFocus = () => {
+      refreshSiteData();
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
     return () => {
       window.removeEventListener("site-content-updated", handleCustomUpdate);
       window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
     };
   }, [refreshSiteData]);
 

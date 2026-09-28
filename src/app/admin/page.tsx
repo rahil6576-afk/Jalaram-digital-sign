@@ -45,6 +45,7 @@ interface Socials {
   facebook: string;
   youtube?: string;
   linkedin?: string;
+  twitter?: string;
 }
 interface Service {
   id: string; slug: string; title: string; shortDescription?: string;
@@ -656,7 +657,7 @@ export default function AdminDashboard() {
       } else if (activeModal.type === "faq") {
         setData((p) => p ? { ...p, faqs: p.faqs.filter((x) => x.id !== activeModal.idOrIndex || x.question.trim() !== "") } : p);
       } else if (activeModal.type === "hero") {
-        setData((p) => p ? { ...p, heroImages: p.heroImages.filter((_, idx) => idx !== activeModal.idOrIndex) } : p);
+        setData((p) => p ? { ...p, heroImages: p.heroImages.filter((img, idx) => idx !== activeModal.idOrIndex || (typeof img === "string" && img.trim() !== "")) } : p);
       }
     }
     setActiveModal(null);
@@ -708,6 +709,7 @@ export default function AdminDashboard() {
           facebook: cleanSocialUrl(payload.socials?.facebook || ""),
           youtube: cleanSocialUrl(payload.socials?.youtube || ""),
           linkedin: cleanSocialUrl(payload.socials?.linkedin || ""),
+          twitter: cleanSocialUrl(payload.socials?.twitter || ""),
         },
         heroImages: (payload.heroImages || []).filter((h) => typeof h === "string" && h.trim() !== ""),
         clients: (payload.clients || []).filter((c) => c.name.trim() !== ""),
@@ -929,15 +931,15 @@ export default function AdminDashboard() {
                     setActiveTab(t.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-left ${
+                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-left select-none cursor-pointer ${
                     isActive
                       ? "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] text-white shadow-md shadow-[#6F20E8]/25 font-bold"
                       : "text-gray-600 hover:text-gray-900 hover:bg-purple-50/60"
                   }`}
                 >
-                  <div className="flex items-center gap-3 truncate">
+                  <div className="flex items-center gap-3 truncate select-none">
                     <Icon className="w-4 h-4 shrink-0" />
-                    <span className="truncate">{t.label}</span>
+                    <span className="truncate select-none">{t.label}</span>
                   </div>
                   {t.id === "inquiries" && inquiriesStats.new > 0 && (
                     <span
@@ -1001,17 +1003,23 @@ export default function AdminDashboard() {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {(["instagram", "facebook", "youtube", "linkedin"] as (keyof Socials)[]).map((key) => (
+                  {(["instagram", "facebook", "youtube", "linkedin", "twitter"] as (keyof Socials)[]).map((key) => (
                     <div key={key}>
                       <label className={labelCls}>
-                        {key === "youtube" ? "YouTube Channel URL" : key === "linkedin" ? "LinkedIn Profile URL" : key.charAt(0).toUpperCase() + key.slice(1) + " URL"}
+                        {key === "youtube"
+                          ? "YouTube Channel URL"
+                          : key === "linkedin"
+                          ? "LinkedIn Profile URL"
+                          : key === "twitter"
+                          ? "Twitter / X Profile URL"
+                          : key.charAt(0).toUpperCase() + key.slice(1) + " URL"}
                       </label>
                       <input
                         type="text"
                         value={data.socials[key] || ""}
                         onChange={(e) => updateSocials(key, e.target.value)}
                         onBlur={() => handleSocialBlur(key)}
-                        placeholder={`https://${key}.com/...`}
+                        placeholder={key === "twitter" ? "https://twitter.com/... or https://x.com/..." : `https://${key}.com/...`}
                         className={field}
                       />
                     </div>
@@ -2998,7 +3006,8 @@ export default function AdminDashboard() {
               };
               setData(updatedData);
               await handleSave(updatedData);
-              closeModal();
+              setActiveModal(null);
+              setModalError(null);
             }}
             saving={saving}
           >
