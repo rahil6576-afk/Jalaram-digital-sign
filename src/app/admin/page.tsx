@@ -240,14 +240,43 @@ function ImageInput({
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
+      
+      let data: { success?: boolean; url?: string; error?: string; dimensions?: { width: number; height: number } } | null = null;
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        const fallbackMsg = res.status === 413
+          ? "File size exceeds server upload limit."
+          : res.status >= 500
+          ? "Server error during upload. Please try again."
+          : `Upload failed (Server status: ${res.status})`;
+        throw new Error(data?.error || fallbackMsg);
+      }
+
+      if (!data?.url) {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
+
       onChange(data.url);
       if (data.dimensions?.width && data.dimensions?.height) {
         setPhotoDims({ w: data.dimensions.width, h: data.dimensions.height });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload failed. Please try again or paste a URL.";
+      let msg = "Upload failed. Please try again or paste a URL.";
+      if (err instanceof Error) {
+        if (err.message.includes("JSON") || err.message.includes("Unexpected end")) {
+          msg = "Upload connection interrupted or timed out. Please try uploading again.";
+        } else if (err.message.includes("fetch") || err.message.includes("network")) {
+          msg = "Network connection error: Unable to reach the server. Please check your connection.";
+        } else {
+          msg = err.message;
+        }
+      }
       setErrorMsg(msg);
     } finally {
       setUploading(false);

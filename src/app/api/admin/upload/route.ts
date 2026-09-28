@@ -37,6 +37,9 @@ export async function GET() {
   }
 }
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 // POST: Upload one or more image files
 export async function POST(request: NextRequest) {
   try {
@@ -110,11 +113,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If Cloudinary credentials are provided, upload directly to Cloudinary
+    // If Cloudinary credentials are provided, upload directly to Cloudinary (with 25s timeout fallback)
     const { isCloudinaryConfigured, uploadToCloudinary } = await import("@/lib/cloudinary");
     if (isCloudinaryConfigured()) {
       try {
-        const cloudResult = await uploadToCloudinary(buffer, "jalaram", file.name);
+        const uploadPromise = uploadToCloudinary(buffer, "jalaram", file.name);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Cloudinary upload timed out")), 25000)
+        );
+        const cloudResult = await Promise.race([uploadPromise, timeoutPromise]);
+
         return NextResponse.json({
           success: true,
           url: cloudResult.secure_url,
@@ -124,11 +132,15 @@ export async function POST(request: NextRequest) {
           provider: "cloudinary",
         });
       } catch (cloudErr) {
-        console.error("Cloudinary upload failed, falling back to local:", cloudErr);
+        console.error("Cloudinary upload failed or timed out, falling back to local:", cloudErr);
       }
     }
 
-    // Local fallback when Cloudinary is not yet configured or on network fallback
+    // Local fallback when Cloudinary is not yet configured, timed out, or had network error
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    }
+
     const sanitizedOriginalName = file.name
       .toLowerCase()
       .replace(/[^a-z0-9.]/g, "-")
@@ -151,6 +163,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error saving uploaded file:", error);
-    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+    const msg = error instanceof Error ? error.message : "Failed to upload file";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
