@@ -12,6 +12,9 @@ export default function PortfolioPage() {
   const siteData = useSiteData();
   const [filter, setFilter] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState<number>(0);
+  const [cardPhotoIndices, setCardPhotoIndices] = useState<Record<string, number>>({});
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const portfolioList = siteData?.portfolio || [];
   const categories = ["All", ...Array.from(new Set(portfolioList.map((p) => p.category)))];
@@ -20,21 +23,43 @@ export default function PortfolioPage() {
     ? portfolioList
     : portfolioList.filter(p => p.category === filter);
 
+  // Helper to get all photos of a site/project
+  const getSitePhotos = (project: (typeof portfolioList)[number]): string[] => {
+    const list = [
+      ...(project.image ? [project.image] : []),
+      ...(Array.isArray(project.images) ? project.images : []),
+    ];
+    return Array.from(new Set(list.filter(Boolean)));
+  };
+
+  const currentProject = lightboxIndex !== null ? filteredProjects[lightboxIndex] : null;
+  const currentSitePhotos = currentProject ? getSitePhotos(currentProject) : [];
+
   // Keyboard navigation for lightbox
   useEffect(() => {
     if (lightboxIndex === null) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxIndex(null);
       if (e.key === "ArrowLeft") {
-        setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + filteredProjects.length) % filteredProjects.length));
+        if (currentSitePhotos.length > 1) {
+          setLightboxPhotoIndex((prev) => (prev - 1 + currentSitePhotos.length) % currentSitePhotos.length);
+        } else {
+          setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + filteredProjects.length) % filteredProjects.length));
+          setLightboxPhotoIndex(0);
+        }
       }
       if (e.key === "ArrowRight") {
-        setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % filteredProjects.length));
+        if (currentSitePhotos.length > 1) {
+          setLightboxPhotoIndex((prev) => (prev + 1) % currentSitePhotos.length);
+        } else {
+          setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % filteredProjects.length));
+          setLightboxPhotoIndex(0);
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lightboxIndex, filteredProjects.length]);
+  }, [lightboxIndex, currentSitePhotos.length, filteredProjects.length]);
 
   return (
     <>
@@ -78,41 +103,117 @@ export default function PortfolioPage() {
             ))}
           </div>
 
-          {/* Grid — images open lightbox with arrow navigation */}
+          {/* Grid — images with multiple photo sliding controls */}
           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence>
-              {filteredProjects.map((project, idx) => (
-                <motion.div
-                  key={project.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                >
-                  <div
-                    className="block relative overflow-hidden aspect-[4/3] bg-card-bg rounded-sm cursor-pointer"
-                    onClick={() => setLightboxIndex(idx)}
+              {filteredProjects.map((project, idx) => {
+                const photos = getSitePhotos(project);
+                const activePhotoIdx = (cardPhotoIndices[project.id] ?? 0) % Math.max(photos.length, 1);
+                const currentImg = photos[activePhotoIdx] || project.image || "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
+
+                return (
+                  <motion.div
+                    key={project.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
-                    <div className="absolute bottom-0 left-0 p-8 w-full">
-                      <span className="inline-block px-2.5 py-0.5 bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-widest mb-3 rounded-full">
-                        {project.category}
-                      </span>
-                      <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{project.title}</h3>
-                      <div className="mt-4">
-                        <span className="text-sm text-gray-300 font-medium">{project.location}</span>
+                    <div
+                      className="group block relative overflow-hidden aspect-[4/3] bg-card-bg rounded-2xl border border-black/8 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300"
+                      onClick={() => {
+                        setLightboxIndex(idx);
+                        setLightboxPhotoIndex(activePhotoIdx);
+                      }}
+                    >
+                      <Image
+                        src={encodeURI(currentImg)}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85" />
+
+                      {/* Top Badges: Category & Photo Slide Counter */}
+                      <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
+                        <span className="inline-block px-3 py-1 bg-[#6F20E8] text-white text-[11px] font-bold uppercase tracking-wider rounded-full shadow-md">
+                          {project.category}
+                        </span>
+                        {photos.length > 1 && (
+                          <span className="px-2.5 py-1 bg-black/65 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold rounded-full shadow-sm">
+                            📸 {activePhotoIdx + 1}/{photos.length}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Slide Arrows on Card (if multiple site photos) */}
+                      {photos.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCardPhotoIndices((prev) => ({
+                                ...prev,
+                                [project.id]: (activePhotoIdx - 1 + photos.length) % photos.length,
+                              }));
+                            }}
+                            aria-label="Previous site photo"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/60 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all opacity-85 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCardPhotoIndices((prev) => ({
+                                ...prev,
+                                [project.id]: (activePhotoIdx + 1) % photos.length,
+                              }));
+                            }}
+                            aria-label="Next site photo"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Card Content & Slide Dots */}
+                      <div className="absolute bottom-0 left-0 p-6 sm:p-7 w-full z-10">
+                        {photos.length > 1 && (
+                          <div className="flex items-center gap-1.5 mb-2.5">
+                            {photos.map((_, pIdx) => (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCardPhotoIndices((prev) => ({ ...prev, [project.id]: pIdx }));
+                                }}
+                                className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                                  pIdx === activePhotoIdx ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                                }`}
+                                aria-label={`Slide to photo ${pIdx + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                        <h3 className="text-xl sm:text-2xl font-bold text-white mb-1.5 drop-shadow-md leading-snug">
+                          {project.title}
+                        </h3>
+                        {project.location && (
+                          <span className="text-xs sm:text-sm text-gray-300 font-medium drop-shadow-sm">
+                            {project.location}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </motion.div>
         </div>
@@ -150,94 +251,200 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      {/* PORTFOLIO LIGHTBOX WITH NEXT/PREV ARROWS */}
+      {/* PORTFOLIO LIGHTBOX: SLIDE THROUGH MULTIPLE PHOTOS OF A SITE */}
       {lightboxIndex !== null && filteredProjects[lightboxIndex] && (() => {
-        const currentProject = filteredProjects[lightboxIndex];
-        const currentSrc = currentProject.image ? encodeURI(currentProject.image) : "";
-        const prevIndex = (lightboxIndex - 1 + filteredProjects.length) % filteredProjects.length;
-        const nextIndex = (lightboxIndex + 1) % filteredProjects.length;
+        const project = filteredProjects[lightboxIndex];
+        const sitePhotos = getSitePhotos(project);
+        const safePhotoIdx = sitePhotos.length > 0 ? lightboxPhotoIndex % sitePhotos.length : 0;
+        const currentPhotoSrc = sitePhotos[safePhotoIdx] ? encodeURI(sitePhotos[safePhotoIdx]) : "";
+        const prevPhotoIdx = (safePhotoIdx - 1 + sitePhotos.length) % sitePhotos.length;
+        const nextPhotoIdx = (safePhotoIdx + 1) % sitePhotos.length;
+
+        const prevProjectIdx = (lightboxIndex - 1 + filteredProjects.length) % filteredProjects.length;
+        const nextProjectIdx = (lightboxIndex + 1) % filteredProjects.length;
+
+        const handleTouchStart = (e: React.TouchEvent) => {
+          setTouchStartX(e.touches[0].clientX);
+        };
+
+        const handleTouchEnd = (e: React.TouchEvent) => {
+          if (touchStartX === null) return;
+          const diff = touchStartX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 40) {
+            if (diff > 0) {
+              // Swipe Left -> Next photo
+              setLightboxPhotoIndex(nextPhotoIdx);
+            } else {
+              // Swipe Right -> Prev photo
+              setLightboxPhotoIndex(prevPhotoIdx);
+            }
+          }
+          setTouchStartX(null);
+        };
 
         return (
           <div
-            className="fixed inset-0 z-[9999] bg-black/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex flex-col items-center justify-between p-3 sm:p-6"
             onClick={() => setLightboxIndex(null)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             {/* Top Toolbar */}
-            <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 flex items-center justify-between text-white z-30 pointer-events-none">
-              <div className="flex items-center gap-3 pointer-events-auto">
-                {currentProject.category && (
+            <div className="w-full max-w-6xl flex items-center justify-between text-white z-30 pointer-events-none mb-2">
+              <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+                {project.category && (
                   <span className="px-3 py-1 rounded-full bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-wider shadow-md">
-                    {currentProject.category}
+                    {project.category}
                   </span>
                 )}
-                <span className="text-xs sm:text-sm font-medium text-gray-300">
-                  {lightboxIndex + 1} / {filteredProjects.length}
-                </span>
+                {sitePhotos.length > 1 && (
+                  <span className="text-xs sm:text-sm font-semibold text-purple-200 bg-white/10 px-3 py-1 rounded-full border border-white/15">
+                    Photo {safePhotoIdx + 1} of {sitePhotos.length}
+                  </span>
+                )}
+                {filteredProjects.length > 1 && (
+                  <span className="text-xs text-gray-400 hidden md:inline-block">
+                    • Site {lightboxIndex + 1} of {filteredProjects.length}
+                  </span>
+                )}
               </div>
-              <button
-                type="button"
-                className="pointer-events-auto text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
-                onClick={() => setLightboxIndex(null)}
-                aria-label="Close lightbox"
-                title="Close (Esc)"
-              >
-                <X className="w-6 h-6" />
-              </button>
+
+              <div className="flex items-center gap-2 pointer-events-auto">
+                {filteredProjects.length > 1 && (
+                  <div className="flex items-center gap-1 bg-white/10 rounded-full px-2 py-1 border border-white/15">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(prevProjectIdx);
+                        setLightboxPhotoIndex(0);
+                      }}
+                      className="text-xs text-gray-300 hover:text-white px-2 py-0.5 rounded-full hover:bg-white/10 font-medium transition-colors"
+                      title="Previous site"
+                    >
+                      ‹ Prev Site
+                    </button>
+                    <span className="text-gray-500">|</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(nextProjectIdx);
+                        setLightboxPhotoIndex(0);
+                      }}
+                      className="text-xs text-gray-300 hover:text-white px-2 py-0.5 rounded-full hover:bg-white/10 font-medium transition-colors"
+                      title="Next site"
+                    >
+                      Next Site ›
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
+                  onClick={() => setLightboxIndex(null)}
+                  aria-label="Close lightbox"
+                  title="Close (Esc)"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            {/* Previous Arrow Button */}
-            {filteredProjects.length > 1 && (
-              <button
-                type="button"
-                className="absolute left-3 sm:left-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(prevIndex);
-                }}
-                aria-label="Previous image"
-                title="Previous image (Left Arrow)"
-              >
-                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
-              </button>
-            )}
-
-            {/* Next Arrow Button */}
-            {filteredProjects.length > 1 && (
-              <button
-                type="button"
-                className="absolute right-3 sm:right-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(nextIndex);
-                }}
-                aria-label="Next image"
-                title="Next image (Right Arrow)"
-              >
-                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
-              </button>
-            )}
-
-            {/* Image Container - Expanded for maximum visibility */}
+            {/* Main Stage: Sliding photo display */}
             <div
-              className="relative max-w-[94vw] max-h-[90vh] w-full flex flex-col items-center justify-center my-auto"
+              className="relative w-full max-w-6xl flex-1 flex items-center justify-center min-h-0"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentSrc}
-                alt={currentProject.title}
-                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl border border-white/15 mx-auto"
-              />
-              <div className="mt-3 text-center px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+              {/* Previous Slide Arrow */}
+              {sitePhotos.length > 1 && (
+                <button
+                  type="button"
+                  className="absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-30 text-white bg-black/70 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/25 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxPhotoIndex(prevPhotoIdx);
+                  }}
+                  aria-label="Previous slide"
+                  title="Slide to Previous Photo (Left Arrow)"
+                >
+                  <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+                </button>
+              )}
+
+              {/* Next Slide Arrow */}
+              {sitePhotos.length > 1 && (
+                <button
+                  type="button"
+                  className="absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-30 text-white bg-black/70 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/25 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxPhotoIndex(nextPhotoIdx);
+                  }}
+                  aria-label="Next slide"
+                  title="Slide to Next Photo (Right Arrow)"
+                >
+                  <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+                </button>
+              )}
+
+              {/* Center Image Container */}
+              <div className="relative max-h-[72vh] sm:max-h-[75vh] max-w-full flex items-center justify-center p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={currentPhotoSrc}
+                  src={currentPhotoSrc}
+                  alt={`${project.title} - photo ${safePhotoIdx + 1}`}
+                  className="max-h-[70vh] sm:max-h-[74vh] max-w-[88vw] object-contain rounded-2xl border border-white/15 shadow-2xl transition-all duration-300 select-none animate-fadeIn"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Section: Site Title & Sliding Thumbnail Strip */}
+            <div
+              className="w-full max-w-6xl mt-2 flex flex-col items-center gap-2 pointer-events-auto z-30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Site Title Pill */}
+              <div className="text-center px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
                 <h3 className="text-white text-sm sm:text-base font-bold drop-shadow-md">
-                  {currentProject.title}
+                  {project.title}
                 </h3>
-                {currentProject.location && (
+                {project.location && (
                   <span className="text-gray-300 text-xs sm:text-sm font-medium">
-                    • {currentProject.location}
+                    • {project.location}
                   </span>
                 )}
               </div>
+
+              {/* Thumbnail Strip: Slide through photos of the site */}
+              {sitePhotos.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1.5 px-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 no-scrollbar">
+                  {sitePhotos.map((thumbUrl, pIndex) => (
+                    <button
+                      key={pIndex}
+                      type="button"
+                      onClick={() => setLightboxPhotoIndex(pIndex)}
+                      className={`relative w-14 h-11 sm:w-16 sm:h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                        pIndex === safePhotoIdx
+                          ? "border-[#6F20E8] scale-105 shadow-md shadow-[#6F20E8]/50 ring-2 ring-purple-400"
+                          : "border-white/20 opacity-60 hover:opacity-100 hover:border-white/60"
+                      }`}
+                      title={`Slide to photo ${pIndex + 1}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={encodeURI(thumbUrl)}
+                        alt={`Thumbnail ${pIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute bottom-0 right-0 bg-black/80 text-[9px] text-white font-bold px-1 rounded-tl">
+                        {pIndex + 1}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );

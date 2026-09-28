@@ -1,243 +1,501 @@
 {
-  "business": {
-    "name": "Jalaram Digital Sign",
-    "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat.",
-    "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
-    "phone": "+91 85111 33363",
-    "whatsapp": "918511133363",
-    "email": "info@jalaramdigitalsign.com",
-    "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
-    "hours": "Mon - Sat: 9:00 AM - 8:00 PM"
-  },
-  "socials": {
-    "instagram": "https://www.instagram.com/jalaram_digital_signs",
-    "facebook": "https://www.facebook.com/jalaramdigitalsign",
-    "youtube": "https://www.youtube.com/@jalaramdigitalsign",
-    "linkedin": "https://www.linkedin.com/company/jalaram-digital-sign",
-    "twitter": "https://twitter.com/jalaramdigital"
-  },
+  "faqs": [
+    {
+      "id": "1",
+      "answer": "We print a wide variety of banners including standard flex banners, star flex, backlit banners, and fabric banners suitable for both indoor and outdoor use.",
+      "question": "What types of banners do you print?"
+    },
+    {
+      "id": "2",
+      "answer": "Yes, our large-format printing capabilities allow us to print banners and signage in virtually any custom size to fit your specific requirements.",
+      "question": "Can you print custom sizes?"
+    },
+    {
+      "id": "3",
+      "answer": "Yes, we offer professional installation services for signage, large banners, and vehicle branding across Gandhinagar and surrounding areas.",
+      "question": "Do you provide installation services?"
+    },
+    {
+      "id": "4",
+      "answer": "Standard orders are typically completed within 24-48 hours. Complex signage or large bulk orders may require more time, which we will discuss during the quotation phase.",
+      "question": "How quickly can an order be completed?"
+    }
+  ],
+  "team": [
+    {
+      "id": "1",
+      "bio": "Leading the vision and operations with over 15 years in print media.",
+      "name": "Rahul Patel",
+      "role": "Founder / Owner",
+      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+      "sortOrder": 1,
+      "socialLinks": {}
+    },
+    {
+      "id": "2",
+      "bio": "Turning ideas into high-impact visuals ready for large-format production.",
+      "name": "Priya Sharma",
+      "role": "Creative Designer",
+      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
+      "sortOrder": 2,
+      "socialLinks": {}
+    },
+    {
+      "id": "3",
+      "bio": "Overseeing the technical precision of our state-of-the-art printers.",
+      "name": "Amit Desai",
+      "role": "Production Specialist",
+      "image": "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?q=80&w=1974&auto=format&fit=crop",
+      "sortOrder": 3,
+      "socialLinks": {}
+    }
+  ],
   "clients": [
     {
       "id": "client-1",
-      "name": "BJP",
       "tag": "Government & Civic Campaigns",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397706/jalaram/jalaram_client-bjp_1790397706955.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397706/jalaram/jalaram_client-bjp_1790397706955.webp",
+      "name": "BJP"
     },
     {
       "id": "client-2",
-      "name": "NFSU College",
       "tag": "National Forensic Sciences University",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397707/jalaram/jalaram_client-nsfu_1790397708478.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397707/jalaram/jalaram_client-nsfu_1790397708478.webp",
+      "name": "NFSU College"
     },
     {
       "id": "client-3",
-      "name": "Jay Gotli Mukhwas",
       "tag": "Food & FMCG Brand",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mukhwas_1790397709166.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mukhwas_1790397709166.webp",
+      "name": "Jay Gotli Mukhwas"
     },
     {
       "id": "client-4",
-      "name": "Mount Carmel School",
       "tag": "Educational Institution",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mount-carmel_1790397709976.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397708/jalaram/jalaram_client-mount-carmel_1790397709976.webp",
+      "name": "Mount Carmel School"
     },
     {
       "id": "client-5",
-      "name": "Xavier School",
       "tag": "Academic Institution",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397709/jalaram/jalaram_client-st-xavier_1790397710778.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397709/jalaram/jalaram_client-st-xavier_1790397710778.webp",
+      "name": "Xavier School"
     },
     {
       "id": "client-sag",
-      "name": "Sports Authority of Gujarat",
       "tag": "Government of Gujarat",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-sports-authority-gujarat_1790397711410.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-sports-authority-gujarat_1790397711410.webp",
+      "name": "Sports Authority of Gujarat"
     },
     {
       "id": "client-advance-hospital",
-      "name": "Advance Hospital",
       "tag": "Healthcare & Multispeciality",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-advance-hospital_1790397711967.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397710/jalaram/jalaram_client-advance-hospital_1790397711967.webp",
+      "name": "Advance Hospital"
     },
     {
       "id": "client-indian-army",
-      "name": "Indian Army (Bharatiya Sena)",
       "tag": "Ministry of Defence",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bharatiya-sena_1790397712522.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bharatiya-sena_1790397712522.webp",
+      "name": "Indian Army (Bharatiya Sena)"
     },
     {
       "id": "client-bsf",
-      "name": "Border Security Force (BSF)",
       "tag": "Ministry of Home Affairs",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bsf_1790397713065.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397711/jalaram/jalaram_client-bsf_1790397713065.webp",
+      "name": "Border Security Force (BSF)"
     },
     {
       "id": "client-dholera-sir",
-      "name": "Dholera SIR",
       "tag": "Special Investment Region",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-dholera-sir_1790397713617.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-dholera-sir_1790397713617.webp",
+      "name": "Dholera SIR"
     },
     {
       "id": "client-geer-foundation",
-      "name": "GEER Foundation",
       "tag": "Forest & Environment Dept., Gujarat",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-geer-foundation_1790397714121.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397712/jalaram/jalaram_client-geer-foundation_1790397714121.webp",
+      "name": "GEER Foundation"
     },
     {
       "id": "client-gspc",
-      "name": "Gujarat State Petroleum Corp. (GSPC)",
       "tag": "Energy & Gas Infrastructure",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-gspc_1790397714723.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-gspc_1790397714723.webp",
+      "name": "Gujarat State Petroleum Corp. (GSPC)"
     },
     {
       "id": "client-the-leela",
-      "name": "The Leela Gandhinagar",
       "tag": "Luxury Hospitality & Hotels",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-the-leela_1790397715255.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397713/jalaram/jalaram_client-the-leela_1790397715255.webp",
+      "name": "The Leela Gandhinagar"
     },
     {
       "id": "client-jaliyan-jewellers",
-      "name": "Jaliyan Jewellers",
       "tag": "Fine Jewellery & Gold",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397714/jalaram/jalaram_client-jaliyan-jewellers_1790397715789.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397714/jalaram/jalaram_client-jaliyan-jewellers_1790397715789.webp",
+      "name": "Jaliyan Jewellers"
     },
     {
       "id": "client-gujarat-police",
-      "name": "Gujarat Police",
       "tag": "Law Enforcement & Public Safety",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-gujarat-police_1790397716761.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-gujarat-police_1790397716761.webp",
+      "name": "Gujarat Police"
     },
     {
       "id": "client-raksha-shakti",
-      "name": "Rashtriya Raksha University",
       "tag": "National Security & Police University",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-raksha-shakti_1790397717304.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397715/jalaram/jalaram_client-raksha-shakti_1790397717304.webp",
+      "name": "Rashtriya Raksha University"
     },
     {
       "id": "client-rivera",
-      "name": "Rivera",
       "tag": "Real Estate & Infrastructure",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397716/jalaram/jalaram_client-rivera_1790397717852.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397716/jalaram/jalaram_client-rivera_1790397717852.webp",
+      "name": "Rivera"
     },
     {
       "id": "client-sai",
-      "name": "Sports Authority of India (SAI)",
       "tag": "Ministry of Youth Affairs & Sports",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sai_1790397718455.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sai_1790397718455.webp",
+      "name": "Sports Authority of India (SAI)"
     },
     {
       "id": "client-sbi",
-      "name": "State Bank of India (SBI)",
       "tag": "Premier Banking & Financial Institution",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sbi_1790397719376.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397717/jalaram/jalaram_client-sbi_1790397719376.webp",
+      "name": "State Bank of India (SBI)"
     },
     {
       "id": "client-tata-aia",
-      "name": "Tata AIA Life Insurance",
       "tag": "Life Insurance & Wealth Solutions",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397718/jalaram/jalaram_client-tata-aia_1790397719911.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397718/jalaram/jalaram_client-tata-aia_1790397719911.webp",
+      "name": "Tata AIA Life Insurance"
     },
     {
       "id": "client-indian-air-force",
-      "name": "Indian Air Force (Bharatiya Vayu Sena)",
       "tag": "Armed Forces of India",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-indian-air-force_1790397720577.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-indian-air-force_1790397720577.webp",
+      "name": "Indian Air Force (Bharatiya Vayu Sena)"
     },
     {
       "id": "client-ugvcl",
-      "name": "UGVCL (Uttar Gujarat Vij Company)",
       "tag": "Power Distribution Utility",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-ugvcl_1790397721245.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397719/jalaram/jalaram_client-ugvcl_1790397721245.webp",
+      "name": "UGVCL (Uttar Gujarat Vij Company)"
     },
     {
       "id": "client-chandra",
-      "name": "Chandra",
       "tag": "Premium Consumer Brand",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790399711/jalaram/jalaram_client-chandra_clean_1790399713252.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790399711/jalaram/jalaram_client-chandra_clean_1790399713252.webp",
+      "name": "Chandra"
     },
     {
       "id": "client-kabir-world",
-      "name": "Kabir World",
       "tag": "A Venture of Kabir Technologies",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790399711/jalaram/jalaram_client-kabir-world_clean_1790399711742.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790399711/jalaram/jalaram_client-kabir-world_clean_1790399711742.webp",
+      "name": "Kabir World"
     },
     {
       "id": "client-jayantilal-chikkiwala",
-      "name": "Jayantilal Chikkiwala",
       "tag": "Traditional Confectionery & Sweets",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397721/jalaram/jalaram_client-jayantilal-chikkiwala_1790397722946.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397721/jalaram/jalaram_client-jayantilal-chikkiwala_1790397722946.webp",
+      "name": "Jayantilal Chikkiwala"
     },
     {
       "id": "client-safal-icon",
-      "name": "Safal Icon",
       "tag": "Commercial Real Estate & Spaces",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397722/jalaram/jalaram_client-safal-icon_1790397723462.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397722/jalaram/jalaram_client-safal-icon_1790397723462.webp",
+      "name": "Safal Icon"
     },
     {
       "id": "client-span-infrastructure",
-      "name": "Span Infrastructure",
       "tag": "Infrastructure & Commercial Builders",
-      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397723/jalaram/jalaram_client-span-infrastructure_1790397724170.webp"
+      "logo": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790397723/jalaram/jalaram_client-span-infrastructure_1790397724170.webp",
+      "name": "Span Infrastructure"
     }
   ],
+  "socials": {
+    "instagram": "https://www.instagram.com/jalaram_digital_signs",
+    "facebook": "https://www.facebook.com/jalaramdigitalsign",
+    "youtube": "",
+    "linkedin": "",
+    "twitter": ""
+  },
+  "business": {
+    "name": "Jalaram Digital Sign",
+    "email": "info@jalaramdigitalsign.com",
+    "hours": "Mon - Sat: 9:00 AM - 8:00 PM",
+    "phone": "+91 85111 33363",
+    "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
+    "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
+    "whatsapp": "918511133363",
+    "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat."
+  },
   "homePage": {
+    "aboutText": "From massive highway hoardings to precision acrylic lettering, we have been transforming brands into bold, visible identities across Gandhinagar and Gujarat for over 15 years.",
+    "whyUsItems": [
+      {
+        "desc": "Trusted by hundreds of businesses across Gujarat since our founding.",
+        "title": "15+ Years Experience"
+      },
+      {
+        "desc": "Large-format printers and precision LED fabrication tools.",
+        "title": "State-of-the-Art Equipment"
+      },
+      {
+        "desc": "Most orders ready in 24–48 hours with professional installation.",
+        "title": "Fast Turnaround"
+      }
+    ],
+    "ctaHeadline": "Ready to Make Your Brand Impossible to Miss?",
+    "ctaSubtitle": "Contact us today for a free quote and consultation.",
     "heroTagline": "Digital Printing • Signage • Visual Branding",
     "heroHeadline": "WE PRINT IDEAS THAT GET NOTICED.",
     "heroSubtitle": "Gandhinagar's trusted partner for large-format printing, LED signage, banners, and complete visual branding solutions.",
-    "aboutHeadline": "About Jalaram Digital Sign",
-    "aboutText": "From massive highway hoardings to precision acrylic lettering, we have been transforming brands into bold, visible identities across Gandhinagar and Gujarat for over 15 years.",
-    "ctaHeadline": "Ready to Make Your Brand Impossible to Miss?",
-    "ctaSubtitle": "Contact us today for a free quote and consultation.",
-    "whyUsItems": [
-      {
-        "title": "15+ Years Experience",
-        "desc": "Trusted by hundreds of businesses across Gujarat since our founding."
-      },
-      {
-        "title": "State-of-the-Art Equipment",
-        "desc": "Large-format printers and precision LED fabrication tools."
-      },
-      {
-        "title": "Fast Turnaround",
-        "desc": "Most orders ready in 24–48 hours with professional installation."
-      }
-    ]
+    "aboutHeadline": "About Jalaram Digital Sign"
   },
+  "services": [
+    {
+      "id": "1",
+      "slug": "digital-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340347/jalaram/jalaram_digital-printing_1790340347919.webp",
+      "title": "Digital Printing",
+      "category": "Printing",
+      "featured": true,
+      "features": [
+        "Fast Turnaround",
+        "High Resolution",
+        "Custom Sizes",
+        "Vibrant Colors"
+      ],
+      "sortOrder": 1,
+      "description": "Our high-speed digital printing services offer crisp, vibrant results for brochures, flyers, business cards, and promotional materials. Perfect for short runs and fast turnaround times.",
+      "shortDescription": "High-resolution digital prints for everyday promotional needs."
+    },
+    {
+      "id": "2",
+      "slug": "flex-banner-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
+      "title": "Flex & Banner Printing",
+      "category": "Large Format",
+      "featured": true,
+      "features": [
+        "Weather Resistant",
+        "Any Size",
+        "Grommets & Finishing",
+        "High Visibility"
+      ],
+      "sortOrder": 2,
+      "description": "Make your message impossible to miss. We produce bold, high-resolution banners built for storefronts, promotions, events, and outdoor visibility.",
+      "shortDescription": "Durable, high-impact banners for outdoor and indoor visibility."
+    },
+    {
+      "id": "3",
+      "slug": "led-illuminated-signage",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
+      "title": "LED & Illuminated Signage",
+      "category": "Signage",
+      "featured": true,
+      "features": [
+        "Energy Efficient",
+        "High Brightness",
+        "Custom Designs",
+        "Durable Build"
+      ],
+      "sortOrder": 3,
+      "description": "Premium LED signage designed to make your business visible 24/7. From backlit boards to 3D glowing letters, we build signs that demand attention.",
+      "shortDescription": "Stand out day and night with custom illuminated signs."
+    },
+    {
+      "id": "4",
+      "slug": "vinyl-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
+      "title": "Vinyl Printing",
+      "category": "Printing",
+      "featured": false,
+      "features": [
+        "Indoor & Outdoor",
+        "Precision Cut",
+        "Matte & Gloss Options",
+        "Easy Removal"
+      ],
+      "sortOrder": 4,
+      "description": "Custom vinyl prints for a variety of applications including window decals, wall graphics, and vehicle branding. Precision cut and professionally installed.",
+      "shortDescription": "Versatile vinyl graphics for windows, walls, and vehicles."
+    }
+  ],
   "aboutPage": {
     "heroImage": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
+    "storyImage": "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?q=80&w=2070&auto=format&fit=crop",
+    "ctaHeadline": "Ready to work with us?",
     "heroTagline": "Our Journey • Visual Branding Specialists",
     "heroHeadline": "OUR STORY.",
     "heroSubtitle": "We are a team of visual branding specialists, dedicated to helping businesses in Gandhinagar and beyond make a lasting impression.",
-    "storyHeadline": "We believe that visibility is everything.",
-    "storyImage": "https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?q=80&w=2070&auto=format&fit=crop",
-    "storyParagraph1": "At Jalaram Digital Sign, we don't just print banners or manufacture signs. We build the visual components that allow your brand to be seen, recognized, and trusted in the real world.",
-    "storyParagraph2": "Founded on the principles of precision and quality, our facility in Sector 11, Gandhinagar is equipped to handle everything from intricate acrylic 3D letters to massive outdoor flex installations.",
-    "storyParagraph3": "We understand that when you invest in physical branding, you are investing in your business's reputation. That's why we approach every project—no matter the size—with the same level of craftsmanship and attention to detail.",
-    "qualityHeadline": "Quality & Craftsmanship",
-    "qualitySubtitle": "We combine modern printing technology with hands-on fabrication expertise to deliver outstanding results.",
     "qualityPoints": [
       {
-        "title": "State-of-the-art Printing",
-        "desc": "High-resolution large format printers ensuring vibrant colors and sharp details on any material."
+        "desc": "High-resolution large format printers ensuring vibrant colors and sharp details on any material.",
+        "title": "State-of-the-art Printing"
       },
       {
-        "title": "Premium Materials",
-        "desc": "We source high-grade vinyl, acrylic, and flex materials to ensure your signage withstands the elements."
+        "desc": "We source high-grade vinyl, acrylic, and flex materials to ensure your signage withstands the elements.",
+        "title": "Premium Materials"
       },
       {
-        "title": "Expert Installation",
-        "desc": "Our job doesn't end at the printer. We offer professional, secure installation for all our signage products."
+        "desc": "Our job doesn't end at the printer. We offer professional, secure installation for all our signage products.",
+        "title": "Expert Installation"
       }
     ],
-    "ctaHeadline": "Ready to work with us?"
+    "storyHeadline": "We believe that visibility is everything.",
+    "qualityHeadline": "Quality & Craftsmanship",
+    "qualitySubtitle": "We combine modern printing technology with hands-on fabrication expertise to deliver outstanding results.",
+    "storyParagraph1": "At Jalaram Digital Sign, we don't just print banners or manufacture signs. We build the visual components that allow your brand to be seen, recognized, and trusted in the real world.",
+    "storyParagraph2": "Founded on the principles of precision and quality, our facility in Sector 11, Gandhinagar is equipped to handle everything from intricate acrylic 3D letters to massive outdoor flex installations.",
+    "storyParagraph3": "We understand that when you invest in physical branding, you are investing in your business's reputation. That's why we approach every project—no matter the size—with the same level of craftsmanship and attention to detail."
   },
-  "contactPage": {
-    "heroImage": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
-    "heroTagline": "Contact Us • Fast Quotes & Consultation",
-    "heroHeadline": "LET'S MAKE YOUR BRAND IMPOSSIBLE TO MISS.",
-    "heroSubtitle": "Tell us what you need printed, branded or installed. Our team will help you find the right solution.",
-    "mapImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop"
-  },
+  "portfolio": [
+    {
+      "id": "1",
+      "slug": "hoardings",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp",
+      "title": "Highway & Urban Hoardings",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp"
+      ],
+      "category": "Hoardings",
+      "featured": true,
+      "location": "Gandhinagar - SG Highway",
+      "sortOrder": 1,
+      "description": "Massive roadside billboards and high-impact structural hoardings designed for maximum brand exposure across Gandhinagar and major highway corridors."
+    },
+    {
+      "id": "2",
+      "slug": "flex-banner",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
+      "title": "High-Resolution Flex Banners",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp"
+      ],
+      "category": "Flex Banner",
+      "featured": true,
+      "location": "Gandhinagar",
+      "sortOrder": 2,
+      "description": "Vibrant, weather-resistant flex and star flex banners with reinforced grommets for storefront promotions, grand openings, and large-scale public events."
+    },
+    {
+      "id": "3",
+      "slug": "vinyl-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
+      "title": "Commercial Vinyl Printing",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp"
+      ],
+      "category": "Vinyl Printing",
+      "featured": true,
+      "location": "Ahmedabad",
+      "sortOrder": 3,
+      "description": "Precision-cut, high-grade self-adhesive vinyl for storefront branding, corporate wall murals, floor graphics, and commercial vehicle fleet wraps."
+    },
+    {
+      "id": "4",
+      "slug": "radium-work",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp",
+      "title": "Radium & Reflective Work",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp"
+      ],
+      "category": "Raduim Work",
+      "featured": true,
+      "location": "Gandhinagar",
+      "sortOrder": 4,
+      "description": "High-intensity radium and micro-prismatic retro-reflective sheet cutting for glow-in-the-dark night visibility, safety boards, and traffic signage."
+    },
+    {
+      "id": "5",
+      "slug": "uv-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
+      "title": "Flatbed UV Printing",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp"
+      ],
+      "category": "UV Printing",
+      "featured": true,
+      "location": "Ahmedabad",
+      "sortOrder": 5,
+      "description": "Direct-to-substrate UV printing on acrylic, wood, glass, ACP, and sunboard delivering ultra-sharp resolution, vivid color depth, and scratch-resistant durability."
+    },
+    {
+      "id": "6",
+      "slug": "1way-vision-print",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp",
+      "title": "1-Way Vision Glass Graphics",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp"
+      ],
+      "category": "1Way Vision Print",
+      "featured": true,
+      "location": "Gandhinagar",
+      "sortOrder": 6,
+      "description": "Perforated window film graphics offering full-color exterior branding and privacy while maintaining crystal-clear outward visibility from indoors."
+    },
+    {
+      "id": "7",
+      "slug": "acrylic-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp",
+      "title": "3D Laser-Cut Acrylic Boards",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp"
+      ],
+      "category": "Acrylic Board",
+      "featured": true,
+      "location": "Gandhinagar",
+      "sortOrder": 7,
+      "description": "Custom laser-cut acrylic letters, embossed 3D logo plaques, clear reception backdrops, and premium polished corporate identity boards."
+    },
+    {
+      "id": "8",
+      "slug": "glow-sign-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp",
+      "title": "Illuminated Glow Sign Boards",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp"
+      ],
+      "category": "Glow Sign",
+      "featured": true,
+      "location": "Gandhinagar",
+      "sortOrder": 8,
+      "description": "Backlit aluminum-cased glow sign boxes with high-lumen internal LED lighting and weather-proof flex faces for 24/7 retail and corporate recognition."
+    },
+    {
+      "id": "9",
+      "slug": "led-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
+      "title": "LED Display & Channel Boards",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp"
+      ],
+      "category": "Board LED Board",
+      "featured": true,
+      "location": "Ahmedabad",
+      "sortOrder": 9,
+      "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence."
+    },
+    {
+      "id": "htxbp6a6",
+      "slug": "project-zeton1f1",
+      "title": "grfd",
+      "category": "Hoardings",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588048/jalaram/shreedhar-bhakti-logo-103055571_1790588051741.jpg",
+      "images": [
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588048/jalaram/shreedhar-bhakti-logo-103055571_1790588051741.jpg",
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588049/jalaram/palasa_1790588053306.webp",
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588050/jalaram/iskon_buider_1790588054333.jpg",
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588051/jalaram/download__1__1790588054956.webp"
+      ],
+      "location": "",
+      "featured": true,
+      "sortOrder": 10
+    }
+  ],
   "heroImages": [
     "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
     "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
@@ -246,10 +504,13 @@
   "bannerSizes": [
     {
       "id": "1",
-      "productName": "Flex Banner (Standard)",
-      "material": "Star Flex 380 GSM",
-      "minSize": "1 ft x 1 ft",
+      "dpi": "72 DPI @ final print size",
+      "notes": "Provide design in actual print size. Include 0.5 inch bleed. Font should be outlined/embedded.",
       "maxSize": "Any custom size",
+      "minSize": "1 ft x 1 ft",
+      "material": "Star Flex 380 GSM",
+      "bleedArea": "0.5 inch on all sides",
+      "colorMode": "CMYK",
       "commonSizes": [
         "2 ft x 4 ft",
         "3 ft x 6 ft",
@@ -257,7 +518,6 @@
         "5 ft x 10 ft",
         "6 ft x 12 ft"
       ],
-      "dpi": "72 DPI @ final print size",
       "fileFormats": [
         "CDR",
         "AI",
@@ -265,16 +525,17 @@
         "PSD",
         "JPEG (at actual size)"
       ],
-      "colorMode": "CMYK",
-      "bleedArea": "0.5 inch on all sides",
-      "notes": "Provide design in actual print size. Include 0.5 inch bleed. Font should be outlined/embedded."
+      "productName": "Flex Banner (Standard)"
     },
     {
       "id": "2",
-      "productName": "Vinyl / Self-Adhesive Sticker",
-      "material": "Oracal 3M Premium Vinyl",
-      "minSize": "Any size",
+      "dpi": "150-300 DPI",
+      "notes": "For cut vinyl (single color), provide vector file. For printed vinyl, send high-res artwork.",
       "maxSize": "48 inch width x unlimited length",
+      "minSize": "Any size",
+      "material": "Oracal 3M Premium Vinyl",
+      "bleedArea": "3 mm on all sides",
+      "colorMode": "CMYK",
       "commonSizes": [
         "A4",
         "A3",
@@ -282,7 +543,6 @@
         "A1",
         "Custom"
       ],
-      "dpi": "150-300 DPI",
       "fileFormats": [
         "CDR",
         "AI",
@@ -290,39 +550,40 @@
         "EPS",
         "SVG"
       ],
-      "colorMode": "CMYK",
-      "bleedArea": "3 mm on all sides",
-      "notes": "For cut vinyl (single color), provide vector file. For printed vinyl, send high-res artwork."
+      "productName": "Vinyl / Self-Adhesive Sticker"
     },
     {
       "id": "3",
-      "productName": "Hoarding / Billboard",
-      "material": "500 GSM Star Flex / Front Lit Flex",
-      "minSize": "10 ft x 10 ft",
+      "dpi": "15-25 DPI @ full scale (300 DPI thumbnail scale-up)",
+      "notes": "For large hoardings, artwork can be at 1:10 scale at 150 DPI. Confirm exact size before sending file.",
       "maxSize": "Unlimited (multi-section)",
+      "minSize": "10 ft x 10 ft",
+      "material": "500 GSM Star Flex / Front Lit Flex",
+      "bleedArea": "1 inch on all sides",
+      "colorMode": "CMYK",
       "commonSizes": [
         "10 ft x 20 ft",
         "12 ft x 24 ft",
         "15 ft x 30 ft",
         "20 ft x 40 ft"
       ],
-      "dpi": "15-25 DPI @ full scale (300 DPI thumbnail scale-up)",
       "fileFormats": [
         "CDR",
         "AI",
         "PSD",
         "JPEG (high-res)"
       ],
-      "colorMode": "CMYK",
-      "bleedArea": "1 inch on all sides",
-      "notes": "For large hoardings, artwork can be at 1:10 scale at 150 DPI. Confirm exact size before sending file."
+      "productName": "Hoarding / Billboard"
     },
     {
       "id": "4",
-      "productName": "UV Printing (Acrylic/Board)",
-      "material": "Acrylic, ACP, Sunboard, MDF, Glass",
-      "minSize": "Any size",
+      "dpi": "300-600 DPI",
+      "notes": "For transparent or backlit effects, provide separate white layer. Mention substrate material when ordering.",
       "maxSize": "4 ft x 8 ft per sheet",
+      "minSize": "Any size",
+      "material": "Acrylic, ACP, Sunboard, MDF, Glass",
+      "bleedArea": "3 mm on all sides",
+      "colorMode": "CMYK + White Ink layer",
       "commonSizes": [
         "A4",
         "A3",
@@ -330,7 +591,6 @@
         "3 ft x 4 ft",
         "4 ft x 8 ft"
       ],
-      "dpi": "300-600 DPI",
       "fileFormats": [
         "CDR",
         "AI",
@@ -338,332 +598,88 @@
         "PSD",
         "PNG (transparent background)"
       ],
-      "colorMode": "CMYK + White Ink layer",
-      "bleedArea": "3 mm on all sides",
-      "notes": "For transparent or backlit effects, provide separate white layer. Mention substrate material when ordering."
+      "productName": "UV Printing (Acrylic/Board)"
     },
     {
       "id": "5",
-      "productName": "1-Way Vision / Perforated Film",
-      "material": "50/50 Perforated Window Film",
-      "minSize": "Any size",
+      "dpi": "150 DPI (at 50% opacity view)",
+      "notes": "Design must be bold with high contrast — lighter images do not print well on perforated film.",
       "maxSize": "4 ft x 50 ft roll",
+      "minSize": "Any size",
+      "material": "50/50 Perforated Window Film",
+      "bleedArea": "0.5 inch on all sides",
+      "colorMode": "CMYK",
       "commonSizes": [
         "2 ft x 4 ft",
         "3 ft x 6 ft",
         "4 ft x 8 ft"
       ],
-      "dpi": "150 DPI (at 50% opacity view)",
       "fileFormats": [
         "CDR",
         "AI",
         "PDF",
         "JPEG"
       ],
-      "colorMode": "CMYK",
-      "bleedArea": "0.5 inch on all sides",
-      "notes": "Design must be bold with high contrast — lighter images do not print well on perforated film."
+      "productName": "1-Way Vision / Perforated Film"
     },
     {
       "id": "6",
-      "productName": "Acrylic / LED Glow Sign Board",
-      "material": "Acrylic + Aluminum Frame + LED Module",
-      "minSize": "1 ft x 1 ft",
+      "dpi": "300 DPI",
+      "notes": "Provide logo and text in vector format. Mention if backlit or front-lit is required.",
       "maxSize": "Any custom size",
+      "minSize": "1 ft x 1 ft",
+      "material": "Acrylic + Aluminum Frame + LED Module",
+      "bleedArea": "0.25 inch on all sides",
+      "colorMode": "CMYK or RGB (mention usage)",
       "commonSizes": [
         "2 ft x 3 ft",
         "2 ft x 4 ft",
         "3 ft x 5 ft",
         "4 ft x 6 ft"
       ],
-      "dpi": "300 DPI",
       "fileFormats": [
         "CDR",
         "AI",
         "PDF"
       ],
-      "colorMode": "CMYK or RGB (mention usage)",
-      "bleedArea": "0.25 inch on all sides",
-      "notes": "Provide logo and text in vector format. Mention if backlit or front-lit is required."
+      "productName": "Acrylic / LED Glow Sign Board"
     }
   ],
-  "services": [
-    {
-      "id": "1",
-      "slug": "digital-printing",
-      "title": "Digital Printing",
-      "shortDescription": "High-resolution digital prints for everyday promotional needs.",
-      "description": "Our high-speed digital printing services offer crisp, vibrant results for brochures, flyers, business cards, and promotional materials. Perfect for short runs and fast turnaround times.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340347/jalaram/jalaram_digital-printing_1790340347919.webp",
-      "category": "Printing",
-      "features": [
-        "Fast Turnaround",
-        "High Resolution",
-        "Custom Sizes",
-        "Vibrant Colors"
-      ],
-      "featured": true,
-      "sortOrder": 1
-    },
-    {
-      "id": "2",
-      "slug": "flex-banner-printing",
-      "title": "Flex & Banner Printing",
-      "shortDescription": "Durable, high-impact banners for outdoor and indoor visibility.",
-      "description": "Make your message impossible to miss. We produce bold, high-resolution banners built for storefronts, promotions, events, and outdoor visibility.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
-      "category": "Large Format",
-      "features": [
-        "Weather Resistant",
-        "Any Size",
-        "Grommets & Finishing",
-        "High Visibility"
-      ],
-      "featured": true,
-      "sortOrder": 2
-    },
-    {
-      "id": "3",
-      "slug": "led-illuminated-signage",
-      "title": "LED & Illuminated Signage",
-      "shortDescription": "Stand out day and night with custom illuminated signs.",
-      "description": "Premium LED signage designed to make your business visible 24/7. From backlit boards to 3D glowing letters, we build signs that demand attention.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
-      "category": "Signage",
-      "features": [
-        "Energy Efficient",
-        "High Brightness",
-        "Custom Designs",
-        "Durable Build"
-      ],
-      "featured": true,
-      "sortOrder": 3
-    },
-    {
-      "id": "4",
-      "slug": "vinyl-printing",
-      "title": "Vinyl Printing",
-      "shortDescription": "Versatile vinyl graphics for windows, walls, and vehicles.",
-      "description": "Custom vinyl prints for a variety of applications including window decals, wall graphics, and vehicle branding. Precision cut and professionally installed.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
-      "category": "Printing",
-      "features": [
-        "Indoor & Outdoor",
-        "Precision Cut",
-        "Matte & Gloss Options",
-        "Easy Removal"
-      ],
-      "featured": false,
-      "sortOrder": 4
-    }
-  ],
-  "portfolio": [
-    {
-      "id": "1",
-      "slug": "hoardings",
-      "title": "Highway & Urban Hoardings",
-      "category": "Hoardings",
-      "description": "Massive roadside billboards and high-impact structural hoardings designed for maximum brand exposure across Gandhinagar and major highway corridors.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_hoardings_1790340350643.webp"
-      ],
-      "location": "Gandhinagar - SG Highway",
-      "featured": true,
-      "sortOrder": 1
-    },
-    {
-      "id": "2",
-      "slug": "flex-banner",
-      "title": "High-Resolution Flex Banners",
-      "category": "Flex Banner",
-      "description": "Vibrant, weather-resistant flex and star flex banners with reinforced grommets for storefront promotions, grand openings, and large-scale public events.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340340/jalaram/jalaram_flex-banner_1790340338972.webp"
-      ],
-      "location": "Gandhinagar",
-      "featured": true,
-      "sortOrder": 2
-    },
-    {
-      "id": "3",
-      "slug": "vinyl-printing",
-      "title": "Commercial Vinyl Printing",
-      "category": "Vinyl Printing",
-      "description": "Precision-cut, high-grade self-adhesive vinyl for storefront branding, corporate wall murals, floor graphics, and commercial vehicle fleet wraps.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340349/jalaram/jalaram_vinyl-printing_1790340349558.webp"
-      ],
-      "location": "Ahmedabad",
-      "featured": true,
-      "sortOrder": 3
-    },
-    {
-      "id": "4",
-      "slug": "radium-work",
-      "title": "Radium & Reflective Work",
-      "category": "Raduim Work",
-      "description": "High-intensity radium and micro-prismatic retro-reflective sheet cutting for glow-in-the-dark night visibility, safety boards, and traffic signage.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340350/jalaram/jalaram_radium-work_1790340351367.webp"
-      ],
-      "location": "Gandhinagar",
-      "featured": true,
-      "sortOrder": 4
-    },
-    {
-      "id": "5",
-      "slug": "uv-printing",
-      "title": "Flatbed UV Printing",
-      "category": "UV Printing",
-      "description": "Direct-to-substrate UV printing on acrylic, wood, glass, ACP, and sunboard delivering ultra-sharp resolution, vivid color depth, and scratch-resistant durability.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp"
-      ],
-      "location": "Ahmedabad",
-      "featured": true,
-      "sortOrder": 5
-    },
-    {
-      "id": "6",
-      "slug": "1way-vision-print",
-      "title": "1-Way Vision Glass Graphics",
-      "category": "1Way Vision Print",
-      "description": "Perforated window film graphics offering full-color exterior branding and privacy while maintaining crystal-clear outward visibility from indoors.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340353/jalaram/jalaram_1-way-vision-print_1790340353558.webp"
-      ],
-      "location": "Gandhinagar",
-      "featured": true,
-      "sortOrder": 6
-    },
-    {
-      "id": "7",
-      "slug": "acrylic-board",
-      "title": "3D Laser-Cut Acrylic Boards",
-      "category": "Acrylic Board",
-      "description": "Custom laser-cut acrylic letters, embossed 3D logo plaques, clear reception backdrops, and premium polished corporate identity boards.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_acrylic-board_1790340354495.webp"
-      ],
-      "location": "Gandhinagar",
-      "featured": true,
-      "sortOrder": 7
-    },
-    {
-      "id": "8",
-      "slug": "glow-sign-board",
-      "title": "Illuminated Glow Sign Boards",
-      "category": "Glow Sign",
-      "description": "Backlit aluminum-cased glow sign boxes with high-lumen internal LED lighting and weather-proof flex faces for 24/7 retail and corporate recognition.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340354/jalaram/jalaram_glow-signs_1790340355356.webp"
-      ],
-      "location": "Gandhinagar",
-      "featured": true,
-      "sortOrder": 8
-    },
-    {
-      "id": "9",
-      "slug": "led-board",
-      "title": "LED Display & Channel Boards",
-      "category": "Board LED Board",
-      "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp"
-      ],
-      "location": "Ahmedabad",
-      "featured": true,
-      "sortOrder": 9
-    }
-  ],
-  "team": [
-    {
-      "id": "1",
-      "name": "Rahul Patel",
-      "role": "Founder / Owner",
-      "bio": "Leading the vision and operations with over 15 years in print media.",
-      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
-      "socialLinks": {},
-      "sortOrder": 1
-    },
-    {
-      "id": "2",
-      "name": "Priya Sharma",
-      "role": "Creative Designer",
-      "bio": "Turning ideas into high-impact visuals ready for large-format production.",
-      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop",
-      "socialLinks": {},
-      "sortOrder": 2
-    },
-    {
-      "id": "3",
-      "name": "Amit Desai",
-      "role": "Production Specialist",
-      "bio": "Overseeing the technical precision of our state-of-the-art printers.",
-      "image": "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?q=80&w=1974&auto=format&fit=crop",
-      "socialLinks": {},
-      "sortOrder": 3
-    }
-  ],
+  "contactPage": {
+    "mapImage": "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop",
+    "heroImage": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340341/jalaram/jalaram_3d-led-board_1790340341450.webp",
+    "heroTagline": "Contact Us • Fast Quotes & Consultation",
+    "heroHeadline": "LET'S MAKE YOUR BRAND IMPOSSIBLE TO MISS.",
+    "heroSubtitle": "Tell us what you need printed, branded or installed. Our team will help you find the right solution."
+  },
   "testimonials": [
     {
       "id": "1",
       "name": "Vikram Mehta",
-      "business": "Apex Retail Solutions",
       "quote": "Outstanding quality and incredibly fast turnaround. The signage transformed our storefront completely and brought in noticeable foot traffic from day one.",
-      "rating": 5
+      "rating": 5,
+      "business": "Apex Retail Solutions"
     },
     {
       "id": "2",
       "name": "Harish Patel",
-      "business": "Gandhinagar Trade Center",
       "quote": "We ordered outdoor hoardings and LED letter signage for our commercial complex. The color clarity, material sturdiness, and installation speed exceeded our expectations.",
-      "rating": 5
+      "rating": 5,
+      "business": "Gandhinagar Trade Center"
     },
     {
       "id": "3",
       "name": "Sneha Joshi",
-      "business": "GreenLeaf Restaurant & Cafe",
       "quote": "The 3D acrylic backlit signage they designed and mounted for our cafe entrance looks phenomenal at night. Exceptional craftsmanship and polite team.",
-      "rating": 5
+      "rating": 5,
+      "business": "GreenLeaf Restaurant & Cafe"
     },
     {
       "id": "4",
       "name": "Amit Trivedi",
-      "business": "Shreeji Developers",
       "quote": "Working with Jalaram Digital Sign for our real estate sites across Gandhinagar and Ahmedabad. Reliable, prompt delivery, and unmatched weather durability.",
-      "rating": 5
-    }
-  ],
-  "faqs": [
-    {
-      "id": "1",
-      "question": "What types of banners do you print?",
-      "answer": "We print a wide variety of banners including standard flex banners, star flex, backlit banners, and fabric banners suitable for both indoor and outdoor use."
-    },
-    {
-      "id": "2",
-      "question": "Can you print custom sizes?",
-      "answer": "Yes, our large-format printing capabilities allow us to print banners and signage in virtually any custom size to fit your specific requirements."
-    },
-    {
-      "id": "3",
-      "question": "Do you provide installation services?",
-      "answer": "Yes, we offer professional installation services for signage, large banners, and vehicle branding across Gandhinagar and surrounding areas."
-    },
-    {
-      "id": "4",
-      "question": "How quickly can an order be completed?",
-      "answer": "Standard orders are typically completed within 24-48 hours. Complex signage or large bulk orders may require more time, which we will discuss during the quotation phase."
+      "rating": 5,
+      "business": "Shreeji Developers"
     }
   ]
 }

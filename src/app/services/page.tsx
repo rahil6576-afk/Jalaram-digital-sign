@@ -1,16 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
 import Link from "next/link";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import PageHero from "@/components/common/PageHero";
 
 export default function ServicesPage() {
   const currentData = useSiteData();
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxAlt, setLightboxAlt] = useState<string>("");
 
   return (
     <>
@@ -39,20 +36,14 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {currentData.services.map((service, index) => (
-              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col hover:border-accent/50 transition-all duration-300">
-                {/* Clickable Image → opens lightbox ONLY */}
-                <div
-                  className="aspect-video relative overflow-hidden cursor-pointer"
-                  onClick={() => {
-                    setLightboxSrc(service.image);
-                    setLightboxAlt(service.title);
-                  }}
-                >
+              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col transition-all duration-300">
+                {/* Service Image — Non-clickable */}
+                <div className="aspect-video relative overflow-hidden cursor-default select-none">
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out pointer-events-none"
+                    className="object-cover pointer-events-none"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                   <span className="absolute top-6 right-6 text-white/90 text-4xl font-bold tracking-tighter drop-shadow-md">
@@ -61,7 +52,7 @@ export default function ServicesPage() {
                   <h3 className="absolute bottom-6 left-6 text-3xl font-bold text-white drop-shadow-md pr-12">{service.title}</h3>
                 </div>
 
-                {/* Card body — NOT clickable as a whole, just text content */}
+                {/* Card body — Informational text content, non-clickable */}
                 <div className="p-8 md:p-10 flex flex-col flex-grow">
                   <p className="text-gray-600 mb-8 leading-relaxed flex-grow text-lg">
                     {service.shortDescription}
@@ -101,32 +92,6 @@ export default function ServicesPage() {
           </Link>
         </div>
       </section>
-
-      {/* LIGHTBOX */}
-      {lightboxSrc && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightboxSrc(null)}
-        >
-          <button
-            className="absolute top-5 right-5 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
-            onClick={() => setLightboxSrc(null)}
-            aria-label="Close"
-          >
-            <X className="w-7 h-7" />
-          </button>
-          <div
-            className="relative max-w-5xl max-h-[90vh] w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={lightboxSrc}
-              alt={lightboxAlt}
-              className="w-full h-full object-contain rounded-lg shadow-2xl max-h-[90vh]"
-            />
-          </div>
-        </div>
-      )}
     </>
   );
 }

@@ -33,6 +33,9 @@ import {
   Search,
   Download,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  UploadCloud,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -138,7 +141,7 @@ const ALLOWED_PHOTO_EXTENSIONS = /\.(jpe?g|png|webp)$/i;
 const ALLOWED_PHOTO_MIMES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const ACCEPT_PHOTO_ATTR = ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
 
-function validatePhoto(file: File): { valid: boolean; error?: string } {
+function validatePhoto(file: File, skipSizeValidation = false): { valid: boolean; error?: string } {
   const hasValidExt = ALLOWED_PHOTO_EXTENSIONS.test(file.name);
   const hasValidMime = ALLOWED_PHOTO_MIMES.includes(file.type);
 
@@ -147,6 +150,11 @@ function validatePhoto(file: File): { valid: boolean; error?: string } {
       valid: false,
       error: `"${file.name}" is not supported. Only JPG, JPEG, PNG, or WEBP photos are allowed.`,
     };
+  }
+
+  // Size validation removed/skipped for portfolio section
+  if (skipSizeValidation) {
+    return { valid: true };
   }
 
   if (file.size < MIN_PHOTO_SIZE_BYTES) {
@@ -168,7 +176,7 @@ function validatePhoto(file: File): { valid: boolean; error?: string } {
 }
 
 // Helper to pre-validate image dimensions before upload
-function checkPhotoDimensions(file: File): Promise<{ valid: boolean; width: number; height: number; error?: string }> {
+function checkPhotoDimensions(file: File, skipSizeValidation = false): Promise<{ valid: boolean; width: number; height: number; error?: string }> {
   return new Promise((resolve) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new window.Image();
@@ -176,6 +184,10 @@ function checkPhotoDimensions(file: File): Promise<{ valid: boolean; width: numb
       URL.revokeObjectURL(objectUrl);
       const w = img.naturalWidth;
       const h = img.naturalHeight;
+      if (skipSizeValidation) {
+        resolve({ valid: true, width: w, height: h });
+        return;
+      }
       if (w < MIN_PHOTO_DIMENSION || h < MIN_PHOTO_DIMENSION) {
         resolve({
           valid: false,
@@ -208,11 +220,13 @@ function ImageInput({
   onChange,
   label,
   readOnly = false,
+  skipSizeValidation = false,
 }: {
   value: string;
   onChange: (v: string) => void;
   label?: string;
   readOnly?: boolean;
+  skipSizeValidation?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -225,14 +239,14 @@ function ImageInput({
     setErrorMsg(null);
 
     // 1. File size and format check
-    const check = validatePhoto(file);
+    const check = validatePhoto(file, skipSizeValidation);
     if (!check.valid) {
       setErrorMsg(check.error || "File exceeds allowed size. Please upload files up to 5 MB.");
       return;
     }
 
     // 2. Photo pixel dimension check
-    const dimCheck = await checkPhotoDimensions(file);
+    const dimCheck = await checkPhotoDimensions(file, skipSizeValidation);
     if (!dimCheck.valid) {
       setErrorMsg(dimCheck.error || "Invalid photo dimensions.");
       return;
@@ -340,7 +354,7 @@ function ImageInput({
       )}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] text-gray-500 gap-1">
-        <span>Photo Size: Max 5MB · Min 50×50px · Formats: JPG, PNG, WEBP</span>
+        <span>{skipSizeValidation ? "Photo Size: No size limit · Formats: JPG, PNG, WEBP" : "Photo Size: Max 5MB · Min 50×50px · Formats: JPG, PNG, WEBP"}</span>
         {photoDims && (
           <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1 w-fit">
             <span>✓ Valid Photo:</span> {photoDims.w} × {photoDims.h} px {fileSizeStr ? `(${fileSizeStr})` : ""}
@@ -371,6 +385,408 @@ function ImageInput({
           No photo uploaded
         </div>
       ) : null}
+    </div>
+  );
+}
+
+// ── SitePhotosManager (Multiple Photo Upload + Sliding View for Portfolio) ──
+function SitePhotosManager({
+  coverImage,
+  images,
+  onCoverChange,
+  onImagesChange,
+  readOnly = false,
+}: {
+  coverImage: string;
+  images: string[];
+  onCoverChange: (v: string) => void;
+  onImagesChange: (v: string[]) => void;
+  readOnly?: boolean;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [newUrlInput, setNewUrlInput] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Combine cover and images uniquely while preserving order
+  const allPhotos = Array.from(
+    new Set([
+      ...(coverImage ? [coverImage] : []),
+      ...(Array.isArray(images) ? images : []),
+    ].filter(Boolean))
+  );
+
+  const handleMultipleUpload = async (files: FileList | File[]) => {
+    if (readOnly || !files || files.length === 0) return;
+    setErrorMsg(null);
+    setUploading(true);
+
+    const fileArray = Array.from(files);
+    const uploadedUrls: string[] = [];
+    let completed = 0;
+
+    for (const file of fileArray) {
+      setUploadProgress(`Uploading ${completed + 1} of ${fileArray.length} photos...`);
+
+      // Photo size validation explicitly removed for portfolio section (skipSizeValidation = true)
+      const check = validatePhoto(file, true);
+      if (!check.valid) {
+        setErrorMsg(check.error || `Unsupported file format for "${file.name}"`);
+        continue;
+      }
+
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("section", "portfolio");
+
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => null);
+          throw new Error(errData?.error || `Upload failed for ${file.name}`);
+        }
+        const data = await res.json();
+        if (data.url) {
+          uploadedUrls.push(data.url);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        setErrorMsg(err instanceof Error ? err.message : `Failed to upload ${file.name}`);
+      }
+      completed++;
+    }
+
+    if (uploadedUrls.length > 0) {
+      const updatedImages = Array.from(new Set([...images, ...uploadedUrls]));
+      onImagesChange(updatedImages);
+      if (!coverImage && uploadedUrls[0]) {
+        onCoverChange(uploadedUrls[0]);
+      }
+      setActiveSlide(allPhotos.length);
+    }
+
+    setUploading(false);
+    setUploadProgress(null);
+  };
+
+  const setAsCover = (url: string) => {
+    if (readOnly) return;
+    onCoverChange(url);
+    const reordered = [url, ...allPhotos.filter((x) => x !== url)];
+    onImagesChange(reordered);
+    setActiveSlide(0);
+  };
+
+  const removePhoto = (urlToRemove: string) => {
+    if (readOnly) return;
+    const remaining = allPhotos.filter((x) => x !== urlToRemove);
+    onImagesChange(remaining);
+    if (coverImage === urlToRemove) {
+      onCoverChange(remaining[0] || "");
+    }
+    setActiveSlide((prev) => Math.max(0, Math.min(prev, remaining.length - 1)));
+  };
+
+  const movePhoto = (idx: number, direction: "left" | "right") => {
+    if (readOnly) return;
+    const targetIdx = direction === "left" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= allPhotos.length) return;
+
+    const newList = [...allPhotos];
+    const temp = newList[idx];
+    newList[idx] = newList[targetIdx];
+    newList[targetIdx] = temp;
+
+    onCoverChange(newList[0] || "");
+    onImagesChange(newList);
+    setActiveSlide(targetIdx);
+  };
+
+  const handleAddUrl = () => {
+    if (!newUrlInput.trim()) return;
+    const cleanUrl = newUrlInput.trim();
+    if (!allPhotos.includes(cleanUrl)) {
+      const updated = [...images, cleanUrl];
+      onImagesChange(updated);
+      if (!coverImage) onCoverChange(cleanUrl);
+    }
+    setNewUrlInput("");
+    setShowUrlInput(false);
+  };
+
+  const safeSlideIdx = allPhotos.length > 0 ? activeSlide % allPhotos.length : 0;
+
+  return (
+    <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
+      {/* Header and Multi-Photo Upload Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+        <div>
+          <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <span>Site Photos & Gallery</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-[#6F20E8] border border-purple-200">
+              {allPhotos.length} {allPhotos.length === 1 ? "Photo" : "Photos"}
+            </span>
+          </h4>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Upload multiple photos of this site and view them by sliding.
+          </p>
+        </div>
+
+        {!readOnly && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-semibold rounded-xl transition-all shadow-sm shadow-[#6F20E8]/20 disabled:opacity-50 cursor-pointer"
+            >
+              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
+              <span>{uploading ? "Uploading..." : "Upload Multiple Photos"}</span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              accept={ACCEPT_PHOTO_ATTR}
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleMultipleUpload(e.target.files);
+                }
+                e.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowUrlInput(!showUrlInput)}
+              className="px-2.5 py-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              title="Add Image by URL"
+            >
+              + URL
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Explanatory Specs Banner (satisfies Photo Size: requirement) */}
+      <div className="text-[11px] text-gray-500 flex flex-wrap items-center justify-between gap-1 bg-purple-50/50 p-2.5 rounded-xl border border-purple-100">
+        <span>Photo Size: No size validation limit in portfolio section · Camera & mobile uploads supported</span>
+        <span className="text-[10px] text-[#6F20E8] font-bold uppercase tracking-wider">Formats: JPG, PNG, WEBP</span>
+      </div>
+
+      {/* URL Input Form */}
+      {showUrlInput && !readOnly && (
+        <div className="flex gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+          <input
+            type="text"
+            value={newUrlInput}
+            onChange={(e) => setNewUrlInput(e.target.value)}
+            placeholder="Paste direct photo URL (https://...)"
+            className="flex-1 text-xs px-3 py-2 bg-white rounded-lg border border-gray-300 focus:outline-none focus:border-[#6F20E8]"
+          />
+          <button
+            type="button"
+            onClick={handleAddUrl}
+            className="px-3 py-2 bg-[#6F20E8] text-white text-xs font-semibold rounded-lg hover:bg-[#5B16C7] transition-colors"
+          >
+            Add
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowUrlInput(false)}
+            className="px-2.5 py-2 text-gray-500 hover:text-gray-800 text-xs font-semibold"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Upload Progress Indicator */}
+      {uploading && (
+        <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl flex items-center gap-2 text-xs font-semibold text-[#6F20E8] animate-pulse">
+          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+          <span>{uploadProgress || "Uploading site photos..."}</span>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {errorMsg && (
+        <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center justify-between">
+          <span>⚠️ {errorMsg}</span>
+          <button type="button" onClick={() => setErrorMsg(null)} className="text-red-400 hover:text-red-700 ml-2 font-bold">✕</button>
+        </div>
+      )}
+
+      {/* ── SLIDING VIEW OF SITE PHOTOS ── */}
+      {allPhotos.length > 0 ? (
+        <div className="space-y-3">
+          {/* Main Slide Preview Display */}
+          <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] rounded-2xl overflow-hidden border border-gray-200 bg-gray-900 shadow-sm flex items-center justify-center group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={allPhotos[safeSlideIdx]}
+              src={encodeURI(allPhotos[safeSlideIdx])}
+              alt={`Slide ${safeSlideIdx + 1}`}
+              className="w-full h-full object-contain"
+            />
+
+            {/* Slide Navigation Arrows */}
+            {allPhotos.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveSlide((prev) => (prev - 1 + allPhotos.length) % allPhotos.length)}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg cursor-pointer"
+                  title="Slide to Previous Photo"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSlide((prev) => (prev + 1) % allPhotos.length)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg cursor-pointer"
+                  title="Slide to Next Photo"
+                  aria-label="Next slide"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+
+            {/* Slide Indicator Badge */}
+            <div className="absolute top-3 left-3 flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-sm text-white text-[11px] font-semibold border border-white/20">
+                Slide {safeSlideIdx + 1} of {allPhotos.length}
+              </span>
+              {allPhotos[safeSlideIdx] === coverImage && (
+                <span className="px-2.5 py-1 rounded-full bg-[#6F20E8] text-white text-[11px] font-bold shadow-sm">
+                  ★ Main Cover Photo
+                </span>
+              )}
+            </div>
+
+            {/* Slide Dots Indicator */}
+            {allPhotos.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-white/10">
+                {allPhotos.map((_, dotIdx) => (
+                  <button
+                    key={dotIdx}
+                    type="button"
+                    onClick={() => setActiveSlide(dotIdx)}
+                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                      dotIdx === safeSlideIdx ? "w-5 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+                    }`}
+                    aria-label={`Slide to ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Photo Management Thumbnails List */}
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-gray-700 block">Manage & Reorder Photos:</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              {allPhotos.map((url, pIdx) => {
+                const isCover = url === coverImage;
+                const isCurrentSlide = pIdx === safeSlideIdx;
+
+                return (
+                  <div
+                    key={`${url}-${pIdx}`}
+                    onClick={() => setActiveSlide(pIdx)}
+                    className={`relative rounded-xl border overflow-hidden p-1.5 flex flex-col justify-between gap-1 transition-all cursor-pointer ${
+                      isCurrentSlide
+                        ? "border-[#6F20E8] bg-purple-50/40 ring-2 ring-[#6F20E8]/30"
+                        : "border-gray-200 bg-gray-50/50 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-200">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={encodeURI(url)} alt={`Photo ${pIdx + 1}`} className="w-full h-full object-cover" />
+                      <span className="absolute top-1 left-1 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                        #{pIdx + 1}
+                      </span>
+                      {isCover && (
+                        <span className="absolute bottom-1 left-1 bg-[#6F20E8] text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                          Cover
+                        </span>
+                      )}
+                    </div>
+
+                    {!readOnly && (
+                      <div className="flex items-center justify-between gap-1 pt-1" onClick={(e) => e.stopPropagation()}>
+                        {!isCover ? (
+                          <button
+                            type="button"
+                            onClick={() => setAsCover(url)}
+                            className="text-[10px] font-semibold text-[#6F20E8] hover:underline"
+                            title="Set as Main Cover Photo"
+                          >
+                            Set Cover
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-bold text-emerald-600">Cover Photo</span>
+                        )}
+
+                        <div className="flex items-center gap-0.5">
+                          {pIdx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => movePhoto(pIdx, "left")}
+                              className="p-1 hover:bg-gray-200 rounded text-gray-600 transition-colors"
+                              title="Move Left in Slide Order"
+                            >
+                              <ChevronLeft className="w-3 h-3" />
+                            </button>
+                          )}
+                          {pIdx < allPhotos.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => movePhoto(pIdx, "right")}
+                              className="p-1 hover:bg-gray-200 rounded text-gray-600 transition-colors"
+                              title="Move Right in Slide Order"
+                            >
+                              <ChevronRight className="w-3 h-3" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(url)}
+                            className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                            title="Remove Photo"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div
+          onClick={() => !readOnly && fileRef.current?.click()}
+          className={`border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center transition-all ${
+            readOnly ? "cursor-default" : "hover:border-[#6F20E8] hover:bg-purple-50/20 cursor-pointer"
+          }`}
+        >
+          <UploadCloud className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+          <p className="text-xs font-semibold text-gray-700">No photos uploaded for this site yet</p>
+          {!readOnly && (
+            <p className="text-[11px] text-[#6F20E8] font-bold mt-1">
+              Click to upload multiple photos (no size limit)
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -2339,75 +2755,25 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <ImageInput
-                label="Cover Photo"
-                value={item.image}
+              <SitePhotosManager
+                coverImage={item.image}
+                images={item.images || []}
                 readOnly={isReadOnly}
-                onChange={(v) => {
+                onCoverChange={(newCover) => {
                   if (isReadOnly) return;
                   setData((p) => p ? {
                     ...p,
-                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: v } : x)
+                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: newCover } : x)
+                  } : p);
+                }}
+                onImagesChange={(newImgs) => {
+                  if (isReadOnly) return;
+                  setData((p) => p ? {
+                    ...p,
+                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: newImgs } : x)
                   } : p);
                 }}
               />
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className={labelCls}>Gallery Photos</label>
-                  {!isReadOnly && (
-                    <button
-                      type="button"
-                      onClick={() => setData((p) => p ? {
-                        ...p,
-                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: [...x.images, ""] } : x)
-                      } : p)}
-                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1"
-                    >
-                      <Plus className="w-3 h-3" /> Add Image
-                    </button>
-                  )}
-                </div>
-                {item.images.length === 0 && isReadOnly && (
-                  <p className="text-xs text-gray-400 italic">No gallery photos uploaded</p>
-                )}
-                {item.images.map((img, gi) => (
-                  <div key={gi} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      disabled={isReadOnly}
-                      readOnly={isReadOnly}
-                      value={img}
-                      onChange={(e) => {
-                        if (isReadOnly) return;
-                        setData((p) => p ? {
-                          ...p,
-                          portfolio: p.portfolio.map((x) => {
-                            if (x.id !== item.id) return x;
-                            const imgs = [...x.images];
-                            imgs[gi] = e.target.value;
-                            return { ...x, images: imgs };
-                          })
-                        } : p);
-                      }}
-                      className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
-                      placeholder="Image URL"
-                    />
-                    {!isReadOnly && (
-                      <button
-                        type="button"
-                        onClick={() => setData((p) => p ? {
-                          ...p,
-                          portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: x.images.filter((_, k) => k !== gi) } : x)
-                        } : p)}
-                        className="text-red-500 hover:text-red-600 px-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
 
               <label className={`flex items-center gap-2 pt-1 ${isReadOnly ? "cursor-default" : "cursor-pointer"}`}>
                 <input

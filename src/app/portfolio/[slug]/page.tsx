@@ -3,6 +3,7 @@ import { siteData, getSiteData, getLiveSiteData } from "@/data/site";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import SitePhotoGallerySlider from "@/components/portfolio/SitePhotoGallerySlider";
 
 export const dynamic = "force-dynamic";
 
@@ -67,8 +68,14 @@ export default async function PortfolioDetailPage({ params }: Props) {
     );
   }
 
-  const coverImage = project.image ? encodeURI(project.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
-  const galleryImages = (project.images || []).filter(Boolean);
+  const allSitePhotos = Array.from(
+    new Set(
+      [
+        ...(project.image ? [project.image] : []),
+        ...(Array.isArray(project.images) ? project.images : []),
+      ].filter(Boolean)
+    )
+  );
 
   return (
     <>
@@ -94,30 +101,9 @@ export default async function PortfolioDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Gallery */}
+        {/* Sliding Site Gallery */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="col-span-1 md:col-span-2 aspect-[21/9] bg-card-bg relative overflow-hidden rounded-2xl shadow-2xl">
-               <Image
-                 src={coverImage}
-                 alt={project.title}
-                 fill
-                 priority
-                 className="object-cover"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-            </div>
-            {galleryImages.map((img, idx) => (
-              <div key={idx} className="aspect-[4/3] bg-card-bg relative overflow-hidden rounded-2xl shadow-xl">
-                 <Image
-                   src={encodeURI(img)}
-                   alt={`${project.title} gallery image ${idx + 1}`}
-                   fill
-                   className="object-cover hover:scale-105 transition-transform duration-1000 ease-out"
-                 />
-              </div>
-            ))}
-          </div>
+          <SitePhotoGallerySlider title={project.title} photos={allSitePhotos} />
         </div>
       </section>
 

@@ -66,27 +66,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Max 5MB size check
-    const MAX_SIZE = 5 * 1024 * 1024;
+    // Allow photos of any size (up to 100MB for modern phone/DSLR cameras) without artificial restrictions
+    const MAX_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
       return NextResponse.json(
-        { error: `File exceeds allowed size (${sizeMb}MB). Please upload files up to 5 MB.` },
+        { error: `File exceeds allowed size (${sizeMb}MB). Maximum supported upload size is 100 MB.` },
         { status: 400 }
       );
     }
 
-    // Minimum file size check (at least 100 bytes)
-    if (file.size < 100) {
+    if (file.size < 10) {
       return NextResponse.json(
-        { error: "Photo file is too small or empty. Please select a valid photo." },
+        { error: "Photo file is empty. Please select a valid photo." },
         { status: 400 }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Validate photo dimensions and integrity
+    // Validate photo dimensions and integrity (allowing high-resolution photos of any size)
     let dimensions = { width: 0, height: 0 };
     try {
       const sharp = (await import("sharp")).default;
@@ -94,18 +93,6 @@ export async function POST(request: NextRequest) {
       if (!meta.width || !meta.height) {
         return NextResponse.json(
           { error: "Invalid photo file. Dimensions could not be read." },
-          { status: 400 }
-        );
-      }
-      if (meta.width < 50 || meta.height < 50) {
-        return NextResponse.json(
-          { error: `Photo size too small (${meta.width}×${meta.height}px). Minimum required photo size is 50×50px.` },
-          { status: 400 }
-        );
-      }
-      if (meta.width > 6000 || meta.height > 6000) {
-        return NextResponse.json(
-          { error: `Photo size exceeds maximum allowed dimensions (${meta.width}×${meta.height}px). Max dimension is 6000×6000px.` },
           { status: 400 }
         );
       }

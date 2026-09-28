@@ -15,8 +15,17 @@ export default function Home() {
   const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState<number>(0);
 
   const portfolioItems = (siteData?.portfolio || []).filter((p) => Boolean(p.image));
+
+  const getSitePhotos = (project: (typeof portfolioItems)[number]): string[] => {
+    const list = [
+      ...(project.image ? [project.image] : []),
+      ...(Array.isArray(project.images) ? project.images : []),
+    ];
+    return Array.from(new Set(list.filter(Boolean)));
+  };
 
   const validHeroImages = (siteData?.heroImages || []).filter((img) => typeof img === "string" && img.trim().length > 0);
   const heroImages = (validHeroImages.length > 0 ? validHeroImages : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
@@ -32,18 +41,31 @@ export default function Home() {
   // Keyboard navigation for portfolio lightbox
   useEffect(() => {
     if (lightboxIndex === null) return;
+    const currentProj = portfolioItems[lightboxIndex];
+    const photos = currentProj ? getSitePhotos(currentProj) : [];
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxIndex(null);
       if (e.key === "ArrowLeft") {
-        setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + portfolioItems.length) % portfolioItems.length));
+        if (photos.length > 1) {
+          setLightboxPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
+        } else {
+          setLightboxIndex((prev) => (prev === null ? 0 : (prev - 1 + portfolioItems.length) % portfolioItems.length));
+          setLightboxPhotoIndex(0);
+        }
       }
       if (e.key === "ArrowRight") {
-        setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % portfolioItems.length));
+        if (photos.length > 1) {
+          setLightboxPhotoIndex((prev) => (prev + 1) % photos.length);
+        } else {
+          setLightboxIndex((prev) => (prev === null ? 0 : (prev + 1) % portfolioItems.length));
+          setLightboxPhotoIndex(0);
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lightboxIndex, portfolioItems.length]);
+  }, [lightboxIndex, portfolioItems]);
 
   return (
     <>
@@ -258,16 +280,16 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="w-full"
                 >
-                  <Link href={`/services/${service.slug}`} className="group block h-full">
+                  <div className="group block h-full select-none cursor-default">
                     {/* MOBILE: compact card with service photo banner */}
-                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl overflow-hidden flex flex-col card-hover relative h-full">
+                    <div className="md:hidden bg-card-bg border border-black/8 rounded-xl overflow-hidden flex flex-col relative h-full">
                       <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden">
                         <Image
                           src={serviceImg}
                           alt={service.title}
                           fill
                           sizes="(max-width: 768px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <span className="absolute top-2 right-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/20">
@@ -279,21 +301,21 @@ export default function Home() {
                           <h3 className="text-xs font-bold leading-tight line-clamp-1">{service.title}</h3>
                           <p className="text-[11px] text-gray-500 leading-snug line-clamp-2 mt-1">{service.shortDescription}</p>
                         </div>
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-accent mt-2 pt-1 border-t border-black/5">
-                          Explore <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500 mt-2 pt-1 border-t border-black/5 uppercase tracking-wider">
+                          <span>{service.category || "Service Solution"}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* DESKTOP: full card with showcase image banner */}
-                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 card-hover relative overflow-hidden flex-col h-full group">
+                    <div className="hidden md:flex bg-card-bg rounded-2xl border border-black/8 relative overflow-hidden flex-col h-full group">
                       <div className="relative w-full aspect-[16/10] bg-gray-900 overflow-hidden">
                         <Image
                           src={serviceImg}
                           alt={service.title}
                           fill
                           sizes="(max-width: 1200px) 50vw, 33vw"
-                          className="object-cover group-hover:scale-108 transition-transform duration-700"
+                          className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         <span className="absolute top-4 right-4 text-white text-xs font-bold tracking-wider px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25">
@@ -307,17 +329,17 @@ export default function Home() {
                       </div>
 
                       <div className="p-7 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold mb-2 group-hover:text-accent transition-colors">{service.title}</h3>
+                        <h3 className="text-xl font-bold mb-2 text-foreground">{service.title}</h3>
                         <p className="text-gray-600 text-sm mb-6 leading-relaxed flex-grow line-clamp-3">
                           {service.shortDescription}
                         </p>
-                        <div className="mt-auto pt-4 border-t border-black/5 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-accent group-hover:text-black transition-colors">
-                          <span>Explore Service</span>
-                          <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300 text-accent" />
+                        <div className="mt-auto pt-4 border-t border-black/5 flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          <span>{service.category || "Professional Signage"}</span>
+                          <span className="text-[11px] font-bold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">Service</span>
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
               );
             })}
@@ -431,85 +453,140 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PORTFOLIO LIGHTBOX WITH NEXT/PREV ARROWS */}
+      {/* PORTFOLIO LIGHTBOX: SLIDING PHOTOS OF SITE */}
       {lightboxIndex !== null && portfolioItems[lightboxIndex] && (() => {
         const currentProject = portfolioItems[lightboxIndex];
-        const currentSrc = currentProject.image ? encodeURI(currentProject.image) : "";
-        const prevIndex = (lightboxIndex - 1 + portfolioItems.length) % portfolioItems.length;
-        const nextIndex = (lightboxIndex + 1) % portfolioItems.length;
+        const sitePhotos = getSitePhotos(currentProject);
+        const safePhotoIdx = sitePhotos.length > 0 ? lightboxPhotoIndex % sitePhotos.length : 0;
+        const currentSrc = sitePhotos[safePhotoIdx] ? encodeURI(sitePhotos[safePhotoIdx]) : "";
+
+        const prevPhotoIdx = (safePhotoIdx - 1 + sitePhotos.length) % sitePhotos.length;
+        const nextPhotoIdx = (safePhotoIdx + 1) % sitePhotos.length;
+
+        const prevProjectIdx = (lightboxIndex - 1 + portfolioItems.length) % portfolioItems.length;
+        const nextProjectIdx = (lightboxIndex + 1) % portfolioItems.length;
 
         return (
           <div
-            className="fixed inset-0 z-[9999] bg-black/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+            className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex flex-col items-center justify-between p-3 sm:p-6"
             onClick={() => setLightboxIndex(null)}
           >
             {/* Top Toolbar */}
-            <div className="absolute top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6 flex items-center justify-between text-white z-30 pointer-events-none">
-              <div className="flex items-center gap-3 pointer-events-auto">
+            <div className="w-full max-w-6xl flex items-center justify-between text-white z-30 pointer-events-none mb-2">
+              <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
                 {currentProject.category && (
                   <span className="px-3 py-1 rounded-full bg-[#6F20E8] text-white text-xs font-bold uppercase tracking-wider shadow-md">
                     {currentProject.category}
                   </span>
                 )}
-                <span className="text-xs sm:text-sm font-medium text-gray-300">
-                  {lightboxIndex + 1} / {portfolioItems.length}
-                </span>
+                {sitePhotos.length > 1 ? (
+                  <span className="text-xs sm:text-sm font-semibold text-purple-200 bg-white/10 px-3 py-1 rounded-full border border-white/15">
+                    Photo {safePhotoIdx + 1} of {sitePhotos.length}
+                  </span>
+                ) : (
+                  <span className="text-xs sm:text-sm font-medium text-gray-300">
+                    {lightboxIndex + 1} / {portfolioItems.length}
+                  </span>
+                )}
               </div>
-              <button
-                type="button"
-                className="pointer-events-auto text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
-                onClick={() => setLightboxIndex(null)}
-                aria-label="Close lightbox"
-                title="Close (Esc)"
-              >
-                <X className="w-6 h-6" />
-              </button>
+
+              <div className="flex items-center gap-2 pointer-events-auto">
+                {portfolioItems.length > 1 && (
+                  <div className="flex items-center gap-1 bg-white/10 rounded-full px-2 py-1 border border-white/15">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(prevProjectIdx);
+                        setLightboxPhotoIndex(0);
+                      }}
+                      className="text-xs text-gray-300 hover:text-white px-2 py-0.5 rounded-full hover:bg-white/10 font-medium transition-colors"
+                      title="Previous installation"
+                    >
+                      ‹ Prev Site
+                    </button>
+                    <span className="text-gray-500">|</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxIndex(nextProjectIdx);
+                        setLightboxPhotoIndex(0);
+                      }}
+                      className="text-xs text-gray-300 hover:text-white px-2 py-0.5 rounded-full hover:bg-white/10 font-medium transition-colors"
+                      title="Next installation"
+                    >
+                      Next Site ›
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="text-white bg-white/10 hover:bg-white/25 rounded-full p-2.5 transition-colors cursor-pointer"
+                  onClick={() => setLightboxIndex(null)}
+                  aria-label="Close lightbox"
+                  title="Close (Esc)"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            {/* Previous Arrow Button */}
-            {portfolioItems.length > 1 && (
-              <button
-                type="button"
-                className="absolute left-3 sm:left-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(prevIndex);
-                }}
-                aria-label="Previous image"
-                title="Previous image (Left Arrow)"
-              >
-                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
-              </button>
-            )}
-
-            {/* Next Arrow Button */}
-            {portfolioItems.length > 1 && (
-              <button
-                type="button"
-                className="absolute right-3 sm:right-8 top-1/2 -translate-y-1/2 z-30 text-white bg-black/60 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setLightboxIndex(nextIndex);
-                }}
-                aria-label="Next image"
-                title="Next image (Right Arrow)"
-              >
-                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
-              </button>
-            )}
-
-            {/* Image Container - Expanded for maximum visibility */}
+            {/* Main Slide Area */}
             <div
-              className="relative max-w-[94vw] max-h-[90vh] w-full flex flex-col items-center justify-center my-auto"
+              className="relative w-full max-w-6xl flex-1 flex items-center justify-center min-h-0"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentSrc}
-                alt={currentProject.title}
-                className="max-w-[92vw] max-h-[82vh] sm:max-h-[85vh] w-auto h-auto object-contain rounded-2xl border border-white/15 mx-auto"
-              />
-              <div className="mt-3 text-center px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
+              {/* Previous Slide Button */}
+              {sitePhotos.length > 1 && (
+                <button
+                  type="button"
+                  className="absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 z-30 text-white bg-black/70 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxPhotoIndex(prevPhotoIdx);
+                  }}
+                  aria-label="Previous photo"
+                  title="Previous Photo"
+                >
+                  <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+                </button>
+              )}
+
+              {/* Next Slide Button */}
+              {sitePhotos.length > 1 && (
+                <button
+                  type="button"
+                  className="absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-30 text-white bg-black/70 hover:bg-[#6F20E8] p-3 sm:p-4 rounded-full border border-white/20 transition-all hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxPhotoIndex(nextPhotoIdx);
+                  }}
+                  aria-label="Next photo"
+                  title="Next Photo"
+                >
+                  <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+                </button>
+              )}
+
+              {/* Centered Image */}
+              <div className="relative max-h-[72vh] sm:max-h-[75vh] max-w-full flex items-center justify-center p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={currentSrc}
+                  src={currentSrc}
+                  alt={currentProject.title}
+                  className="max-h-[70vh] sm:max-h-[74vh] max-w-[88vw] object-contain rounded-2xl border border-white/15 shadow-2xl select-none"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Section: Site Title & Sliding Thumbnail Strip */}
+            <div
+              className="w-full max-w-6xl mt-2 flex flex-col items-center gap-2 pointer-events-auto z-30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-3">
                 <h3 className="text-white text-sm sm:text-base font-bold drop-shadow-md">
                   {currentProject.title}
                 </h3>
@@ -519,6 +596,35 @@ export default function Home() {
                   </span>
                 )}
               </div>
+
+              {/* Thumbnails of Site Photos */}
+              {sitePhotos.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto max-w-full py-1.5 px-3 bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 no-scrollbar">
+                  {sitePhotos.map((thumbUrl, pIndex) => (
+                    <button
+                      key={pIndex}
+                      type="button"
+                      onClick={() => setLightboxPhotoIndex(pIndex)}
+                      className={`relative w-14 h-11 sm:w-16 sm:h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                        pIndex === safePhotoIdx
+                          ? "border-[#6F20E8] scale-105 shadow-md shadow-[#6F20E8]/50 ring-2 ring-purple-400"
+                          : "border-white/20 opacity-60 hover:opacity-100 hover:border-white/60"
+                      }`}
+                      title={`Slide to photo ${pIndex + 1}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={encodeURI(thumbUrl)}
+                        alt={`Thumbnail ${pIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute bottom-0 right-0 bg-black/80 text-[9px] text-white font-bold px-1 rounded-tl">
+                        {pIndex + 1}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
