@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -8,12 +9,30 @@ import PageHero from "@/components/common/PageHero";
 
 export default function ServicesPage() {
   const currentData = useSiteData();
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleScrollToHash = () => {
+      if (typeof window !== "undefined" && window.location.hash) {
+        const id = window.location.hash.replace("#", "");
+        const el = document.getElementById(id);
+        if (el) {
+          setHighlightedId(id);
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => setHighlightedId(null), 3500);
+        }
+      }
+    };
+
+    handleScrollToHash();
+    window.addEventListener("hashchange", handleScrollToHash);
+    return () => window.removeEventListener("hashchange", handleScrollToHash);
+  }, []);
 
   return (
     <>
       {/* PAGE HERO */}
       <PageHero
-        badgeText="Capabilities • Materials • Solutions"
         title={
           <>
             WHAT WE{" "}
@@ -23,53 +42,69 @@ export default function ServicesPage() {
           </>
         }
         subtitle="Comprehensive visual branding and printing solutions designed to get your business noticed."
-        images={[
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398057/jalaram/jalaram_vinyl-printing_1790398058572.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398036/jalaram/jalaram_flex-banner_1790398038042.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
-        ]}
       />
 
       {/* SERVICES GRID */}
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {currentData.services.map((service, index) => (
-              <div key={service.id} className="bg-card-bg h-full border border-black/5 rounded-sm overflow-hidden flex flex-col transition-all duration-300">
-                {/* Service Image — Non-clickable */}
-                <div className="aspect-video relative overflow-hidden cursor-default select-none">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    className="object-cover pointer-events-none"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  <span className="absolute top-4 sm:top-6 right-4 sm:right-6 text-white/90 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter drop-shadow-md">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-md pr-8 sm:pr-12">{service.title}</h3>
-                </div>
+            {currentData.services.map((service) => {
+              const targetId = service.slug || service.id;
+              const isHighlighted = highlightedId === targetId;
+              return (
+                <div
+                  key={service.id}
+                  id={targetId}
+                  className={`scroll-mt-28 bg-card-bg h-full border rounded-2xl overflow-hidden flex flex-col transition-all duration-500 shadow-sm hover:shadow-lg ${
+                    isHighlighted ? "border-[#6F20E8] ring-4 ring-[#6F20E8]/30 shadow-xl scale-[1.01]" : "border-black/5"
+                  }`}
+                >
+                  {/* Service Image — Non-clickable */}
+                  <div className="aspect-video relative overflow-hidden cursor-default select-none bg-gray-900">
+                    <Image
+                      src={service.image ? encodeURI(service.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp"}
+                      alt={service.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6F20E8] text-white text-[11px] font-bold uppercase tracking-wider mb-2 shadow-sm">
+                        {service.category || "Service"}
+                      </span>
+                      <h3 className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-md">{service.title}</h3>
+                    </div>
+                  </div>
 
-                {/* Card body — Informational text content, non-clickable */}
-                <div className="p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col flex-grow">
-                  <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed flex-grow text-base sm:text-lg">
-                    {service.shortDescription}
-                  </p>
+                  {/* Card body — Informational text content, non-clickable */}
+                  <div className="p-6 sm:p-7 md:p-8 lg:p-10 flex flex-col flex-grow">
+                    <p className="text-gray-700 mb-4 leading-relaxed text-base sm:text-lg font-medium">
+                      {service.shortDescription || service.description}
+                    </p>
 
-                  {/* Features List */}
-                  <ul className="space-y-3">
-                    {service.features.map((feature, i) => (
-                      <li key={i} className="text-sm text-gray-600 font-medium flex items-center gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                    {/* Detailed Description if distinct from shortDescription */}
+                    {service.description && service.shortDescription && service.description.trim() !== service.shortDescription.trim() && (
+                      <p className="text-gray-500 mb-6 leading-relaxed text-sm">
+                        {service.description}
+                      </p>
+                    )}
+
+                    {/* Features List */}
+                    {Array.isArray(service.features) && service.features.filter(Boolean).length > 0 && (
+                      <ul className="space-y-3 mt-auto pt-4 border-t border-black/5">
+                        {service.features.filter(Boolean).map((feature, i) => (
+                          <li key={i} className="text-sm text-gray-600 font-medium flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

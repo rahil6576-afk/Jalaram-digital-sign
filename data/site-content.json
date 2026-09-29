@@ -26,8 +26,9 @@
       "id": "1",
       "bio": "Leading the vision and operations with over 15 years in print media.",
       "name": "Rahul Patel",
-      "role": "Founder / Owner",
+      "role": "Founder & Managing Director",
       "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+      "phone": "+91 85111 33363",
       "sortOrder": 1,
       "socialLinks": {}
     },
@@ -51,6 +52,24 @@
     }
   ],
   "clients": [
+    {
+      "id": "client-iscon",
+      "tag": "Real Estate & Infrastructure",
+      "logo": "/client-iscon.png",
+      "name": "ISCON"
+    },
+    {
+      "id": "client-kesariya-garba",
+      "tag": "Cultural Festivals & Events",
+      "logo": "/client-kesariya-garba.png",
+      "name": "Kesariya Garba"
+    },
+    {
+      "id": "client-origin",
+      "tag": "Commercial & Residential Builders",
+      "logo": "/client-origin.png",
+      "name": "Origin Group"
+    },
     {
       "id": "client-1",
       "tag": "Government & Civic Campaigns",
@@ -223,12 +242,14 @@
   },
   "business": {
     "name": "Jalaram Digital Sign",
-    "email": "info@jalaramdigitalsign.com",
+    "email": "jalaramdigitalsign@gmail.com",
     "hours": "Mon - Sat: 9:00 AM - 8:00 PM",
     "phone": "+91 85111 33363",
     "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
     "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
     "whatsapp": "918511133363",
+    "extraEmail": "",
+    "extraPhone": "",
     "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat."
   },
   "homePage": {
@@ -292,7 +313,7 @@
     {
       "id": "3",
       "slug": "banner-printing",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592420/jalaram/banner_printing_1790592422861.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790675494/jalaram/banner_printing_1790675493142.jpg",
       "title": "Banner Printing",
       "category": "Promotional & Events",
       "featured": false,
@@ -309,7 +330,7 @@
     {
       "id": "4",
       "slug": "sign-board",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592466/jalaram/sign_board_1790592469088.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591583/jalaram/services/jalaram_service_sign-board.jpg",
       "title": "Sign Board",
       "category": "Outdoor Signage",
       "featured": false,
@@ -377,7 +398,7 @@
     {
       "id": "8",
       "slug": "3d-letter-signage",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592556/jalaram/3D_letter_1790592559499.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790676431/jalaram/3D_letter_1790676429418.jpg",
       "title": "3D Letter Signage",
       "category": "Dimensional Branding",
       "featured": true,
@@ -394,7 +415,7 @@
     {
       "id": "9",
       "slug": "sunboard-printing",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
+      "image": "/images/service-sunboard-printing.jpg",
       "title": "Sunboard Printing",
       "category": "Rigid Substrates",
       "featured": false,
@@ -411,7 +432,7 @@
     {
       "id": "10",
       "slug": "roll-up-standee",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592605/jalaram/roll_up_1790592607753.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591582/jalaram/services/jalaram_service_roll-up-standee.jpg",
       "title": "Roll-Up Standee",
       "category": "Display Systems",
       "featured": false,
@@ -479,7 +500,7 @@
     {
       "id": "14",
       "slug": "pamphlet-flyer-printing",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592541/jalaram/pamphlet_1790592543253.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591586/jalaram/services/jalaram_service_pamphlet-flyer-printing.jpg",
       "title": "Pamphlet / Flyer Printing",
       "category": "Marketing Collateral",
       "featured": false,
@@ -496,7 +517,7 @@
     {
       "id": "15",
       "slug": "visiting-cards",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592525/jalaram/visiting_card_1790592528636.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591587/jalaram/services/jalaram_service_visiting-cards.jpg",
       "title": "Visiting Cards",
       "category": "Corporate Identity",
       "featured": false,
@@ -530,7 +551,7 @@
     {
       "id": "17",
       "slug": "invitation-cards",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592511/jalaram/wedding_car_1790592514344.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_invitation-cards.jpg",
       "title": "Invitation Cards",
       "category": "Special Occasions",
       "featured": false,
@@ -547,7 +568,7 @@
     {
       "id": "18",
       "slug": "name-plates-acrylic-ss",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790592491/jalaram/name_plates_1790592492878.jpg",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_name-plates-acrylic-ss.jpg",
       "title": "Name Plates – Acrylic / SS",
       "category": "Residential & Corporate",
       "featured": false,
@@ -679,6 +700,60 @@
       "sortOrder": 25,
       "description": "Sharp, rich commercial digital printing for corporate brochures, marketing handouts, manuals, certificates, and short-run promotional requirements.",
       "shortDescription": "High-speed high-resolution commercial digital printing for immediate business needs."
+    },
+    {
+      "id": "uv-printing",
+      "slug": "uv-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
+      "title": "UV Printing",
+      "category": "Rigid & Specialty Media",
+      "featured": true,
+      "features": [
+        "Direct Substrate Printing (Glass, Acrylic, Wood, Sunboard, ACP)",
+        "Instant UV LED Ink Curing with Zero Smudge",
+        "High-Definition 1440+ DPI Photographic Print Quality",
+        "Scratch, Waterproof & UV Weather-Resistant Coating",
+        "Embossed & Textured Spot Gloss/Varnish Effects"
+      ],
+      "sortOrder": 26,
+      "description": "Industrial flatbed UV printing delivers photo-realistic clarity, microscopic ink dot precision, and scratch-resistant durability directly onto acrylic, sunboard, wood, ACP, glass, metal, and leather with instant UV LED ink curing.",
+      "shortDescription": "Direct-to-substrate ultra-high definition UV printing with instant LED curing on rigid and flexible media."
+    },
+    {
+      "id": "fabric-box",
+      "slug": "fabric-box",
+      "image": "/images/service-fabric-box.jpg",
+      "title": "Fabric Box",
+      "category": "Illuminated Signage",
+      "featured": true,
+      "features": [
+        "Seamless Edge-to-Edge Frameless Aluminum Profile",
+        "Silicone Edge Graphic (SEG) Easy Push-Fit Changing",
+        "Ultra-Bright Uniform LED Edge & Back Lighting",
+        "High-Resolution Dye-Sublimated Textile Prints",
+        "Ideal for Showrooms, Retail Malls & Corporate Lobbies"
+      ],
+      "sortOrder": 27,
+      "description": "Sleek frameless fabric lightboxes engineered with edge-to-edge dye-sublimation printed stretch fabric and high-intensity LED backlighting. Offers seamless borderless graphics and effortless push-fit image replacement.",
+      "shortDescription": "Frameless silicone-edge graphic (SEG) fabric LED lightboxes with vibrant backlit textiles for luxury retail displays."
+    },
+    {
+      "id": "acp-cladding",
+      "slug": "acp-cladding",
+      "image": "/images/service-acp-cladding.jpg",
+      "title": "ACP Cladding",
+      "category": "Architectural Facades",
+      "featured": true,
+      "features": [
+        "PVDF-Coated High-Grade Aluminum Composite Panels",
+        "100% Weather-Resistant, Rain-Proof & Anti-Corrosive",
+        "Precision CNC V-Grooving, Routing & Structural Folding",
+        "Available in Metallic, Gloss, Matte & Wood Grain Finishes",
+        "Precision Structural Mounting with 3D LED Letter Mounting"
+      ],
+      "sortOrder": 28,
+      "description": "Heavy-duty exterior and interior ACP sheet cladding engineered for commercial shopfronts, corporate offices, and showroom facades. Weatherproof, fire-resistant, and CNC-routed to integrate flawlessly with 3D LED signage.",
+      "shortDescription": "Durable Aluminum Composite Panel (ACP) facade cladding and modern architectural elevations."
     }
   ],
   "aboutPage": {
@@ -772,7 +847,8 @@
       "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
       "title": "Flatbed UV Printing",
       "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp"
       ],
       "category": "UV Printing",
       "featured": true,

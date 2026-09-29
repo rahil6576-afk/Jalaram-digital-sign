@@ -15,6 +15,16 @@ export default function PortfolioPage() {
   const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState<number>(0);
   const [cardPhotoIndices, setCardPhotoIndices] = useState<Record<string, number>>({});
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [marqueeOffset, setMarqueeOffset] = useState<number>(0);
+
+  const handlePrevPortfolio = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setMarqueeOffset((prev) => prev + 360);
+  };
+  const handleNextPortfolio = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setMarqueeOffset((prev) => prev - 360);
+  };
 
   const portfolioList = siteData?.portfolio || [];
   const categories = ["All", ...Array.from(new Set(portfolioList.map((p) => p.category)))];
@@ -61,6 +71,26 @@ export default function PortfolioPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex, currentSitePhotos.length, filteredProjects.length]);
 
+  // Auto-scroll / auto-advance through multiple photos on cards (especially the first image/card)
+  useEffect(() => {
+    const multiPhotoProjects = filteredProjects.filter((p) => getSitePhotos(p).length > 1);
+    if (multiPhotoProjects.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCardPhotoIndices((prev) => {
+        const next = { ...prev };
+        multiPhotoProjects.forEach((p) => {
+          const photos = getSitePhotos(p);
+          const currentIdx = next[p.id] || 0;
+          next[p.id] = (currentIdx + 1) % photos.length;
+        });
+        return next;
+      });
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [filteredProjects]);
+
   return (
     <>
       {/* PAGE HERO */}
@@ -75,13 +105,121 @@ export default function PortfolioPage() {
           </>
         }
         subtitle="Explore our recent projects, from large-scale signage installations to precision print jobs."
-        images={[
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398007/jalaram/jalaram_3d-led-board_1790398009053.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
-          "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398009/jalaram/jalaram_acrylic-board_1790398010851.webp",
-        ]}
       />
+
+      {/* AUTO-SCROLLING PROJECT SHOWCASE REEL */}
+      <section className="py-10 sm:py-14 bg-white border-b border-black/5 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-[#6F20E8] font-bold text-xs uppercase tracking-wider mb-2">
+              <span className="w-2 h-2 rounded-full bg-[#6F20E8] animate-ping" />
+              Live Project Reel • Auto Scroll
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Recent Installations on Display
+            </h2>
+            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
+              Continuous auto-scrolling gallery. Hover to pause, click arrows to go back &amp; forth, or click any project to view.
+            </p>
+          </div>
+          
+          {/* Header Back & Forth Arrows */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrevPortfolio}
+              className="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Previous projects"
+              aria-label="Previous projects"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextPortfolio}
+              className="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Next projects"
+              aria-label="Next projects"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Infinite Slow Auto Scroll Marquee Track with Back & Forth Navigation Arrows */}
+        <div className="relative w-full overflow-hidden py-2 group/track">
+          {/* Back & Forth Navigation Arrow Buttons */}
+          <button
+            type="button"
+            onClick={handlePrevPortfolio}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer border border-white/20 backdrop-blur-md"
+            title="Scroll portfolio back"
+            aria-label="Previous portfolio installation"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={handleNextPortfolio}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer border border-white/20 backdrop-blur-md"
+            title="Scroll portfolio forward"
+            aria-label="Next portfolio installation"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Marquee Track Container with Smooth Manual Shift */}
+          <div
+            className="transition-transform duration-500 ease-out will-change-transform"
+            style={{ transform: `translateX(${marqueeOffset}px)` }}
+          >
+            <div className="animate-marquee-slow flex gap-6 min-w-max">
+              {[...portfolioList, ...portfolioList].filter(p => Boolean(p.image)).map((project, i) => {
+                const imgSrc = project.image ? encodeURI(project.image) : "";
+                const actualIdx = filteredProjects.findIndex((p) => p.id === project.id);
+                return (
+                  <button
+                    key={`marquee-${project.id || i}-${i}`}
+                    type="button"
+                    onClick={() => {
+                      if (actualIdx >= 0) {
+                        setLightboxIndex(actualIdx);
+                      } else {
+                        setFilter("All");
+                        const allIdx = portfolioList.findIndex((p) => p.id === project.id);
+                        setLightboxIndex(allIdx >= 0 ? allIdx : 0);
+                      }
+                      setLightboxPhotoIndex(0);
+                    }}
+                    className="block relative w-64 sm:w-72 md:w-80 h-48 sm:h-56 md:h-60 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group shadow-sm hover:shadow-xl transition-all duration-300 text-left"
+                  >
+                    <Image
+                      src={imgSrc}
+                      alt={project.title}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 768px) 256px, 320px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
+                    <div className="absolute bottom-3.5 left-4 right-4 text-left">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6F20E8] text-white text-[10px] font-bold uppercase tracking-wider mb-1 shadow-sm">
+                        {project.category}
+                      </span>
+                      <h3 className="text-white text-xs sm:text-sm font-bold line-clamp-1 drop-shadow-sm">
+                        {project.title}
+                      </h3>
+                      {project.location && (
+                        <p className="text-gray-300 text-[11px] line-clamp-1 mt-0.5">{project.location}</p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* PORTFOLIO GRID */}
       <section className="py-12 sm:py-20 md:py-32">
@@ -127,13 +265,24 @@ export default function PortfolioPage() {
                         setLightboxPhotoIndex(activePhotoIdx);
                       }}
                     >
-                      <Image
-                        src={encodeURI(currentImg)}
-                        alt={project.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85" />
+                      <AnimatePresence mode="popLayout">
+                        <motion.div
+                          key={currentImg}
+                          initial={{ opacity: 0.7 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0.7 }}
+                          transition={{ duration: 0.5, ease: "easeInOut" }}
+                          className="absolute inset-0"
+                        >
+                          <Image
+                            src={encodeURI(currentImg)}
+                            alt={project.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                          />
+                        </motion.div>
+                      </AnimatePresence>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85 pointer-events-none" />
 
                       {/* Top Badges: Category & Photo Slide Counter */}
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">

@@ -128,8 +128,10 @@ export default function Footer() {
             </h4>
             <ul className="space-y-4">
               <li><Link href="/" className="text-muted hover:text-foreground transition-colors">Home</Link></li>
-              <li><Link href="/team" className="text-muted hover:text-foreground transition-colors">Team</Link></li>
+              <li><Link href="/services" className="text-muted hover:text-foreground transition-colors">Services</Link></li>
+              <li><Link href="/machines" className="text-muted hover:text-foreground transition-colors">Machines</Link></li>
               <li><Link href="/portfolio" className="text-muted hover:text-foreground transition-colors">Portfolio</Link></li>
+              <li><Link href="/team" className="text-muted hover:text-foreground transition-colors">Team</Link></li>
               <li><Link href="/contact" className="text-muted hover:text-foreground transition-colors">Contact Us</Link></li>
               {/* <li><Link href="/about" className="text-muted hover:text-foreground transition-colors">About</Link></li> */}
               {/* <li><Link href="/services" className="text-muted hover:text-foreground transition-colors">Services</Link></li> */}
@@ -165,7 +167,12 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-accent shrink-0" />
-                <a href={`tel:${siteData.business.phone.replace(/\s/g,'')}`} className="text-muted hover:text-accent transition-colors">{siteData.business.phone}</a>
+                <div className="flex flex-col">
+                  <a href={`tel:${siteData.business.phone.replace(/\s/g,'')}`} className="text-muted hover:text-accent transition-colors">{siteData.business.phone}</a>
+                  {Boolean(siteData.business.extraPhone?.trim()) && (
+                    <a href={`tel:${siteData.business.extraPhone!.replace(/\s/g,'')}`} className="text-muted text-xs hover:text-accent transition-colors mt-0.5">{siteData.business.extraPhone}</a>
+                  )}
+                </div>
               </li>
               <li className="flex items-center gap-3">
                 <MessageCircle className="w-5 h-5 text-accent shrink-0" />
@@ -173,16 +180,32 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-accent shrink-0" />
-                <a href={`mailto:${siteData.business.email}`} className="text-muted hover:text-accent transition-colors">{siteData.business.email}</a>
+                <div className="flex flex-col">
+                  <a href={`mailto:${siteData.business.email}`} className="text-muted hover:text-accent transition-colors">{siteData.business.email}</a>
+                  {Boolean(siteData.business.extraEmail?.trim()) && (
+                    <a href={`mailto:${siteData.business.extraEmail}`} className="text-muted text-xs hover:text-accent transition-colors mt-0.5">{siteData.business.extraEmail}</a>
+                  )}
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-black/10 text-center">
+        <div className="pt-8 border-t border-black/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <p className="text-muted text-sm">
             &copy; {currentYear} {siteData.business.name}. All rights reserved.
+          </p>
+          <p className="text-sm text-gray-500 font-medium">
+            Created by{" "}
+            <a
+              href="https://kraziocloud.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#6F20E8] hover:text-[#5B16C7] font-semibold underline underline-offset-4 decoration-purple-300 hover:decoration-[#6F20E8] transition-colors"
+            >
+              Krazio Cloud
+            </a>
           </p>
         </div>
       </div>

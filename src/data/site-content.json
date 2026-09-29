@@ -26,8 +26,9 @@
       "id": "1",
       "bio": "Leading the vision and operations with over 15 years in print media.",
       "name": "Rahul Patel",
-      "role": "Founder / Owner",
+      "role": "Founder & Managing Director",
       "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop",
+      "phone": "+91 85111 33363",
       "sortOrder": 1,
       "socialLinks": {}
     },
@@ -51,6 +52,24 @@
     }
   ],
   "clients": [
+    {
+      "id": "client-iscon",
+      "tag": "Real Estate & Infrastructure",
+      "logo": "/client-iscon.png",
+      "name": "ISCON"
+    },
+    {
+      "id": "client-kesariya-garba",
+      "tag": "Cultural Festivals & Events",
+      "logo": "/client-kesariya-garba.png",
+      "name": "Kesariya Garba"
+    },
+    {
+      "id": "client-origin",
+      "tag": "Commercial & Residential Builders",
+      "logo": "/client-origin.png",
+      "name": "Origin Group"
+    },
     {
       "id": "client-1",
       "tag": "Government & Civic Campaigns",
@@ -223,12 +242,14 @@
   },
   "business": {
     "name": "Jalaram Digital Sign",
-    "email": "info@jalaramdigitalsign.com",
+    "email": "jalaramdigitalsign@gmail.com",
     "hours": "Mon - Sat: 9:00 AM - 8:00 PM",
     "phone": "+91 85111 33363",
     "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
     "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
     "whatsapp": "918511133363",
+    "extraEmail": "",
+    "extraPhone": "",
     "description": "Professional digital printing, banners, signage, LED signs, vinyl printing and visual branding solutions in Gandhinagar, Gujarat."
   },
   "homePage": {
@@ -258,427 +279,481 @@
     {
       "id": "1",
       "slug": "flex-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398036/jalaram/jalaram_flex-banner_1790398038042.webp",
       "title": "Flex Printing",
       "category": "Large Format",
-      "shortDescription": "Heavy-duty weather-resistant flex prints for high-impact outdoor commercial displays.",
-      "description": "Specialized flex printing engineered for extreme durability across outdoor weather conditions in Gandhinagar and Gujarat. Available in standard, star flex, and blackback flex with vibrant UV-stable solvent inks.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398036/jalaram/jalaram_flex-banner_1790398038042.webp",
+      "featured": true,
       "features": [
         "Weather-Resistant PVC Media",
         "Frontlit & Backlit Options",
         "Seamless High-Speed Solvent Print",
         "Vibrant Long-Lasting Inks"
       ],
-      "featured": true,
-      "sortOrder": 1
+      "sortOrder": 1,
+      "description": "Specialized flex printing engineered for extreme durability across outdoor weather conditions in Gandhinagar and Gujarat. Available in standard, star flex, and blackback flex with vibrant UV-stable solvent inks.",
+      "shortDescription": "Heavy-duty weather-resistant flex prints for high-impact outdoor commercial displays."
     },
     {
       "id": "2",
       "slug": "vinyl-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398057/jalaram/jalaram_vinyl-printing_1790398058572.webp",
       "title": "Vinyl Printing",
       "category": "Signage & Branding",
-      "shortDescription": "Precision-cut self-adhesive vinyl graphics for shopfronts, glass, walls, and vehicles.",
-      "description": "High-resolution adhesive vinyl prints tailored for corporate branding, store window graphics, commercial decals, and indoor wall murals with protective matte or gloss overlaminate.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398057/jalaram/jalaram_vinyl-printing_1790398058572.webp",
+      "featured": true,
       "features": [
         "High-Grade Self-Adhesive Vinyl",
         "Matte & Gloss Lamination",
         "Waterproof & UV Fade Proof",
         "Precision Contour Machine Cut"
       ],
-      "featured": true,
-      "sortOrder": 2
+      "sortOrder": 2,
+      "description": "High-resolution adhesive vinyl prints tailored for corporate branding, store window graphics, commercial decals, and indoor wall murals with protective matte or gloss overlaminate.",
+      "shortDescription": "Precision-cut self-adhesive vinyl graphics for shopfronts, glass, walls, and vehicles."
     },
     {
       "id": "3",
       "slug": "banner-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790675494/jalaram/banner_printing_1790675493142.jpg",
       "title": "Banner Printing",
       "category": "Promotional & Events",
-      "shortDescription": "Eye-catching promotional banners for events, retail sales, and corporate conferences.",
-      "description": "Custom banner printing with reinforced border hemming and metal grommets. Ideal for exhibitions, grand openings, event stages, and promotional campaigns.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591595/jalaram/services/jalaram_service_banner-printing.jpg",
+      "featured": false,
       "features": [
         "Star Flex & Fabric Banners",
         "Reinforced Hems & Eyelets",
         "Exhibition & Stage Backdrops",
         "Fast Turnaround Delivery"
       ],
-      "featured": false,
-      "sortOrder": 3
+      "sortOrder": 3,
+      "description": "Custom banner printing with reinforced border hemming and metal grommets. Ideal for exhibitions, grand openings, event stages, and promotional campaigns.",
+      "shortDescription": "Eye-catching promotional banners for events, retail sales, and corporate conferences."
     },
     {
       "id": "4",
       "slug": "sign-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591583/jalaram/services/jalaram_service_sign-board.jpg",
       "title": "Sign Board",
       "category": "Outdoor Signage",
-      "shortDescription": "Robust outdoor and indoor commercial sign boards built for decades of brand visibility.",
-      "description": "Durable structural business sign boards fabricated with precision metal frames, ACP sheets, and premium graphic faces for shops, offices, and industrial units.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591583/jalaram/services/jalaram_service_sign-board.jpg",
+      "featured": false,
       "features": [
         "Heavy-Duty MS / GI Structure",
         "ACP Sheet Base Cladding",
         "Rust-Proof Weather Coating",
         "Custom Commercial Dimensions"
       ],
-      "featured": false,
-      "sortOrder": 4
+      "sortOrder": 4,
+      "description": "Durable structural business sign boards fabricated with precision metal frames, ACP sheets, and premium graphic faces for shops, offices, and industrial units.",
+      "shortDescription": "Robust outdoor and indoor commercial sign boards built for decades of brand visibility."
     },
     {
       "id": "5",
       "slug": "led-sign-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398007/jalaram/jalaram_3d-led-board_1790398009053.webp",
       "title": "LED Sign Board",
       "category": "Illuminated Signage",
-      "shortDescription": "Bright, energy-efficient illuminated LED signs engineered for 24/7 visibility.",
-      "description": "Custom fabricated LED signage designed to give retail storefronts and corporate offices a commanding night-time presence across Gujarat with premium waterproof LEDs.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398007/jalaram/jalaram_3d-led-board_1790398009053.webp",
+      "featured": true,
       "features": [
         "High-Lumen Waterproof LEDs",
         "Energy-Efficient Power Drivers",
         "Day & Night Striking Visibility",
         "Multi-Year Warranty Protection"
       ],
-      "featured": true,
-      "sortOrder": 5
+      "sortOrder": 5,
+      "description": "Custom fabricated LED signage designed to give retail storefronts and corporate offices a commanding night-time presence across Gujarat with premium waterproof LEDs.",
+      "shortDescription": "Bright, energy-efficient illuminated LED signs engineered for 24/7 visibility."
     },
     {
       "id": "6",
       "slug": "acrylic-signage",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398009/jalaram/jalaram_acrylic-board_1790398010851.webp",
       "title": "Acrylic Signage",
       "category": "Architectural Signage",
-      "shortDescription": "Sleek laser-cut acrylic boards and 3D letters for sophisticated office reception areas.",
-      "description": "High-precision laser cut acrylic signs, corporate lobby logos, and branded architectural plaques with flame-polished edges and dimensional depth.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398009/jalaram/jalaram_acrylic-board_1790398010851.webp",
+      "featured": true,
       "features": [
         "Premium Cast Acrylic Sheets",
         "Laser-Cut Flame-Polished Edges",
         "Embossed 3D Letterforms",
         "Clear, Frosted & Mirror Finishes"
       ],
-      "featured": true,
-      "sortOrder": 6
+      "sortOrder": 6,
+      "description": "High-precision laser cut acrylic signs, corporate lobby logos, and branded architectural plaques with flame-polished edges and dimensional depth.",
+      "shortDescription": "Sleek laser-cut acrylic boards and 3D letters for sophisticated office reception areas."
     },
     {
       "id": "7",
       "slug": "glow-sign-board",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
       "title": "Glow Sign Board",
       "category": "Illuminated Signage",
-      "shortDescription": "Classic illuminated lightbox signage delivering even illumination and long service life.",
-      "description": "Backlit glow sign boxes fabricated with weather-sealed aluminum framing and high-diffusion backlit graphics for retail stores, clinics, and commercial complexes.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398038/jalaram/jalaram_glow-signs_1790398039933.webp",
+      "featured": true,
       "features": [
         "Extruded Aluminum Box Frame",
         "Translucent Backlit Flex Face",
         "Uniform Edge-to-Edge Glow",
         "Weather-Sealed Electricals"
       ],
-      "featured": true,
-      "sortOrder": 7
+      "sortOrder": 7,
+      "description": "Backlit glow sign boxes fabricated with weather-sealed aluminum framing and high-diffusion backlit graphics for retail stores, clinics, and commercial complexes.",
+      "shortDescription": "Classic illuminated lightbox signage delivering even illumination and long service life."
     },
     {
       "id": "8",
       "slug": "3d-letter-signage",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591584/jalaram/services/jalaram_service_3d-letter-signage.jpg",
       "title": "3D Letter Signage",
       "category": "Dimensional Branding",
-      "shortDescription": "Dimensional letters fabricated from acrylic, stainless steel, and titanium for modern facades.",
-      "description": "Handcrafted and CNC-machined 3D channel letters featuring optional halo-backlighting or face illumination, elevating exterior building facades and reception lobbies.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591584/jalaram/services/jalaram_service_3d-letter-signage.jpg",
+      "featured": true,
       "features": [
         "Acrylic, Stainless Steel & Brass",
         "Front-Lit, Halo-Lit & Backlit",
         "CNC Routed Precision Contours",
         "Deep Architectural Projection"
       ],
-      "featured": true,
-      "sortOrder": 8
+      "sortOrder": 8,
+      "description": "Handcrafted and CNC-machined 3D channel letters featuring optional halo-backlighting or face illumination, elevating exterior building facades and reception lobbies.",
+      "shortDescription": "Dimensional letters fabricated from acrylic, stainless steel, and titanium for modern facades."
     },
     {
       "id": "9",
       "slug": "sunboard-printing",
+      "image": "/images/service-sunboard-printing.jpg",
       "title": "Sunboard Printing",
       "category": "Rigid Substrates",
-      "shortDescription": "Rigid, lightweight PVC sunboard prints perfect for retail branding and trade exhibitions.",
-      "description": "Direct-to-substrate UV printing and vinyl-mounted graphics on high-density foam sunboard. Provides sharp image fidelity with zero curling or wrinkling.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
+      "featured": false,
       "features": [
         "3mm to 10mm High-Density PVC",
         "Direct Flatbed UV Printing",
         "Rigid, Lightweight & Flat Display",
         "Ideal for In-Store POP & Expos"
       ],
-      "featured": false,
-      "sortOrder": 9
+      "sortOrder": 9,
+      "description": "Direct-to-substrate UV printing and vinyl-mounted graphics on high-density foam sunboard. Provides sharp image fidelity with zero curling or wrinkling.",
+      "shortDescription": "Rigid, lightweight PVC sunboard prints perfect for retail branding and trade exhibitions."
     },
     {
       "id": "10",
       "slug": "roll-up-standee",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591582/jalaram/services/jalaram_service_roll-up-standee.jpg",
       "title": "Roll-Up Standee",
       "category": "Display Systems",
-      "shortDescription": "Portable roll-up pull banner standees for exhibitions, corporate events, and showrooms.",
-      "description": "Lightweight aluminum retractable standees paired with non-tearable grey-back photographic media. Easy to carry and assemble in seconds for sales presentations.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591582/jalaram/services/jalaram_service_roll-up-standee.jpg",
+      "featured": false,
       "features": [
         "6x3 ft & 6x2.5 ft Aluminum Base",
         "Non-Tearable Matte PET Film",
         "Padded Carry Bag Included",
         "Instant 30-Second Setup"
       ],
-      "featured": false,
-      "sortOrder": 10
+      "sortOrder": 10,
+      "description": "Lightweight aluminum retractable standees paired with non-tearable grey-back photographic media. Easy to carry and assemble in seconds for sales presentations.",
+      "shortDescription": "Portable roll-up pull banner standees for exhibitions, corporate events, and showrooms."
     },
     {
       "id": "11",
       "slug": "hoardings",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp",
       "title": "Hoardings",
       "category": "Outdoor Media",
-      "shortDescription": "Large-format highway and city hoardings providing city-wide brand prominence.",
-      "description": "Full-scale outdoor hoarding solutions including flex printing, mounting, structural framing, and on-site illumination across Ahmedabad, Gandhinagar, and state highways.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp",
+      "featured": false,
       "features": [
         "Massive Highway Billboard Sizes",
         "Heavy Wind-Load Structural Safety",
         "High-Resolution Outdoor Solvent",
         "End-to-End Gujarat Site Erection"
       ],
-      "featured": false,
-      "sortOrder": 11
+      "sortOrder": 11,
+      "description": "Full-scale outdoor hoarding solutions including flex printing, mounting, structural framing, and on-site illumination across Ahmedabad, Gandhinagar, and state highways.",
+      "shortDescription": "Large-format highway and city hoardings providing city-wide brand prominence."
     },
     {
       "id": "12",
       "slug": "posters",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591585/jalaram/services/jalaram_service_posters.jpg",
       "title": "Posters",
       "category": "Commercial Print",
-      "shortDescription": "High-definition promotional and decorative posters printed on premium art media.",
-      "description": "Vibrant color posters printed with rich saturation and fine text clarity. Suitable for film promotions, retail campaigns, events, and interior decor.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591585/jalaram/services/jalaram_service_posters.jpg",
+      "featured": false,
       "features": [
         "170 to 300 GSM Art Card & Synthetic",
         "Ultra-High Resolution Photographic DPI",
         "Gloss, Matte & Velvet Lamination",
         "Standard A3, A2, A1 to Custom Sizes"
       ],
-      "featured": false,
-      "sortOrder": 12
+      "sortOrder": 12,
+      "description": "Vibrant color posters printed with rich saturation and fine text clarity. Suitable for film promotions, retail campaigns, events, and interior decor.",
+      "shortDescription": "High-definition promotional and decorative posters printed on premium art media."
     },
     {
       "id": "13",
       "slug": "stickers-and-labels",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591585/jalaram/services/jalaram_service_stickers-and-labels.jpg",
       "title": "Stickers & Labels",
       "category": "Packaging & Decals",
-      "shortDescription": "Custom die-cut product stickers, packaging labels, and commercial decals.",
-      "description": "Precision-cut adhesive stickers for jars, bottles, retail packaging, and promotional branding. Resistant to moisture, oil, and outdoor handling.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591585/jalaram/services/jalaram_service_stickers-and-labels.jpg",
+      "featured": false,
       "features": [
         "Waterproof & Scratch-Resistant Vinyl",
         "Custom Die-Cut Shapes & Sizes",
         "Metallic, Foil & Clear Transparents",
         "Roll or Kiss-Cut Sheet Supply"
       ],
-      "featured": false,
-      "sortOrder": 13
+      "sortOrder": 13,
+      "description": "Precision-cut adhesive stickers for jars, bottles, retail packaging, and promotional branding. Resistant to moisture, oil, and outdoor handling.",
+      "shortDescription": "Custom die-cut product stickers, packaging labels, and commercial decals."
     },
     {
       "id": "14",
       "slug": "pamphlet-flyer-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591586/jalaram/services/jalaram_service_pamphlet-flyer-printing.jpg",
       "title": "Pamphlet / Flyer Printing",
       "category": "Marketing Collateral",
-      "shortDescription": "Cost-effective promotional pamphlets and multi-fold flyers for mass marketing.",
-      "description": "High-volume flyer and pamphlet printing with sharp text and true-to-life colors. Ideal for newspaper inserts, door-to-door campaigns, and retail promotions.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591586/jalaram/services/jalaram_service_pamphlet-flyer-printing.jpg",
+      "featured": false,
       "features": [
         "90 to 170 GSM Gloss & Art Paper",
         "Single & Double Sided Offset Runs",
         "Bi-Fold, Tri-Fold & Custom Creasing",
         "High-Volume Mass Distribution"
       ],
-      "featured": false,
-      "sortOrder": 14
+      "sortOrder": 14,
+      "description": "High-volume flyer and pamphlet printing with sharp text and true-to-life colors. Ideal for newspaper inserts, door-to-door campaigns, and retail promotions.",
+      "shortDescription": "Cost-effective promotional pamphlets and multi-fold flyers for mass marketing."
     },
     {
       "id": "15",
       "slug": "visiting-cards",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591587/jalaram/services/jalaram_service_visiting-cards.jpg",
       "title": "Visiting Cards",
       "category": "Corporate Identity",
-      "shortDescription": "Luxury business cards with premium tactile finishes that leave a lasting impression.",
-      "description": "Executive business visiting cards crafted with premium imported card stocks, spot UV varnish, metallic foil embossing, and velvety matte lamination.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591587/jalaram/services/jalaram_service_visiting-cards.jpg",
+      "featured": false,
       "features": [
         "350+ GSM Heavyweight Card Stock",
         "Spot UV, Gold & Silver Foil Emboss",
         "Velvet Touch & Textured Paper",
         "Round Edge & Square Cut Finish"
       ],
-      "featured": false,
-      "sortOrder": 15
+      "sortOrder": 15,
+      "description": "Executive business visiting cards crafted with premium imported card stocks, spot UV varnish, metallic foil embossing, and velvety matte lamination.",
+      "shortDescription": "Luxury business cards with premium tactile finishes that leave a lasting impression."
     },
     {
       "id": "16",
       "slug": "letterheads",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591588/jalaram/services/jalaram_service_letterheads.jpg",
       "title": "Letterheads",
       "category": "Corporate Stationery",
-      "shortDescription": "Official corporate letterheads printed on smooth, high-grade bond papers.",
-      "description": "Professional company letterheads printed with non-bleed inks suitable for smooth everyday office laser and inkjet printing.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591588/jalaram/services/jalaram_service_letterheads.jpg",
+      "featured": false,
       "features": [
         "100 to 120 GSM Sunshine / Bond Paper",
         "Laser & Inkjet Printer Compatible",
         "Accurate Corporate Color Matching",
         "Crisp Executive Letterhead Layout"
       ],
-      "featured": false,
-      "sortOrder": 16
+      "sortOrder": 16,
+      "description": "Professional company letterheads printed with non-bleed inks suitable for smooth everyday office laser and inkjet printing.",
+      "shortDescription": "Official corporate letterheads printed on smooth, high-grade bond papers."
     },
     {
       "id": "17",
       "slug": "invitation-cards",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_invitation-cards.jpg",
       "title": "Invitation Cards",
       "category": "Special Occasions",
-      "shortDescription": "Bespoke invitation cards with ornate textures, gold foil, and laser-cut details.",
-      "description": "Exclusive designer invitation cards for Gujarati weddings, corporate inaugurations, and religious ceremonies, crafted on rich specialty handmade papers.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_invitation-cards.jpg",
+      "featured": false,
       "features": [
         "Embossed & Laser-Cut Filigree Patterns",
         "Gold Foil Stamping & Silk Texture",
         "Custom Die-Cut Envelopes",
         "Weddings, Invitations & Corporate Galas"
       ],
-      "featured": false,
-      "sortOrder": 17
+      "sortOrder": 17,
+      "description": "Exclusive designer invitation cards for Gujarati weddings, corporate inaugurations, and religious ceremonies, crafted on rich specialty handmade papers.",
+      "shortDescription": "Bespoke invitation cards with ornate textures, gold foil, and laser-cut details."
     },
     {
       "id": "18",
       "slug": "name-plates-acrylic-ss",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_name-plates-acrylic-ss.jpg",
       "title": "Name Plates – Acrylic / SS",
       "category": "Residential & Corporate",
-      "shortDescription": "Architectural name plates in stainless steel and acrylic for homes, bungalows, and offices.",
-      "description": "Modern name plates designed with laser-cut acrylic and brushed or mirror-finish stainless steel. Weatherproof, elegant, and built to withstand outdoor sun and rain.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591589/jalaram/services/jalaram_service_name-plates-acrylic-ss.jpg",
+      "featured": false,
       "features": [
         "304 Grade Stainless Steel & Acrylic",
         "Chemical Acid Etching & Laser Cutting",
         "Polished Gold, Rose Gold & Silver",
         "Rustproof Brass Stud Mounts"
       ],
-      "featured": false,
-      "sortOrder": 18
+      "sortOrder": 18,
+      "description": "Modern name plates designed with laser-cut acrylic and brushed or mirror-finish stainless steel. Weatherproof, elegant, and built to withstand outdoor sun and rain.",
+      "shortDescription": "Architectural name plates in stainless steel and acrylic for homes, bungalows, and offices."
     },
     {
       "id": "19",
       "slug": "vehicle-graphics",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591590/jalaram/services/jalaram_service_vehicle-graphics.jpg",
       "title": "Vehicle Graphics",
       "category": "Fleet Branding",
-      "shortDescription": "Mobile advertising with full vehicle wraps and precision commercial fleet branding.",
-      "description": "Turn company vehicles into rolling billboards across Gujarat with high-grade cast vinyl wraps, door decals, and commercial fleet branding.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591590/jalaram/services/jalaram_service_vehicle-graphics.jpg",
+      "featured": false,
       "features": [
         "Cast Automotive Vinyl Wraps",
         "Commercial Vans, Autos & Trucks",
         "UV Protective Clear Overlaminate",
         "Residue-Free Clean Removal"
       ],
-      "featured": false,
-      "sortOrder": 19
+      "sortOrder": 19,
+      "description": "Turn company vehicles into rolling billboards across Gujarat with high-grade cast vinyl wraps, door decals, and commercial fleet branding.",
+      "shortDescription": "Mobile advertising with full vehicle wraps and precision commercial fleet branding."
     },
     {
       "id": "20",
       "slug": "bag-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591591/jalaram/services/jalaram_service_bag-printing.jpg",
       "title": "Bag Printing",
       "category": "Retail Packaging",
-      "shortDescription": "Eco-friendly custom printed paper and non-woven carry bags for retail stores.",
-      "description": "Custom printed shopping carry bags for boutiques, jewellery showrooms, grocery chains, and retail stores, providing mobile brand visibility.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591591/jalaram/services/jalaram_service_bag-printing.jpg",
+      "featured": false,
       "features": [
         "Non-Woven D-Cut & W-Cut Bags",
         "Eco-Friendly Kraft & Art Paper Bags",
         "Screen & Flexographic Printing",
         "Durable Heavy Weight Capacity"
       ],
-      "featured": false,
-      "sortOrder": 20
+      "sortOrder": 20,
+      "description": "Custom printed shopping carry bags for boutiques, jewellery showrooms, grocery chains, and retail stores, providing mobile brand visibility.",
+      "shortDescription": "Eco-friendly custom printed paper and non-woven carry bags for retail stores."
     },
     {
       "id": "21",
       "slug": "graphic-designing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591591/jalaram/services/jalaram_service_graphic-designing.jpg",
       "title": "Graphic Designing",
       "category": "Creative Studio",
-      "shortDescription": "Professional creative artwork, logo design, and print-ready technical layouts.",
-      "description": "In-house graphic design studio specializing in logo design, brand guideline development, outdoor signage visualization, and high-resolution print prepress.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591591/jalaram/services/jalaram_service_graphic-designing.jpg",
+      "featured": false,
       "features": [
         "Vector Logo & Brand Identity Creation",
         "Print-Ready CMYK Production Files",
         "Gujarati & English Creative Typography",
         "3D Architecture Signage Mockups"
       ],
-      "featured": false,
-      "sortOrder": 21
+      "sortOrder": 21,
+      "description": "In-house graphic design studio specializing in logo design, brand guideline development, outdoor signage visualization, and high-resolution print prepress.",
+      "shortDescription": "Professional creative artwork, logo design, and print-ready technical layouts."
     },
     {
       "id": "22",
       "slug": "installation-services",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591592/jalaram/services/jalaram_service_installation-services.jpg",
       "title": "Installation Services",
       "category": "Field Execution",
-      "shortDescription": "Expert on-site signage fabrication, structural mounting, and height installations.",
-      "description": "Professional field installation crews equipped for high-altitude mounting, facade cladding, electrical connections, and maintenance across all districts of Gujarat.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591592/jalaram/services/jalaram_service_installation-services.jpg",
+      "featured": false,
       "features": [
         "Trained Riggers & Signage Scaffolders",
         "High-Rise Boom Lift & Crane Operations",
         "On-Site Structural Welding & Wiring",
         "Gujarat-Wide Rapid Deployment"
       ],
-      "featured": false,
-      "sortOrder": 22
+      "sortOrder": 22,
+      "description": "Professional field installation crews equipped for high-altitude mounting, facade cladding, electrical connections, and maintenance across all districts of Gujarat.",
+      "shortDescription": "Expert on-site signage fabrication, structural mounting, and height installations."
     },
     {
       "id": "23",
       "slug": "one-way-print",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398006/jalaram/jalaram_1-way-vision-print_1790398007861.webp",
       "title": "One way Print",
       "category": "Glass & Privacy",
-      "shortDescription": "One-way vision perforated glass graphics offering external advertising and internal privacy.",
-      "description": "Specialized perforated vinyl films for glass facades, office cabins, and showroom windows that display high-definition graphics to the outside while preserving outdoor vision from inside.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398006/jalaram/jalaram_1-way-vision-print_1790398007861.webp",
+      "featured": false,
       "features": [
         "Micro-Perforated Window Film",
         "Full Exterior Graphic Display",
         "Clear Outward See-Through View",
         "Solar Heat & Glare Reduction"
       ],
-      "featured": false,
-      "sortOrder": 23
+      "sortOrder": 23,
+      "description": "Specialized perforated vinyl films for glass facades, office cabins, and showroom windows that display high-definition graphics to the outside while preserving outdoor vision from inside.",
+      "shortDescription": "One-way vision perforated glass graphics offering external advertising and internal privacy."
     },
     {
       "id": "24",
       "slug": "frosted",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591594/jalaram/services/jalaram_service_frosted-film.jpg",
       "title": "Frosted",
       "category": "Office Glass Decor",
-      "shortDescription": "Decorative frosted film for office partitions, glass doors, and privacy screening.",
-      "description": "Architectural glass frosting films custom cut with geometric stripes, company logos, and frosted designs for executive cabins and corporate conference rooms.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790591594/jalaram/services/jalaram_service_frosted-film.jpg",
+      "featured": false,
       "features": [
         "Translucent Sandblast & Dusted Finish",
         "Computerized Plotter-Cut Patterns",
         "Cabin & Conference Room Privacy",
         "Custom Company Logo Cutouts"
       ],
-      "featured": false,
-      "sortOrder": 24
+      "sortOrder": 24,
+      "description": "Architectural glass frosting films custom cut with geometric stripes, company logos, and frosted designs for executive cabins and corporate conference rooms.",
+      "shortDescription": "Decorative frosted film for office partitions, glass doors, and privacy screening."
     },
     {
       "id": "25",
       "slug": "digital-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp",
       "title": "Digital Printing",
       "category": "Digital Print",
-      "shortDescription": "High-speed high-resolution commercial digital printing for immediate business needs.",
-      "description": "Sharp, rich commercial digital printing for corporate brochures, marketing handouts, manuals, certificates, and short-run promotional requirements.",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398035/jalaram/jalaram_digital-printing_1790398036942.webp",
+      "featured": true,
       "features": [
         "High-Speed Same-Day Production",
         "Exceptional Color Precision",
         "Variable Data & Numbering Print",
         "Custom Paper Stocks & Textures"
       ],
+      "sortOrder": 25,
+      "description": "Sharp, rich commercial digital printing for corporate brochures, marketing handouts, manuals, certificates, and short-run promotional requirements.",
+      "shortDescription": "High-speed high-resolution commercial digital printing for immediate business needs."
+    },
+    {
+      "id": "uv-printing",
+      "slug": "uv-printing",
+      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp",
+      "title": "UV Printing",
+      "category": "Rigid & Specialty Media",
       "featured": true,
-      "sortOrder": 25
+      "features": [
+        "Direct Substrate Printing (Glass, Acrylic, Wood, Sunboard, ACP)",
+        "Instant UV LED Ink Curing with Zero Smudge",
+        "High-Definition 1440+ DPI Photographic Print Quality",
+        "Scratch, Waterproof & UV Weather-Resistant Coating",
+        "Embossed & Textured Spot Gloss/Varnish Effects"
+      ],
+      "sortOrder": 26,
+      "description": "Industrial flatbed UV printing delivers photo-realistic clarity, microscopic ink dot precision, and scratch-resistant durability directly onto acrylic, sunboard, wood, ACP, glass, metal, and leather with instant UV LED ink curing.",
+      "shortDescription": "Direct-to-substrate ultra-high definition UV printing with instant LED curing on rigid and flexible media."
+    },
+    {
+      "id": "fabric-box",
+      "slug": "fabric-box",
+      "image": "/images/service-fabric-box.jpg",
+      "title": "Fabric Box",
+      "category": "Illuminated Signage",
+      "featured": true,
+      "features": [
+        "Seamless Edge-to-Edge Frameless Aluminum Profile",
+        "Silicone Edge Graphic (SEG) Easy Push-Fit Changing",
+        "Ultra-Bright Uniform LED Edge & Back Lighting",
+        "High-Resolution Dye-Sublimated Textile Prints",
+        "Ideal for Showrooms, Retail Malls & Corporate Lobbies"
+      ],
+      "sortOrder": 27,
+      "description": "Sleek frameless fabric lightboxes engineered with edge-to-edge dye-sublimation printed stretch fabric and high-intensity LED backlighting. Offers seamless borderless graphics and effortless push-fit image replacement.",
+      "shortDescription": "Frameless silicone-edge graphic (SEG) fabric LED lightboxes with vibrant backlit textiles for luxury retail displays."
+    },
+    {
+      "id": "acp-cladding",
+      "slug": "acp-cladding",
+      "image": "/images/service-acp-cladding.jpg",
+      "title": "ACP Cladding",
+      "category": "Architectural Facades",
+      "featured": true,
+      "features": [
+        "PVDF-Coated High-Grade Aluminum Composite Panels",
+        "100% Weather-Resistant, Rain-Proof & Anti-Corrosive",
+        "Precision CNC V-Grooving, Routing & Structural Folding",
+        "Available in Metallic, Gloss, Matte & Wood Grain Finishes",
+        "Precision Structural Mounting with 3D LED Letter Mounting"
+      ],
+      "sortOrder": 28,
+      "description": "Heavy-duty exterior and interior ACP sheet cladding engineered for commercial shopfronts, corporate offices, and showroom facades. Weatherproof, fire-resistant, and CNC-routed to integrate flawlessly with 3D LED signage.",
+      "shortDescription": "Durable Aluminum Composite Panel (ACP) facade cladding and modern architectural elevations."
     }
   ],
   "aboutPage": {
@@ -772,7 +847,8 @@
       "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
       "title": "Flatbed UV Printing",
       "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp"
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790340352/jalaram/jalaram_UV-flatbed-printer-close-1080x600_1790340352689.webp",
+        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398054/jalaram/jalaram_uv-flatbed-printer-close-1080x600_1790398056052.webp"
       ],
       "category": "UV Printing",
       "featured": true,
@@ -835,22 +911,6 @@
       "location": "Ahmedabad",
       "sortOrder": 9,
       "description": "Energy-efficient programmable scrolling LED message boards and vibrant 3D front-lit / back-lit LED channel lettering for striking night presence."
-    },
-    {
-      "id": "htxbp6a6",
-      "slug": "project-zeton1f1",
-      "title": "grfd",
-      "category": "Hoardings",
-      "image": "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588048/jalaram/shreedhar-bhakti-logo-103055571_1790588051741.jpg",
-      "images": [
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588048/jalaram/shreedhar-bhakti-logo-103055571_1790588051741.jpg",
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588049/jalaram/palasa_1790588053306.webp",
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588050/jalaram/iskon_buider_1790588054333.jpg",
-        "https://res.cloudinary.com/v61ii2hr/image/upload/v1790588051/jalaram/download__1__1790588054956.webp"
-      ],
-      "location": "",
-      "featured": true,
-      "sortOrder": 10
     }
   ],
   "heroImages": [

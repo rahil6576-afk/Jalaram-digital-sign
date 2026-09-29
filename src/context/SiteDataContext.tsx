@@ -39,13 +39,29 @@ export function SiteDataProvider({
     }
   }, []);
 
+  // Sync if initialData from server updates
+  useEffect(() => {
+    if (initialData && initialData.business) {
+      setSiteData(initialData);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
+        localStorage.setItem(`${STORAGE_KEY}_time`, Date.now().toString());
+      } catch {
+        // safe fallback
+      }
+    }
+  }, [initialData]);
+
   // Fetch fresh content from server API (reads directly from Supabase / disk)
   const refreshSiteData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/content?t=${Date.now()}`, { cache: "no-store" });
+      const res = await fetch(`/api/admin/content?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
+      });
       if (res.ok) {
         const json = await res.json();
-        if (json && json.business) {
+        if (json && json.business && Array.isArray(json.services)) {
           updateLocalSiteData(json);
         }
       }
@@ -55,23 +71,25 @@ export function SiteDataProvider({
   }, [updateLocalSiteData]);
 
   useEffect(() => {
-    // 1. On client mount, check cached storage if valid and up-to-date
-    try {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed?.business) {
-          setSiteData(parsed);
+    // 1. Only if initialData was not provided, check cached storage
+    if (!initialData) {
+      try {
+        const cached = localStorage.getItem(STORAGE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed?.business) {
+            setSiteData(parsed);
+          }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
 
     // 2. Fetch latest data from server
     refreshSiteData();
 
-    // 3. Listen for in-app updates dispatched when admin clicks "Save Changes"
+    // 3. Listen for in-app updates dispatched when admin clicks Save
     const handleCustomUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<SiteData>;
       if (customEvent.detail && customEvent.detail.business) {
@@ -80,7 +98,22 @@ export function SiteDataProvider({
     };
     window.addEventListener("site-content-updated", handleCustomUpdate);
 
-    // 4. Listen for storage events (sync across different browser tabs!)
+    // 4. BroadcastChannel listener (instant real-time cross-tab sync with ZERO reload!)
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("jalaram_site_sync");
+        bc.onmessage = (event) => {
+          if (event.data && event.data.business) {
+            setSiteData(event.data);
+          }
+        };
+      }
+    } catch {
+      // fallback
+    }
+
+    // 5. Listen for storage events (sync across different browser tabs!)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY && e.newValue) {
         try {
@@ -95,7 +128,7 @@ export function SiteDataProvider({
     };
     window.addEventListener("storage", handleStorageChange);
 
-    // 5. Refetch automatically when user returns/focuses back to the tab
+    // 6. Refetch automatically when user returns/focuses back to the tab
     const handleFocus = () => {
       refreshSiteData();
     };
@@ -104,6 +137,7 @@ export function SiteDataProvider({
 
     return () => {
       window.removeEventListener("site-content-updated", handleCustomUpdate);
+      if (bc) bc.close();
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleFocus);

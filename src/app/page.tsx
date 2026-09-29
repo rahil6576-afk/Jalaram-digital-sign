@@ -16,6 +16,16 @@ export default function Home() {
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState<number>(0);
+  const [marqueeOffset, setMarqueeOffset] = useState<number>(0);
+
+  const handlePrevPortfolio = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setMarqueeOffset((prev) => prev + 360);
+  };
+  const handleNextPortfolio = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setMarqueeOffset((prev) => prev - 360);
+  };
 
   const portfolioItems = (siteData?.portfolio || []).filter((p) => Boolean(p.image));
 
@@ -195,7 +205,7 @@ export default function Home() {
 
       {/* 3.5 PROJECT SHOWCASE INFINITE SLOW MARQUEE */}
       <section className="py-20 md:py-28 bg-white border-t border-black/5 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div>
             <span className="text-accent text-xs md:text-sm font-bold uppercase tracking-[0.2em] mb-3 block md:inline-block">
               Project Showcase
@@ -206,35 +216,81 @@ export default function Home() {
             <p className="text-gray-500 text-sm mt-1">Glimpse into our live outdoor, retail, and corporate installations across Gujarat.</p>
           </div>
 
+          {/* Quick Header Arrows */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrevPortfolio}
+              className="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Previous portfolio projects"
+              aria-label="Previous portfolio projects"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNextPortfolio}
+              className="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-purple-50 text-gray-700 hover:text-[#6F20E8] flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              title="Next portfolio projects"
+              aria-label="Next portfolio projects"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
         
-        {/* Infinite Slow Marquee Track */}
-        <div className="relative w-full overflow-hidden py-2">
-          {/* Marquee Track */}
-          <div className="animate-marquee-slow flex gap-6 min-w-max">
-            {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
-              const imgSrc = project.image ? encodeURI(project.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
-              return (
-                <button
-                  key={`${project.id || i}-${i}`}
-                  type="button"
-                  onClick={() => {
-                    const actualIdx = portfolioItems.findIndex((p) => p.id === project.id);
-                    setLightboxIndex(actualIdx >= 0 ? actualIdx : 0);
-                  }}
-                  className="block relative w-64 sm:w-72 md:w-80 lg:w-96 h-48 sm:h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group"
-                >
-                  <Image
-                    src={imgSrc}
-                    alt={project.title}
-                    fill
-                    loading="lazy"
-                    sizes="(max-width: 768px) 288px, 384px"
-                    className="object-cover pointer-events-none"
-                  />
-                </button>
-              );
-            })}
+        {/* Infinite Slow Marquee Track with Back & Forth Navigation Arrows */}
+        <div className="relative w-full overflow-hidden py-2 group/track">
+          {/* Back & Forth Navigation Arrow Buttons */}
+          <button
+            type="button"
+            onClick={handlePrevPortfolio}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer border border-white/20 backdrop-blur-md"
+            title="Scroll portfolio back"
+            aria-label="Previous portfolio installation"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={handleNextPortfolio}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-[#6F20E8] text-white flex items-center justify-center transition-all shadow-xl hover:scale-110 active:scale-95 cursor-pointer border border-white/20 backdrop-blur-md"
+            title="Scroll portfolio forward"
+            aria-label="Next portfolio installation"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Marquee Track Container with Smooth Manual Shift */}
+          <div
+            className="transition-transform duration-500 ease-out will-change-transform"
+            style={{ transform: `translateX(${marqueeOffset}px)` }}
+          >
+            <div className="animate-marquee-slow flex gap-6 min-w-max">
+              {[...(siteData?.portfolio || []), ...(siteData?.portfolio || [])].filter(p => p.image).map((project, i) => {
+                const imgSrc = project.image ? encodeURI(project.image) : "https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp";
+                return (
+                  <button
+                    key={`${project.id || i}-${i}`}
+                    type="button"
+                    onClick={() => {
+                      const actualIdx = portfolioItems.findIndex((p) => p.id === project.id);
+                      setLightboxIndex(actualIdx >= 0 ? actualIdx : 0);
+                    }}
+                    className="block relative w-64 sm:w-72 md:w-80 lg:w-96 h-48 sm:h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden border border-black/10 shrink-0 bg-gray-900 cursor-pointer group shadow-sm hover:shadow-xl transition-all"
+                  >
+                    <Image
+                      src={imgSrc}
+                      alt={project.title}
+                      fill
+                      loading="lazy"
+                      sizes="(max-width: 768px) 288px, 384px"
+                      className="object-cover pointer-events-none group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -292,17 +348,11 @@ export default function Home() {
                           className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <span className="absolute top-2 right-2 text-white text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/20">
-                          0{index + 1}
-                        </span>
                       </div>
                       <div className="p-3 flex flex-col flex-1 justify-between gap-1">
                         <div>
                           <h3 className="text-xs font-bold leading-tight line-clamp-1">{service.title}</h3>
-                          <p className="text-[11px] text-gray-500 leading-snug line-clamp-2 mt-1">{service.shortDescription}</p>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500 mt-2 pt-1 border-t border-black/5 uppercase tracking-wider">
-                          <span>{service.category || "Service Solution"}</span>
+                          <p className="text-[11px] text-gray-500 leading-snug line-clamp-2 mt-1">{service.shortDescription || service.description}</p>
                         </div>
                       </div>
                     </div>
@@ -317,26 +367,14 @@ export default function Home() {
                           sizes="(max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                        <span className="absolute top-3 sm:top-4 right-3 sm:right-4 text-white text-xs font-bold tracking-wider px-2.5 sm:px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/25">
-                          0{index + 1}
-                        </span>
-                        {service.category && (
-                          <span className="absolute bottom-3 left-4 text-white/90 text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-[#6F20E8]/80 backdrop-blur-sm">
-                            {service.category}
-                          </span>
-                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                       </div>
 
                       <div className="p-5 md:p-6 lg:p-7 flex flex-col flex-1">
                         <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">{service.title}</h3>
-                        <p className="text-gray-600 text-xs sm:text-sm mb-5 leading-relaxed flex-grow line-clamp-3">
-                          {service.shortDescription}
+                        <p className="text-gray-600 text-xs sm:text-sm leading-relaxed flex-grow line-clamp-3">
+                          {service.shortDescription || service.description}
                         </p>
-                        <div className="mt-auto pt-3 sm:pt-4 border-t border-black/5 flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          <span className="truncate pr-2">{service.category || "Professional Signage"}</span>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-[#6F20E8] bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 shrink-0">Service</span>
-                        </div>
                       </div>
                     </div>
                   </div>

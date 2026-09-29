@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteData } from "@/context/SiteDataContext";
 
 interface PageHeroProps {
-  badgeText: string;
+  badgeText?: string;
   title: React.ReactNode;
   subtitle: string;
-  images: string[];
+  images?: string[];
   minHeightClass?: string;
   children?: React.ReactNode;
 }
@@ -21,15 +22,26 @@ export default function PageHero({
   minHeightClass = "min-h-[60vh] sm:min-h-[65vh] md:min-h-[70vh]",
   children,
 }: PageHeroProps) {
+  const siteData = useSiteData();
   const [currentHeroImage, setCurrentHeroImage] = useState(0);
 
-  const heroImages = (images && images.length > 0 ? images : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]).slice(0, 7);
+  const adminHeroImages = (siteData?.heroImages || []).filter(
+    (img) => typeof img === "string" && img.trim().length > 0
+  );
+
+  const heroImages = (
+    adminHeroImages.length > 0
+      ? adminHeroImages
+      : images && images.length > 0
+      ? images
+      : ["https://res.cloudinary.com/v61ii2hr/image/upload/v1790398039/jalaram/jalaram_hoardings_1790398041158.webp"]
+  ).slice(0, 7);
 
   useEffect(() => {
     if (heroImages.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentHeroImage((prev) => (prev + 1) % heroImages.length);
-    }, 5000);
+    }, 4500);
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
@@ -43,7 +55,7 @@ export default function PageHero({
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
+            transition={{ duration: 1.0, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <Image
@@ -62,17 +74,19 @@ export default function PageHero({
       {/* Content centered exactly like Home Page */}
       <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 flex flex-col items-center text-center">
         {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-6"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
-            <span>{badgeText}</span>
-          </div>
-        </motion.div>
+        {badgeText && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mb-6"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/25 text-white font-semibold text-xs md:text-sm tracking-[0.2em] uppercase shadow-lg">
+              <span className="w-2 h-2 rounded-full bg-[#A855F7] animate-pulse shrink-0" />
+              <span>{badgeText}</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Heading */}
         <motion.h1
@@ -105,18 +119,26 @@ export default function PageHero({
         )}
       </div>
 
-      {/* Carousel Indicators */}
+      {/* Carousel Indicators with Animated Auto-scroll Progress Bars */}
       {heroImages.length > 1 && (
-        <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-20 flex justify-center gap-2 sm:gap-3">
+        <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 z-20 flex items-center justify-center gap-2 sm:gap-3">
           {heroImages.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentHeroImage(i)}
-              className={`w-10 sm:w-12 h-1 rounded-full transition-all duration-300 ${
-                i === currentHeroImage ? "bg-accent" : "bg-white/30 hover:bg-white/60"
-              }`}
+              className="relative w-10 sm:w-14 h-1.5 rounded-full overflow-hidden bg-white/30 hover:bg-white/50 transition-all cursor-pointer"
               aria-label={`Slide ${i + 1}`}
-            />
+            >
+              {i === currentHeroImage && (
+                <motion.div
+                  key={`progress-${currentHeroImage}`}
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 3.5, ease: "linear" }}
+                  className="absolute inset-0 bg-[#A855F7] rounded-full"
+                />
+              )}
+            </button>
           ))}
         </div>
       )}

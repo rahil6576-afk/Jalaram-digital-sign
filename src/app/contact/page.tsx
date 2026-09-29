@@ -165,26 +165,65 @@ export default function ContactPage() {
                   Contact Information
                 </h2>
                 <div className="space-y-6">
-                  {[
-                    { icon: MapPin, label: "Our Location", value: siteData.business.address, href: `https://maps.google.com/?q=${encodeURIComponent(siteData.business.address)}`, target: "_blank" },
-                    { icon: Phone, label: "Phone & WhatsApp", value: siteData.business.phone, href: `tel:${siteData.business.phone.replace(/\s/g,'')}`, target: undefined },
-                    { icon: Mail, label: "Email", value: siteData.business.email, href: `mailto:${siteData.business.email}`, target: undefined },
-                    { icon: Clock, label: "Business Hours", value: siteData.business.hours, href: undefined, target: undefined },
-                  ].map(({ icon: Icon, label, value, href, target }) => (
-                    <div key={label} className="flex items-start gap-5">
-                      <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
-                        <Icon className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold mb-1 text-lg">{label}</h3>
-                        {href ? (
-                          <a href={href} target={target} rel={target === "_blank" ? "noopener noreferrer" : undefined} className="text-gray-600 text-sm leading-relaxed max-w-xs hover:text-accent transition-colors">{value}</a>
-                        ) : (
-                          <p className="text-gray-600 text-sm leading-relaxed max-w-xs">{value}</p>
-                        )}
-                      </div>
+                  {/* Location */}
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                      <MapPin className="w-6 h-6 text-accent" />
                     </div>
-                  ))}
+                    <div>
+                      <h3 className="font-bold mb-1 text-lg">Our Location</h3>
+                      <a href={`https://maps.google.com/?q=${encodeURIComponent(siteData.business.address)}`} target="_blank" rel="noopener noreferrer" className="text-gray-600 text-sm leading-relaxed max-w-xs hover:text-accent transition-colors block">
+                        {siteData.business.address}
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Phone & WhatsApp */}
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                      <Phone className="w-6 h-6 text-accent" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="font-bold mb-1 text-lg">Phone &amp; WhatsApp</h3>
+                      <a href={`tel:${siteData.business.phone.replace(/\s/g, "")}`} className="text-gray-600 text-sm leading-relaxed hover:text-accent transition-colors">
+                        {siteData.business.phone}
+                      </a>
+                      {Boolean(siteData.business.extraPhone?.trim()) && (
+                        <a href={`tel:${siteData.business.extraPhone!.replace(/\s/g, "")}`} className="text-gray-600 text-sm leading-relaxed hover:text-accent transition-colors mt-1">
+                          {siteData.business.extraPhone} <span className="text-xs text-gray-400 font-normal">(Secondary)</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                      <Mail className="w-6 h-6 text-accent" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="font-bold mb-1 text-lg">Email</h3>
+                      <a href={`mailto:${siteData.business.email}`} className="text-gray-600 text-sm leading-relaxed hover:text-accent transition-colors">
+                        {siteData.business.email}
+                      </a>
+                      {Boolean(siteData.business.extraEmail?.trim()) && (
+                        <a href={`mailto:${siteData.business.extraEmail}`} className="text-gray-600 text-sm leading-relaxed hover:text-accent transition-colors mt-1">
+                          {siteData.business.extraEmail} <span className="text-xs text-gray-400 font-normal">(Secondary)</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Business Hours */}
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                      <Clock className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold mb-1 text-lg">Business Hours</h3>
+                      <p className="text-gray-600 text-sm leading-relaxed max-w-xs">{siteData.business.hours}</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Social Media Links */}
@@ -410,11 +449,13 @@ export default function ContactPage() {
                     <select
                       value={formData.service}
                       onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                      className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm"
+                      className="w-full bg-background border border-black/10 px-5 py-4 text-gray-900 focus:outline-none focus:border-accent transition-colors appearance-none rounded-sm cursor-pointer"
                     >
-                      <option value="">Select a service category</option>
+                      <option value="">Select a service</option>
                       {siteData.services.map((s) => (
-                        <option key={s.id} value={s.title}>{s.title}</option>
+                        <option key={s.id} value={s.title}>
+                          {s.title}
+                        </option>
                       ))}
                     </select>
                   </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSiteData } from "@/context/SiteDataContext";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -13,6 +13,7 @@ const navLinks = [
   { name: "Portfolio", href: "/portfolio" },
   { name: "Team", href: "/team" },
   { name: "Services", href: "/services" },
+  { name: "Machines", href: "/machines" },
   { name: "Contact Us", href: "/contact" },
 ];
 
@@ -22,7 +23,18 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollY = useRef(0);
+
+  // Group services by category/type
+  const servicesByCategory = (siteData?.services || []).reduce((acc, s) => {
+    const cat = s.category || "General Services";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(s);
+    return acc;
+  }, {} as Record<string, typeof siteData.services>);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -113,6 +125,97 @@ export default function Navbar() {
             <nav className="hidden lg:flex items-center gap-5 xl:gap-8">
               {navLinks.map((link) => {
                 const active = isActive(link.href);
+
+                // Dedicated Services dropdown with categorized service types
+                if (link.name === "Services") {
+                  return (
+                    <div
+                      key={link.name}
+                      className="relative"
+                      onMouseEnter={() => {
+                        if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
+                        setServicesDropdownOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        dropdownTimeoutRef.current = setTimeout(() => {
+                          setServicesDropdownOpen(false);
+                        }, 200);
+                      }}
+                    >
+                      <Link
+                        href="/services"
+                        prefetch={true}
+                        className={`inline-flex items-center gap-1.5 text-xs xl:text-sm uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                          active
+                            ? "text-black font-bold underline underline-offset-8 decoration-2 decoration-accent scale-105"
+                            : "text-gray-600 font-medium hover:text-black"
+                        }`}
+                      >
+                        <span>{link.name}</span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            servicesDropdownOpen ? "rotate-180 text-black" : "text-gray-400"
+                          }`}
+                        />
+                      </Link>
+
+                      {/* Dropdown Menu Container */}
+                      <AnimatePresence>
+                        {servicesDropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                            transition={{ duration: 0.18, ease: "easeOut" }}
+                            className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[720px] max-w-[90vw] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 z-50 text-left"
+                          >
+                            <div className="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
+                              <div>
+                                <h4 className="text-sm font-bold text-gray-900 tracking-tight">
+                                  All Printing &amp; Signage Services
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  {siteData.services.length} services available
+                                </p>
+                              </div>
+                              <Link
+                                href="/services"
+                                onClick={() => setServicesDropdownOpen(false)}
+                                className="text-xs font-bold text-[#6F20E8] hover:text-[#5B16C7] transition-colors"
+                              >
+                                View All Services &rarr;
+                              </Link>
+                            </div>
+
+                            {/* Clean Multi-column Services List (Redirects to clicked service) */}
+                            <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 max-h-[420px] overflow-y-auto pr-2">
+                              {siteData.services.map((service) => {
+                                const targetId = service.slug || service.id;
+                                return (
+                                  <Link
+                                    key={service.id}
+                                    href={`/services#${targetId}`}
+                                    onClick={() => {
+                                      setServicesDropdownOpen(false);
+                                      if (typeof window !== "undefined" && window.location.pathname === "/services") {
+                                        const el = document.getElementById(targetId);
+                                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                      }
+                                    }}
+                                    className="text-xs text-gray-700 hover:text-[#6F20E8] hover:translate-x-1 transition-all block py-1.5 px-2.5 rounded-lg hover:bg-purple-50 font-medium leading-snug cursor-pointer"
+                                  >
+                                    {service.title}
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={link.name}
@@ -205,6 +308,72 @@ export default function Navbar() {
               </p>
               {navLinks.map((link) => {
                 const active = isActive(link.href);
+
+                if (link.name === "Services") {
+                  return (
+                    <div key={link.name} className="flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={link.href}
+                          prefetch={true}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex-1 flex items-center px-4 py-3.5 rounded-xl font-bold uppercase tracking-wider text-base transition-all min-h-[50px] ${
+                            active
+                              ? "bg-purple-50 text-[#6F20E8] border border-purple-200 shadow-sm"
+                              : "text-gray-800 hover:bg-gray-50 active:bg-gray-100"
+                          }`}
+                        >
+                          <span className="flex items-center gap-3">
+                            <span
+                              className={`w-2.5 h-2.5 rounded-full ${
+                                active ? "bg-[#6F20E8]" : "bg-gray-300"
+                              }`}
+                            />
+                            {link.name}
+                          </span>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                          className="px-3 py-3 text-gray-500 hover:text-gray-900"
+                          aria-label="Toggle Services List"
+                        >
+                          <ChevronDown
+                            className={`w-5 h-5 transition-transform ${
+                              mobileServicesOpen ? "rotate-180 text-[#6F20E8]" : ""
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Mobile Accordion of Services (Redirects to clicked service) */}
+                      {mobileServicesOpen && (
+                        <div className="pl-4 pr-2 py-3 grid grid-cols-1 gap-1 max-h-[300px] overflow-y-auto bg-gray-50/70 rounded-xl my-1 border border-gray-100">
+                          {siteData.services.map((s) => {
+                            const targetId = s.slug || s.id;
+                            return (
+                              <Link
+                                key={s.id}
+                                href={`/services#${targetId}`}
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  if (typeof window !== "undefined" && window.location.pathname === "/services") {
+                                    const el = document.getElementById(targetId);
+                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  }
+                                }}
+                                className="text-xs text-gray-700 hover:text-[#6F20E8] block py-1.5 px-3 rounded-lg hover:bg-purple-50 font-medium cursor-pointer"
+                              >
+                                {s.title}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     key={link.name}

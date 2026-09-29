@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Also keep local JSON synchronized as reliable backup and offline cache (when filesystem is writable)
+    // 2. Also keep runtime local JSON synchronized as reliable backup and offline cache (when filesystem is writable)
+    // Note: We only write to RUNTIME_CONTENT_PATH (outside src/) so Next.js dev server does not trigger an HMR page reload on save
     try {
       const dir = path.dirname(RUNTIME_CONTENT_PATH);
       if (!fs.existsSync(dir)) {

@@ -41,7 +41,9 @@ import {
 // ── Types ──────────────────────────────────────────────────────────────────
 interface Business {
   name: string; description: string; address: string; phone: string;
-  whatsapp: string; email: string; mapsLink: string; hours: string;
+  extraPhone?: string;
+  whatsapp: string; email: string; extraEmail?: string;
+  mapsLink: string; hours: string;
 }
 interface Socials {
   instagram: string;
@@ -61,6 +63,7 @@ interface PortfolioItem {
 }
 interface TeamMember {
   id: string; name: string; role: string; bio?: string; image: string;
+  phone?: string; email?: string;
   socialLinks: Record<string, string>; sortOrder: number;
 }
 interface Testimonial { id: string; name: string; business: string; quote: string; rating: number; }
@@ -93,7 +96,7 @@ type ActiveModal = {
 } | null;
 
 const TABS = [
-  { id: "business", label: "Social Links", icon: Globe },
+  { id: "business", label: "Business & Contact", icon: Building2 },
   { id: "hero", label: "Hero Images", icon: ImageIcon },
   { id: "clients", label: "Client Logos", icon: Building2 },
   { id: "portfolio", label: "Portfolio", icon: LayoutGrid },
@@ -106,14 +109,39 @@ const TABS = [
 
 export const CATEGORY_OPTIONS = [
   "Hoardings",
+  "Flex Printing",
   "Flex Banner",
   "Vinyl Printing",
-  "Raduim Work",
-  "UV Printing",
-  "1Way Vision Print",
-  "Acrylic Board",
-  "Glow Sign",
+  "Banner Printing",
+  "Sign Board",
+  "LED Sign Board",
   "Board LED Board",
+  "Acrylic Signage",
+  "Acrylic Board",
+  "Glow Sign Board",
+  "Glow Sign",
+  "3D Letter Signage",
+  "UV Printing",
+  "Fabric Box",
+  "ACP Cladding",
+  "Sunboard Printing",
+  "Roll-Up Standee",
+  "Posters",
+  "Stickers & Labels",
+  "Pamphlet / Flyer Printing",
+  "Visiting Cards",
+  "Letterheads",
+  "Invitation Cards",
+  "Name Plates – Acrylic / SS",
+  "Vehicle Graphics",
+  "Bag Printing",
+  "Graphic Designing",
+  "Installation Services",
+  "1Way Vision Print",
+  "One way Print",
+  "Frosted",
+  "Digital Printing",
+  "Raduim Work",
 ];
 
 // ── Toast ───────────────────────────────────────────────────────────────────
@@ -942,9 +970,33 @@ const labelCls = "text-xs font-semibold text-gray-500 uppercase tracking-wider m
 // ── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("business");
+  const [activeTab, setActiveTabState] = useState("business");
+
+  // Restore active tab from localStorage so admin stays on the active tab
+  useEffect(() => {
+    try {
+      const savedTab = localStorage.getItem("jalaram_admin_active_tab");
+      if (savedTab && TABS.some((t) => t.id === savedTab)) {
+        setActiveTabState(savedTab);
+      }
+    } catch {}
+  }, []);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem("jalaram_admin_active_tab", tab);
+    } catch {}
+  };
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [data, setData] = useState<SiteData | null>(null);
+  const dataRef = useRef<SiteData | null>(null);
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "loading" } | null>(null);
@@ -1091,8 +1143,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch("/api/admin/content");
+        const res = await fetch("/api/admin/content?t=" + Date.now(), { cache: "no-store" });
         const json = await res.json();
+        dataRef.current = json;
         setData(json);
       } catch {
         showToast("Failed to load site data", "error");
@@ -1113,7 +1166,7 @@ export default function AdminDashboard() {
   };
 
   const handleSave = async (customData?: SiteData) => {
-    const payload = customData || data;
+    const payload = customData || dataRef.current || data;
     if (!payload) return;
     setSaving(true);
     showToast("Saving…", "loading");
@@ -1151,6 +1204,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(sanitizedData),
       });
       if (!res.ok) throw new Error("Save failed");
+      dataRef.current = sanitizedData;
       setData(sanitizedData);
 
       // Immediately propagate updates to localStorage and custom events
@@ -1160,6 +1214,11 @@ export default function AdminDashboard() {
         localStorage.setItem("jalaram_site_content_v3_time", Date.now().toString());
         localStorage.setItem("jalaram_site_content_v2", JSON.stringify(sanitizedData));
         window.dispatchEvent(new CustomEvent("site-content-updated", { detail: sanitizedData }));
+        if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+          const bc = new BroadcastChannel("jalaram_site_sync");
+          bc.postMessage(sanitizedData);
+          bc.close();
+        }
       } catch {
         // safe fallback if storage is restricted
       }
@@ -1207,7 +1266,7 @@ export default function AdminDashboard() {
     await handleSave(updated);
   };
 
-  const _updateBusiness = (k: keyof Business, v: string) =>
+  const updateBusiness = (k: keyof Business, v: string) =>
     setData((p) => p ? { ...p, business: { ...p.business, [k]: v } } : p);
 
   const updateSocials = (k: keyof Socials, v: string) =>
@@ -1400,23 +1459,165 @@ export default function AdminDashboard() {
           {activeTab === "business" && (
             <div className="space-y-6">
               <SectionHeader
-                title="Social Profiles"
-                subtitle="Configure official social media profile URLs (Instagram and Facebook)."
-              />
-              <div className={sectionCard}>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-[#6F20E8]" /> Official Social Profiles
-                  </h3>
+                title="Business Contact & Details"
+                subtitle="Configure company contact phone numbers, emails, office address, and social profiles."
+                actionButton={
                   <button
                     type="button"
                     onClick={() => handleSave()}
                     disabled={saving}
-                    className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center gap-1.5"
                   >
-                    {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                    {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     Save
                   </button>
+                }
+              />
+
+              {/* Business Contact Details Card */}
+              <div className={sectionCard}>
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-[#6F20E8]" /> Business Contact Information
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Main phone and email, plus additional contact numbers and emails.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Company Name */}
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Company Name</label>
+                    <input
+                      type="text"
+                      value={data.business.name || ""}
+                      onChange={(e) => updateBusiness("name", e.target.value)}
+                      placeholder="Jalaram Digital Sign"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Primary Phone */}
+                  <div>
+                    <label className={labelCls}>Primary Phone / Contact Number</label>
+                    <input
+                      type="text"
+                      value={data.business.phone || ""}
+                      onChange={(e) => updateBusiness("phone", e.target.value)}
+                      placeholder="+91 85111 33363"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Secondary Phone */}
+                  <div>
+                    <label className={labelCls}>Secondary Contact Number</label>
+                    <input
+                      type="text"
+                      value={data.business.extraPhone || ""}
+                      onChange={(e) => updateBusiness("extraPhone", e.target.value)}
+                      placeholder="+91 98765 43210"
+                      className={field}
+                    />
+                    <p className="text-[11px] text-gray-500 mt-1">Shows on the main site only if entered.</p>
+                  </div>
+
+                  {/* Primary Email */}
+                  <div>
+                    <label className={labelCls}>Primary Contact Email</label>
+                    <input
+                      type="email"
+                      value={data.business.email || ""}
+                      onChange={(e) => updateBusiness("email", e.target.value)}
+                      placeholder="jalaramdigitalsign@gmail.com"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Secondary Email */}
+                  <div>
+                    <label className={labelCls}>Secondary Email</label>
+                    <input
+                      type="email"
+                      value={data.business.extraEmail || ""}
+                      onChange={(e) => updateBusiness("extraEmail", e.target.value)}
+                      placeholder="info@jalaramdigitalsign.com"
+                      className={field}
+                    />
+                    <p className="text-[11px] text-gray-500 mt-1">Shows on the main site only if entered.</p>
+                  </div>
+
+                  {/* WhatsApp */}
+                  <div>
+                    <label className={labelCls}>WhatsApp Number (without + symbol)</label>
+                    <input
+                      type="text"
+                      value={data.business.whatsapp || ""}
+                      onChange={(e) => updateBusiness("whatsapp", e.target.value)}
+                      placeholder="918511133363"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Working Hours */}
+                  <div>
+                    <label className={labelCls}>Working / Operating Hours</label>
+                    <input
+                      type="text"
+                      value={data.business.hours || ""}
+                      onChange={(e) => updateBusiness("hours", e.target.value)}
+                      placeholder="Mon - Sat: 9:00 AM - 8:00 PM"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Physical Address */}
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Full Workshop / Office Address</label>
+                    <input
+                      type="text"
+                      value={data.business.address || ""}
+                      onChange={(e) => updateBusiness("address", e.target.value)}
+                      placeholder="G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010"
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Maps Link */}
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Google Maps Location URL</label>
+                    <input
+                      type="text"
+                      value={data.business.mapsLink || ""}
+                      onChange={(e) => updateBusiness("mapsLink", e.target.value)}
+                      placeholder="https://maps.app.goo.gl/..."
+                      className={field}
+                    />
+                  </div>
+
+                  {/* Business Description */}
+                  <div className="sm:col-span-2">
+                    <label className={labelCls}>Business Overview / Tagline</label>
+                    <textarea
+                      rows={3}
+                      value={data.business.description || ""}
+                      onChange={(e) => updateBusiness("description", e.target.value)}
+                      placeholder="Professional digital printing, banners, signage, LED signs, vinyl printing..."
+                      className={field}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media Profiles Card */}
+              <div className={sectionCard}>
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#6F20E8]" /> Official Social Profiles
+                  </h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(["instagram", "facebook", "youtube", "linkedin", "twitter"] as (keyof Socials)[]).map((key) => (
@@ -1572,22 +1773,33 @@ export default function AdminDashboard() {
                 title="Client Companies & Marquee Logos"
                 subtitle="All client entries displayed in a table. Click any entry or photo to view and edit in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newClient: ClientCompany = {
-                        id: `client-${genId()}`,
-                        name: "",
-                        tag: "",
-                        logo: "",
-                      };
-                      setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
-                      setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true, mode: "edit" });
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    <Plus className="w-4 h-4" /> Add Client Company
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newClient: ClientCompany = {
+                          id: `client-${genId()}`,
+                          name: "",
+                          tag: "",
+                          logo: "",
+                        };
+                        setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
+                        setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true, mode: "edit" });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Add Client Company
+                    </button>
+                  </div>
                 }
               />
 
@@ -1694,27 +1906,38 @@ export default function AdminDashboard() {
                 title="Portfolio Projects"
                 subtitle="All projects organized in a table. Click any row or action icon to view and edit details in a popup modal screen."
                 actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newItem: PortfolioItem = {
-                        id: genId(),
-                        slug: `project-${genId()}`,
-                        title: "",
-                        category: "Hoardings",
-                        image: "",
-                        images: [],
-                        location: "",
-                        featured: false,
-                        sortOrder: data.portfolio.length + 1,
-                      };
-                      setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
-                      setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true, mode: "edit" });
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    <Plus className="w-4 h-4" /> Add Project
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newItem: PortfolioItem = {
+                          id: genId(),
+                          slug: `project-${genId()}`,
+                          title: "",
+                          category: "Hoardings",
+                          image: "",
+                          images: [],
+                          location: "",
+                          featured: false,
+                          sortOrder: data.portfolio.length + 1,
+                        };
+                        setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
+                        setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true, mode: "edit" });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Add Project
+                    </button>
+                  </div>
                 }
               />
 
@@ -1822,28 +2045,39 @@ export default function AdminDashboard() {
                 title="Services"
                 subtitle="All services listed in a table. Click any entry or action icon to view and edit details in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const s: Service = {
-                        id: genId(),
-                        slug: `service-${genId()}`,
-                        title: "",
-                        shortDescription: "",
-                        description: "",
-                        image: "",
-                        category: "Flex Banner",
-                        features: [],
-                        featured: false,
-                        sortOrder: data.services.length + 1,
-                      };
-                      setData((p) => p ? { ...p, services: [...p.services, s] } : p);
-                      setActiveModal({ type: "service", idOrIndex: s.id, isNew: true, mode: "edit" });
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    <Plus className="w-4 h-4" /> Add Service
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const s: Service = {
+                          id: genId(),
+                          slug: `service-${genId()}`,
+                          title: "",
+                          shortDescription: "",
+                          description: "",
+                          image: "",
+                          category: "Flex Banner",
+                          features: [],
+                          featured: false,
+                          sortOrder: data.services.length + 1,
+                        };
+                        setData((p) => p ? { ...p, services: [...p.services, s] } : p);
+                        setActiveModal({ type: "service", idOrIndex: s.id, isNew: true, mode: "edit" });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Add Service
+                    </button>
+                  </div>
                 }
               />
 
@@ -1957,25 +2191,36 @@ export default function AdminDashboard() {
                 title="Team Members"
                 subtitle="All team members displayed in a table. Click any row or action icon to view and edit details in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const m: TeamMember = {
-                        id: genId(),
-                        name: "",
-                        role: "",
-                        bio: "",
-                        image: "",
-                        socialLinks: {},
-                        sortOrder: data.team.length + 1,
-                      };
-                      setData((p) => p ? { ...p, team: [...p.team, m] } : p);
-                      setActiveModal({ type: "team", idOrIndex: m.id, isNew: true, mode: "edit" });
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    <Plus className="w-4 h-4" /> Add Member
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const m: TeamMember = {
+                          id: genId(),
+                          name: "",
+                          role: "",
+                          bio: "",
+                          image: "",
+                          socialLinks: {},
+                          sortOrder: data.team.length + 1,
+                        };
+                        setData((p) => p ? { ...p, team: [...p.team, m] } : p);
+                        setActiveModal({ type: "team", idOrIndex: m.id, isNew: true, mode: "edit" });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Add Member
+                    </button>
+                  </div>
                 }
               />
 
@@ -2073,26 +2318,37 @@ export default function AdminDashboard() {
                 title={`Client Reviews (${data.testimonials.length}/30)`}
                 subtitle="All client reviews listed in a table (up to 30 maximum). Click any entry or action icon to view and edit details in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    disabled={data.testimonials.length >= 30}
-                    onClick={() => {
-                      if (data.testimonials.length >= 30) {
-                        showToast("You can have a maximum of 30 client reviews.", "error");
-                        return;
-                      }
-                      const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
-                      setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
-                      setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
-                    }}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md ${
-                      data.testimonials.length >= 30
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-                        : "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-[#6F20E8]/20"
-                    }`}
-                  >
-                    <Plus className="w-4 h-4" /> {data.testimonials.length >= 30 ? "Limit Reached (30)" : "Add Review"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      disabled={data.testimonials.length >= 30}
+                      onClick={() => {
+                        if (data.testimonials.length >= 30) {
+                          showToast("You can have a maximum of 30 client reviews.", "error");
+                          return;
+                        }
+                        const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
+                        setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
+                        setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
+                      }}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md ${
+                        data.testimonials.length >= 30
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                          : "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-[#6F20E8]/20"
+                      }`}
+                    >
+                      <Plus className="w-4 h-4" /> {data.testimonials.length >= 30 ? "Limit Reached (30)" : "Add Review"}
+                    </button>
+                  </div>
                 }
               />
 
@@ -2184,17 +2440,28 @@ export default function AdminDashboard() {
                 title="Frequently Asked Questions"
                 subtitle="All questions listed in a table. Click any entry or action icon to view and edit details in a popup modal."
                 actionButton={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newFaq = { id: genId(), question: "", answer: "" };
-                      setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
-                      setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true, mode: "edit" });
-                    }}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                  >
-                    <Plus className="w-4 h-4" /> Add FAQ
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSave()}
+                      disabled={saving}
+                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newFaq = { id: genId(), question: "", answer: "" };
+                        setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
+                        setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true, mode: "edit" });
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                    >
+                      <Plus className="w-4 h-4" /> Add FAQ
+                    </button>
+                  </div>
                 }
               />
 
@@ -2678,12 +2945,14 @@ export default function AdminDashboard() {
             mode={activeModal.mode || "edit"}
             onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
-              if (!item.title || !item.title.trim()) {
+              const latestData = dataRef.current || data;
+              const currentItem = latestData?.portfolio.find((x) => x.id === item.id);
+              if (!currentItem?.title || !currentItem.title.trim()) {
                 setModalError("Project Title is required. Please fill in the project title before saving.");
                 return;
               }
               setModalError(null);
-              await handleSave();
+              await handleSave(latestData);
               closeModal();
             }}
             saving={saving}
@@ -2699,14 +2968,18 @@ export default function AdminDashboard() {
                   onChange={(e) => {
                     if (isReadOnly) return;
                     setModalError(null);
-                    setData((p) => p ? {
-                      ...p,
-                      portfolio: p.portfolio.map((x) => x.id === item.id ? {
+                    const base = dataRef.current || data;
+                    if (!base) return;
+                    const updated = {
+                      ...base,
+                      portfolio: base.portfolio.map((x) => x.id === item.id ? {
                         ...x,
                         title: e.target.value,
                         slug: x.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
                       } : x)
-                    } : p);
+                    };
+                    dataRef.current = updated;
+                    setData(updated);
                   }}
                   className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   placeholder="e.g. Reliance Retail LED Display"
@@ -2720,17 +2993,21 @@ export default function AdminDashboard() {
                     value={item.category}
                     onChange={(e) => {
                       if (isReadOnly) return;
-                      setData((p) => p ? {
-                        ...p,
-                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
-                      } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updated = {
+                        ...base,
+                        portfolio: base.portfolio.map((x) => x.id === item.id ? { ...x, category: e.target.value } : x)
+                      };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : " cursor-pointer font-medium")}
                   >
-                    {CATEGORY_OPTIONS.map((cat) => (
+                    {Array.from(new Set([...CATEGORY_OPTIONS, ...(data?.services?.map((s) => s.title) || [])])).map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
-                    {!CATEGORY_OPTIONS.includes(item.category) && item.category && (
+                    {item.category && !CATEGORY_OPTIONS.includes(item.category) && !data?.services?.some(s => s.title === item.category) && (
                       <option value={item.category}>{item.category}</option>
                     )}
                   </select>
@@ -2744,10 +3021,14 @@ export default function AdminDashboard() {
                     value={item.location}
                     onChange={(e) => {
                       if (isReadOnly) return;
-                      setData((p) => p ? {
-                        ...p,
-                        portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
-                      } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updated = {
+                        ...base,
+                        portfolio: base.portfolio.map((x) => x.id === item.id ? { ...x, location: e.target.value } : x)
+                      };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                     placeholder="e.g. Gandhinagar, Gujarat"
@@ -2761,17 +3042,25 @@ export default function AdminDashboard() {
                 readOnly={isReadOnly}
                 onCoverChange={(newCover) => {
                   if (isReadOnly) return;
-                  setData((p) => p ? {
-                    ...p,
-                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, image: newCover } : x)
-                  } : p);
+                  const base = dataRef.current || data;
+                  if (!base) return;
+                  const updated = {
+                    ...base,
+                    portfolio: base.portfolio.map((x) => x.id === item.id ? { ...x, image: newCover } : x)
+                  };
+                  dataRef.current = updated;
+                  setData(updated);
                 }}
                 onImagesChange={(newImgs) => {
                   if (isReadOnly) return;
-                  setData((p) => p ? {
-                    ...p,
-                    portfolio: p.portfolio.map((x) => x.id === item.id ? { ...x, images: newImgs } : x)
-                  } : p);
+                  const base = dataRef.current || data;
+                  if (!base) return;
+                  const updated = {
+                    ...base,
+                    portfolio: base.portfolio.map((x) => x.id === item.id ? { ...x, images: newImgs } : x)
+                  };
+                  dataRef.current = updated;
+                  setData(updated);
                 }}
               />
 
@@ -2798,7 +3087,8 @@ export default function AdminDashboard() {
 
       {/* 2. Service Modal */}
       {activeModal?.type === "service" && (() => {
-        const svc = data.services.find((x) => x.id === activeModal.idOrIndex);
+        const currentData = dataRef.current || data;
+        const svc = currentData?.services.find((x) => x.id === activeModal.idOrIndex);
         if (!svc) return null;
         const isReadOnly = activeModal.mode === "view";
         return (
@@ -2811,12 +3101,14 @@ export default function AdminDashboard() {
             mode={activeModal.mode || "edit"}
             onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
-              if (!svc.title || !svc.title.trim()) {
+              const latestData = dataRef.current || data;
+              const currentSvc = latestData?.services.find((x) => x.id === svc.id);
+              if (!currentSvc?.title || !currentSvc.title.trim()) {
                 setModalError("Service Title is required. Please fill in the title before saving.");
                 return;
               }
               setModalError(null);
-              await handleSave();
+              await handleSave(latestData);
               closeModal();
             }}
             saving={saving}
@@ -2833,10 +3125,12 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       if (isReadOnly) return;
                       setModalError(null);
-                      setData((p) => p ? {
-                        ...p,
-                        services: p.services.map((x) => x.id === svc.id ? { ...x, title: e.target.value } : x)
-                      } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, title: e.target.value } : x);
+                      const updated = { ...base, services: updatedServices };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
@@ -2848,17 +3142,19 @@ export default function AdminDashboard() {
                     value={svc.category}
                     onChange={(e) => {
                       if (isReadOnly) return;
-                      setData((p) => p ? {
-                        ...p,
-                        services: p.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x)
-                      } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, category: e.target.value } : x);
+                      const updated = { ...base, services: updatedServices };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : " cursor-pointer font-medium")}
                   >
-                    {CATEGORY_OPTIONS.map((cat) => (
+                    {Array.from(new Set([...CATEGORY_OPTIONS, ...(data?.services?.map((s) => s.title) || [])])).map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
-                    {!CATEGORY_OPTIONS.includes(svc.category) && svc.category && (
+                    {svc.category && !CATEGORY_OPTIONS.includes(svc.category) && !data?.services?.some(s => s.title === svc.category) && (
                       <option value={svc.category}>{svc.category}</option>
                     )}
                   </select>
@@ -2871,10 +3167,12 @@ export default function AdminDashboard() {
                 readOnly={isReadOnly}
                 onChange={(v) => {
                   if (isReadOnly) return;
-                  setData((p) => p ? {
-                    ...p,
-                    services: p.services.map((x) => x.id === svc.id ? { ...x, image: v } : x)
-                  } : p);
+                  const base = dataRef.current || data;
+                  if (!base) return;
+                  const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, image: v } : x);
+                  const updated = { ...base, services: updatedServices };
+                  dataRef.current = updated;
+                  setData(updated);
                 }}
               />
 
@@ -2887,10 +3185,12 @@ export default function AdminDashboard() {
                   value={svc.shortDescription || ""}
                   onChange={(e) => {
                     if (isReadOnly) return;
-                    setData((p) => p ? {
-                      ...p,
-                      services: p.services.map((x) => x.id === svc.id ? { ...x, shortDescription: e.target.value } : x)
-                    } : p);
+                    const base = dataRef.current || data;
+                    if (!base) return;
+                    const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, shortDescription: e.target.value } : x);
+                    const updated = { ...base, services: updatedServices };
+                    dataRef.current = updated;
+                    setData(updated);
                   }}
                   className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   placeholder="e.g. High-impact durable hoardings and flex boards for outdoor advertising."
@@ -2906,10 +3206,12 @@ export default function AdminDashboard() {
                   value={svc.description || ""}
                   onChange={(e) => {
                     if (isReadOnly) return;
-                    setData((p) => p ? {
-                      ...p,
-                      services: p.services.map((x) => x.id === svc.id ? { ...x, description: e.target.value } : x)
-                    } : p);
+                    const base = dataRef.current || data;
+                    if (!base) return;
+                    const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, description: e.target.value } : x);
+                    const updated = { ...base, services: updatedServices };
+                    dataRef.current = updated;
+                    setData(updated);
                   }}
                   className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   placeholder="Comprehensive details, material specs, installation and delivery options for this service..."
@@ -2925,10 +3227,14 @@ export default function AdminDashboard() {
                   {!isReadOnly && (
                     <button
                       type="button"
-                      onClick={() => setData((p) => p ? {
-                        ...p,
-                        services: p.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x)
-                      } : p)}
+                      onClick={() => {
+                        const base = dataRef.current || data;
+                        if (!base) return;
+                        const updatedServices = base.services.map((x) => x.id === svc.id ? { ...x, features: [...x.features, ""] } : x);
+                        const updated = { ...base, services: updatedServices };
+                        dataRef.current = updated;
+                        setData(updated);
+                      }}
                       className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200"
                     >
                       <Plus className="w-3 h-3" /> Add Bullet Point
@@ -2948,15 +3254,17 @@ export default function AdminDashboard() {
                       value={feat}
                       onChange={(e) => {
                         if (isReadOnly) return;
-                        setData((p) => p ? {
-                          ...p,
-                          services: p.services.map((x) => {
-                            if (x.id !== svc.id) return x;
-                            const f = [...x.features];
-                            f[fi] = e.target.value;
-                            return { ...x, features: f };
-                          })
-                        } : p);
+                        const base = dataRef.current || data;
+                        if (!base) return;
+                        const updatedServices = base.services.map((x) => {
+                          if (x.id !== svc.id) return x;
+                          const f = [...x.features];
+                          f[fi] = e.target.value;
+                          return { ...x, features: f };
+                        });
+                        const updated = { ...base, services: updatedServices };
+                        dataRef.current = updated;
+                        setData(updated);
                       }}
                       className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                       placeholder={`Bullet point ${fi + 1}`}
@@ -3014,12 +3322,14 @@ export default function AdminDashboard() {
             mode={activeModal.mode || "edit"}
             onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
             onSave={async () => {
-              if (!m.name || !m.name.trim() || !m.role || !m.role.trim()) {
+              const latestData = dataRef.current || data;
+              const currentM = latestData?.team.find((x) => x.id === m.id);
+              if (!currentM?.name || !currentM.name.trim() || !currentM.role || !currentM.role.trim()) {
                 setModalError("Both Full Name and Role / Position are required before saving.");
                 return;
               }
               setModalError(null);
-              await handleSave();
+              await handleSave(latestData);
               closeModal();
             }}
             saving={saving}
@@ -3036,7 +3346,12 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       if (isReadOnly) return;
                       setModalError(null);
-                      setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, name: e.target.value } : x) } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updatedTeam = base.team.map((x) => x.id === m.id ? { ...x, name: e.target.value } : x);
+                      const updated = { ...base, team: updatedTeam };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
@@ -3051,11 +3366,37 @@ export default function AdminDashboard() {
                     onChange={(e) => {
                       if (isReadOnly) return;
                       setModalError(null);
-                      setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, role: e.target.value } : x) } : p);
+                      const base = dataRef.current || data;
+                      if (!base) return;
+                      const updatedTeam = base.team.map((x) => x.id === m.id ? { ...x, role: e.target.value } : x);
+                      const updated = { ...base, team: updatedTeam };
+                      dataRef.current = updated;
+                      setData(updated);
                     }}
                     className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Direct Contact Number / Phone (Especially Founder/Owner)</label>
+                <input
+                  type="text"
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
+                  value={m.phone || ""}
+                  onChange={(e) => {
+                    if (isReadOnly) return;
+                    const base = dataRef.current || data;
+                    if (!base) return;
+                    const updatedTeam = base.team.map((x) => x.id === m.id ? { ...x, phone: e.target.value } : x);
+                    const updated = { ...base, team: updatedTeam };
+                    dataRef.current = updated;
+                    setData(updated);
+                  }}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                  placeholder="+91 85111 33363"
+                />
               </div>
 
               <ImageInput
@@ -3064,7 +3405,12 @@ export default function AdminDashboard() {
                 readOnly={isReadOnly}
                 onChange={(v) => {
                   if (isReadOnly) return;
-                  setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, image: v } : x) } : p);
+                  const base = dataRef.current || data;
+                  if (!base) return;
+                  const updatedTeam = base.team.map((x) => x.id === m.id ? { ...x, image: v } : x);
+                  const updated = { ...base, team: updatedTeam };
+                  dataRef.current = updated;
+                  setData(updated);
                 }}
               />
 
@@ -3077,7 +3423,12 @@ export default function AdminDashboard() {
                   value={m.bio || ""}
                   onChange={(e) => {
                     if (isReadOnly) return;
-                    setData((p) => p ? { ...p, team: p.team.map((x) => x.id === m.id ? { ...x, bio: e.target.value } : x) } : p);
+                    const base = dataRef.current || data;
+                    if (!base) return;
+                    const updatedTeam = base.team.map((x) => x.id === m.id ? { ...x, bio: e.target.value } : x);
+                    const updated = { ...base, team: updatedTeam };
+                    dataRef.current = updated;
+                    setData(updated);
                   }}
                   className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
                   placeholder="Short description, experience, or role details for this team member..."
