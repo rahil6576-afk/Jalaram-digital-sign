@@ -166,17 +166,25 @@ export default function ContactPage() {
                 </h2>
                 <div className="space-y-6">
                   {/* Location */}
-                  <div className="flex items-start gap-5">
-                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5">
+                  <a
+                    href="https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-5 group cursor-pointer"
+                  >
+                    <div className="w-14 h-14 bg-card-bg border border-black/5 rounded-sm flex items-center justify-center shrink-0 shadow-lg shadow-accent/5 group-hover:border-accent group-hover:scale-105 transition-all">
                       <MapPin className="w-6 h-6 text-accent" />
                     </div>
                     <div>
-                      <h3 className="font-bold mb-1 text-lg">Our Location</h3>
-                      <a href={`https://maps.google.com/?q=${encodeURIComponent(siteData.business.address)}`} target="_blank" rel="noopener noreferrer" className="text-gray-600 text-sm leading-relaxed max-w-xs hover:text-accent transition-colors block">
+                      <h3 className="font-bold mb-1 text-lg group-hover:text-accent transition-colors">Our Location</h3>
+                      <p className="text-gray-600 text-sm leading-relaxed max-w-xs group-hover:text-accent transition-colors">
                         {siteData.business.address}
-                      </a>
+                      </p>
+                      <span className="text-xs text-accent font-semibold mt-1 inline-flex items-center gap-1 group-hover:underline">
+                        Open in Google Maps &rarr;
+                      </span>
                     </div>
-                  </div>
+                  </a>
 
                   {/* Phone & WhatsApp */}
                   <div className="flex items-start gap-5">
@@ -313,13 +321,26 @@ export default function ContactPage() {
               </div>
 
               {/* Map */}
-              <div className="aspect-video bg-card-bg border border-black/5 rounded-sm overflow-hidden">
+              <div className="aspect-video bg-card-bg border border-black/5 rounded-sm overflow-hidden relative group">
                 <iframe
                   src={`https://www.google.com/maps?q=${encodeURIComponent(siteData.business.address)}&output=embed`}
-                  className="w-full h-full border-0"
+                  className="w-full h-full border-0 pointer-events-none"
                   allowFullScreen
                   loading="lazy"
+                  title="Jalaram Digital Sign Location Map"
                 />
+                <a
+                  href="https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 group-hover:bg-black/25 transition-all duration-300 cursor-pointer"
+                  aria-label="Open location in Google Maps"
+                >
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4 py-2 bg-white text-[#6F20E8] font-bold text-xs rounded-full shadow-xl flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-accent" />
+                    View on Google Maps &rarr;
+                  </span>
+                </a>
               </div>
             </div>
 

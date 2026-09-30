@@ -163,7 +163,14 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                <span className="text-muted">{siteData.business.address}</span>
+                <a
+                  href="https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted hover:text-accent transition-colors leading-relaxed"
+                >
+                  {siteData.business.address}
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-accent shrink-0" />

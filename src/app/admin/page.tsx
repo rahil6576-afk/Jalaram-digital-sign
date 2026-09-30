@@ -36,6 +36,8 @@ import {
   ChevronLeft,
   ChevronRight,
   UploadCloud,
+  Cpu,
+  GripVertical,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -61,6 +63,19 @@ interface PortfolioItem {
   id: string; slug: string; title: string; category: string; description?: string;
   image: string; images: string[]; location: string; featured: boolean; sortOrder: number;
 }
+interface MachineItem {
+  id: string;
+  name: string;
+  gujaratiName?: string;
+  badge?: string;
+  image: string;
+  tagline?: string;
+  description?: string;
+  capabilities: string[];
+  idealFor?: string;
+  speedOrSpec?: string;
+  sortOrder?: number;
+}
 interface TeamMember {
   id: string; name: string; role: string; bio?: string; image: string;
   phone?: string; email?: string;
@@ -84,12 +99,14 @@ export interface InquiryItem {
 interface SiteData {
   business: Business; socials: Socials; heroImages: string[];
   clients?: ClientCompany[];
-  services: Service[]; portfolio: PortfolioItem[]; team: TeamMember[];
+  services: Service[]; portfolio: PortfolioItem[];
+  machines?: MachineItem[];
+  team: TeamMember[];
   testimonials: Testimonial[]; faqs: FAQ[];
 }
 
 type ActiveModal = {
-  type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero";
+  type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero" | "machine";
   idOrIndex: string | number;
   isNew?: boolean;
   mode?: "view" | "edit";
@@ -101,6 +118,7 @@ const TABS = [
   { id: "clients", label: "Client Logos", icon: Building2 },
   { id: "portfolio", label: "Portfolio", icon: LayoutGrid },
   { id: "services", label: "Services", icon: Briefcase },
+  { id: "machines", label: "Machines", icon: Cpu },
   { id: "team", label: "Team", icon: Users },
   { id: "testimonials", label: "Reviews", icon: MessageSquare },
   { id: "faqs", label: "FAQs", icon: HelpCircle },
@@ -936,25 +954,77 @@ function ModalWrapper({
   );
 }
 
-// ── Section Header with Save Button ─────────────────────────────────────────
+// ── Search Bar Component ──────────────────────────────────────────────────
+function SearchBar({
+  value,
+  onChange,
+  placeholder,
+  total,
+  filtered,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  total: number;
+  filtered: number;
+}) {
+  return (
+    <div className="relative w-full sm:w-72 md:w-80">
+      <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder || "Search entries..."}
+        className="w-full bg-white border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-xs md:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#6F20E8] focus:ring-2 focus:ring-[#6F20E8]/20 transition-all shadow-sm"
+      />
+      {value ? (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 rounded-md"
+          title="Clear search"
+          aria-label="Clear search"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      ) : (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">
+          {filtered !== total ? `${filtered}/${total}` : `${total}`}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ── Section Header with Save Button and Search Bar ──────────────────────────
 function SectionHeader({
   title,
   subtitle,
   actionButton,
+  searchBar,
 }: {
   title: string;
   subtitle?: string;
   actionButton?: React.ReactNode;
+  searchBar?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200">
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+    <div className="space-y-3 pb-4 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+        </div>
+        {actionButton && (
+          <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+            {actionButton}
+          </div>
+        )}
       </div>
-      {actionButton && (
-        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
-          {actionButton}
+      {searchBar && (
+        <div className="flex items-center justify-between gap-3 pt-1">
+          {searchBar}
         </div>
       )}
     </div>
@@ -1001,6 +1071,19 @@ export default function AdminDashboard() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "loading" } | null>(null);
 
+  // Section search queries
+  const [portfolioSearch, setPortfolioSearch] = useState("");
+  const [servicesSearch, setServicesSearch] = useState("");
+  const [machinesSearch, setMachinesSearch] = useState("");
+  const [draggedMachineId, setDraggedMachineId] = useState<string | null>(null);
+  const [dragOverMachineId, setDragOverMachineId] = useState<string | null>(null);
+  const [newMachineDraft, setNewMachineDraft] = useState<MachineItem | null>(null);
+  const [teamSearch, setTeamSearch] = useState("");
+  const [clientsSearch, setClientsSearch] = useState("");
+  const [testimonialsSearch, setTestimonialsSearch] = useState("");
+  const [faqsSearch, setFaqsSearch] = useState("");
+  const [heroSearch, setHeroSearch] = useState("");
+
   const handleLogout = async () => {
     try { await fetch("/api/admin/auth", { method: "DELETE" }); } catch {}
     router.replace("/admin/login");
@@ -1013,10 +1096,135 @@ export default function AdminDashboard() {
 
   // Delete confirmation popup state
   const [deletePrompt, setDeletePrompt] = useState<{
-    type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero" | "inquiry";
+    type: "portfolio" | "service" | "team" | "client" | "testimonial" | "faq" | "hero" | "inquiry" | "machine";
     idOrIndex: string | number;
     name: string;
   } | null>(null);
+
+  // Unified Drag-and-Drop state & handlers for all sections
+  const [draggedItem, setDraggedItem] = useState<{ section: string; id: string | number } | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<{ section: string; id: string | number } | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, section: string, id: string | number) => {
+    e.dataTransfer.setData("text/plain", JSON.stringify({ section, id }));
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedItem({ section, id });
+  };
+
+  const handleDragOver = (e: React.DragEvent, section: string, id: string | number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverItem?.section !== section || dragOverItem?.id !== id) {
+      setDragOverItem({ section, id });
+    }
+  };
+
+  const handleDragLeave = (section: string, id: string | number) => {
+    if (dragOverItem?.section === section && dragOverItem?.id === id) {
+      setDragOverItem(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetSection: string, targetId: string | number) => {
+    e.preventDefault();
+    let sourceSection = draggedItem?.section;
+    let sourceId = draggedItem?.id;
+    try {
+      const raw = e.dataTransfer.getData("text/plain");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.section) sourceSection = parsed.section;
+        if (parsed.id !== undefined) sourceId = parsed.id;
+      }
+    } catch {}
+
+    setDraggedItem(null);
+    setDragOverItem(null);
+
+    if (!sourceSection || sourceSection !== targetSection || sourceId === targetId || !data) return;
+
+    const list = data[targetSection as keyof SiteData];
+    if (!Array.isArray(list)) return;
+
+    const copy = [...list];
+    const fromIndex = typeof sourceId === "number"
+      ? sourceId
+      : copy.findIndex((x: any) => String(x?.id) === String(sourceId));
+    const toIndex = typeof targetId === "number"
+      ? targetId
+      : copy.findIndex((x: any) => String(x?.id) === String(targetId));
+
+    if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+    const [moved] = copy.splice(fromIndex, 1);
+    copy.splice(toIndex, 0, moved);
+
+    const reordered = copy.map((item: any, idx: number) => {
+      if (typeof item === "object" && item !== null) {
+        return { ...item, sortOrder: idx + 1 };
+      }
+      return item;
+    });
+
+    const updated: SiteData = { ...data, [targetSection]: reordered };
+    dataRef.current = updated;
+    setData(updated);
+
+    // Direct database persistence for reordered services in Supabase 'services' table
+    if (targetSection === "services") {
+      fetch("/api/services", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ services: reordered }),
+      }).catch((err) => console.warn("Supabase services reorder sync error:", err));
+    }
+
+    // Direct database persistence for reordered machines in Supabase 'machines' table
+    if (targetSection === "machines") {
+      fetch("/api/machines", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ machines: reordered }),
+      }).catch((err) => console.warn("Supabase machines reorder sync error:", err));
+    }
+
+    handleSave(updated);
+  };
+
+  // Reorder sequence of items in any section
+  const moveItem = (
+    section: "services" | "portfolio" | "machines" | "team" | "clients" | "testimonials" | "faqs" | "heroImages",
+    idOrIndex: string | number,
+    dir: "up" | "down"
+  ) => {
+    if (!data) return;
+    const list = data[section];
+    if (!Array.isArray(list)) return;
+
+    const currentIndex = typeof idOrIndex === "number"
+      ? idOrIndex
+      : (list as Array<{ id?: string }>).findIndex((x) => x?.id === idOrIndex);
+
+    if (currentIndex === -1) return;
+    const targetIndex = dir === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= list.length) return;
+
+    const copy = [...list];
+    const [moved] = copy.splice(currentIndex, 1);
+    copy.splice(targetIndex, 0, moved);
+
+    const withSortOrder = copy.map((item, idx) => {
+      if (typeof item === "object" && item !== null && "sortOrder" in item) {
+        return { ...item, sortOrder: idx + 1 };
+      }
+      return item;
+    });
+
+    const updated: SiteData = { ...data, [section]: withSortOrder };
+    dataRef.current = updated;
+    setData(updated);
+    handleSave(updated);
+  };
 
   // Inquiries State & Management
   const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
@@ -1126,8 +1334,11 @@ export default function AdminDashboard() {
         setData((p) => p ? { ...p, faqs: p.faqs.filter((x) => x.id !== activeModal.idOrIndex || x.question.trim() !== "") } : p);
       } else if (activeModal.type === "hero") {
         setData((p) => p ? { ...p, heroImages: p.heroImages.filter((img, idx) => idx !== activeModal.idOrIndex || (typeof img === "string" && img.trim() !== "")) } : p);
+      } else if (activeModal.type === "machine") {
+        setData((p) => p ? { ...p, machines: (p.machines || []).filter((x) => x.id !== activeModal.idOrIndex || x.name.trim() !== "") } : p);
       }
     }
+    setNewMachineDraft(null);
     setActiveModal(null);
     setModalError(null);
     setExpandedPortfolio(null);
@@ -1143,10 +1354,42 @@ export default function AdminDashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch("/api/admin/content?t=" + Date.now(), { cache: "no-store" });
-        const json = await res.json();
-        dataRef.current = json;
-        setData(json);
+        const [contentRes, servicesRes, machinesRes] = await Promise.allSettled([
+          fetch("/api/admin/content?t=" + Date.now(), { cache: "no-store" }),
+          fetch("/api/services?t=" + Date.now(), { cache: "no-store" }),
+          fetch("/api/machines?t=" + Date.now(), { cache: "no-store" }),
+        ]);
+
+        let json: any = null;
+        if (contentRes.status === "fulfilled" && contentRes.value.ok) {
+          json = await contentRes.value.json();
+        }
+
+        let dbServices: any = null;
+        if (servicesRes.status === "fulfilled" && servicesRes.value.ok) {
+          const sJson = await servicesRes.value.json();
+          if (sJson.success && Array.isArray(sJson.services) && sJson.services.length > 0) {
+            dbServices = sJson.services;
+          }
+        }
+
+        let dbMachines: any = null;
+        if (machinesRes.status === "fulfilled" && machinesRes.value.ok) {
+          const mJson = await machinesRes.value.json();
+          if (mJson.success && Array.isArray(mJson.machines) && mJson.machines.length > 0) {
+            dbMachines = mJson.machines;
+          }
+        }
+
+        if (json) {
+          const merged = {
+            ...json,
+            ...(dbServices && dbServices.length > 0 ? { services: dbServices } : {}),
+            ...(dbMachines && dbMachines.length > 0 ? { machines: dbMachines } : {}),
+          };
+          dataRef.current = merged;
+          setData(merged);
+        }
       } catch {
         showToast("Failed to load site data", "error");
       } finally {
@@ -1155,6 +1398,39 @@ export default function AdminDashboard() {
     };
     loadData();
   }, [showToast]);
+
+  // Fetch directly from the separate Supabase Services API whenever the Services tab is active
+  useEffect(() => {
+    if (activeTab === "services") {
+      fetch("/api/services?t=" + Date.now(), { cache: "no-store" })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success && Array.isArray(res.services) && res.services.length > 0) {
+            setData((prev) => {
+              if (!prev) return prev;
+              const updated = { ...prev, services: res.services };
+              dataRef.current = updated;
+              return updated;
+            });
+          }
+        })
+        .catch(() => {});
+    } else if (activeTab === "machines") {
+      fetch("/api/machines?t=" + Date.now(), { cache: "no-store" })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.success && Array.isArray(res.machines) && res.machines.length > 0) {
+            setData((prev) => {
+              if (!prev) return prev;
+              const updated = { ...prev, machines: res.machines };
+              dataRef.current = updated;
+              return updated;
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [activeTab]);
 
   const cleanSocialUrl = (url: string) => {
     if (!url) return "";
@@ -1182,6 +1458,14 @@ export default function AdminDashboard() {
         },
         heroImages: (payload.heroImages || []).filter((h) => typeof h === "string" && h.trim() !== ""),
         clients: (payload.clients || []).filter((c) => c.name.trim() !== ""),
+        machines: (payload.machines || []).filter((m) => m.name.trim() !== "").map((m, idx) => ({
+          ...m,
+          sortOrder: typeof m.sortOrder === "number" ? m.sortOrder : idx + 1,
+        })),
+        services: (payload.services || []).filter((s) => s.title && s.title.trim() !== "").map((s, idx) => ({
+          ...s,
+          sortOrder: typeof s.sortOrder === "number" ? s.sortOrder : idx + 1,
+        })),
       };
 
       // Validate client logo formats (must be JPG, JPEG, PNG, or WEBP if provided)
@@ -1198,12 +1482,45 @@ export default function AdminDashboard() {
         }
       }
 
+      // Validate machine photo formats (must be JPG, JPEG, PNG, or WEBP if provided)
+      for (const machine of sanitizedData.machines || []) {
+        if (machine.image && machine.image.trim()) {
+          const mImg = machine.image.trim();
+          const hasValidExt = /\.(jpe?g|png|webp)(\?.*)?$/i.test(mImg);
+          const isUrlOrLocal = /^(https?:\/\/|\/|data:image\/)/i.test(mImg);
+          if (!hasValidExt && !isUrlOrLocal) {
+            showToast(`Photo for "${machine.name}" must be a valid JPG, JPEG, PNG, or WEBP file`, "error");
+            setSaving(false);
+            return;
+          }
+        }
+      }
+
       const res = await fetch("/api/admin/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sanitizedData),
       });
       if (!res.ok) throw new Error("Save failed");
+
+      // Also ensure Supabase services table directly updates sort_order
+      if (sanitizedData.services && sanitizedData.services.length > 0) {
+        fetch("/api/services", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ services: sanitizedData.services }),
+        }).catch((err) => console.warn("Supabase services sync in handleSave error:", err));
+      }
+
+      // Also ensure Supabase machines table directly updates sort_order
+      if (sanitizedData.machines && sanitizedData.machines.length > 0) {
+        fetch("/api/machines", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ machines: sanitizedData.machines }),
+        }).catch((err) => console.warn("Supabase machines sync in handleSave error:", err));
+      }
+
       dataRef.current = sanitizedData;
       setData(sanitizedData);
 
@@ -1248,6 +1565,10 @@ export default function AdminDashboard() {
     if (type === "portfolio") {
       updated = { ...updated, portfolio: updated.portfolio.filter((x) => x.id !== idOrIndex) };
     } else if (type === "service") {
+      const serviceId = String(idOrIndex);
+      fetch(`/api/services?id=${encodeURIComponent(serviceId)}`, {
+        method: "DELETE",
+      }).catch((err) => console.warn("Direct Supabase service delete error:", err));
       updated = { ...updated, services: updated.services.filter((x) => x.id !== idOrIndex) };
     } else if (type === "team") {
       updated = { ...updated, team: updated.team.filter((x) => x.id !== idOrIndex) };
@@ -1259,6 +1580,12 @@ export default function AdminDashboard() {
       updated = { ...updated, faqs: updated.faqs.filter((x) => x.id !== idOrIndex) };
     } else if (type === "hero") {
       updated = { ...updated, heroImages: updated.heroImages.filter((_, idx) => idx !== idOrIndex) };
+    } else if (type === "machine") {
+      const machineId = String(idOrIndex);
+      fetch(`/api/machines?id=${encodeURIComponent(machineId)}`, {
+        method: "DELETE",
+      }).catch((err) => console.warn("Direct Supabase machine delete error:", err));
+      updated = { ...updated, machines: (updated.machines || []).filter((x) => x.id !== idOrIndex) };
     }
 
     setData(updated);
@@ -1574,27 +1901,37 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  {/* Physical Address */}
+                  {/* Physical Address (Locked / Fixed Location) */}
                   <div className="sm:col-span-2">
-                    <label className={labelCls}>Full Workshop / Office Address</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className={labelCls}>Full Workshop / Office Address</label>
+                      <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 font-medium px-2 py-0.5 rounded-md">
+                        🔒 Fixed Location (Cannot be changed)
+                      </span>
+                    </div>
                     <input
                       type="text"
-                      value={data.business.address || ""}
-                      onChange={(e) => updateBusiness("address", e.target.value)}
-                      placeholder="G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010"
-                      className={field}
+                      readOnly
+                      disabled
+                      value="G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India"
+                      className={`${field} bg-gray-100 text-gray-700 cursor-not-allowed border-dashed`}
                     />
                   </div>
 
-                  {/* Maps Link */}
+                  {/* Maps Link (Locked) */}
                   <div className="sm:col-span-2">
-                    <label className={labelCls}>Google Maps Location URL</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className={labelCls}>Google Maps Location URL</label>
+                      <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200/80 font-medium px-2 py-0.5 rounded-md">
+                        🔒 Fixed Location URL (Cannot be changed)
+                      </span>
+                    </div>
                     <input
                       type="text"
-                      value={data.business.mapsLink || ""}
-                      onChange={(e) => updateBusiness("mapsLink", e.target.value)}
-                      placeholder="https://maps.app.goo.gl/..."
-                      className={field}
+                      readOnly
+                      disabled
+                      value="https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India"
+                      className={`${field} bg-gray-100 text-gray-700 cursor-not-allowed border-dashed`}
                     />
                   </div>
 
@@ -1647,892 +1984,1517 @@ export default function AdminDashboard() {
           )}
 
           {/* ── HERO IMAGES (TABLE VIEW + MODAL POP SCREEN) ───────────── */}
-          {activeTab === "hero" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title={`Hero Carousel Banners (${data.heroImages.length}/7)`}
-                subtitle="Manage up to 7 hero carousel banners. Click any row or action icon to view and edit the hero slide in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "hero" && (() => {
+            const filteredHeroImages = data.heroImages
+              .map((url, origIdx) => ({ url, origIdx }))
+              .filter(({ url }) => !heroSearch.trim() || url.toLowerCase().includes(heroSearch.toLowerCase()));
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Hero Carousel Banners (${data.heroImages.length}/7)`}
+                  subtitle="Manage up to 7 hero carousel banners. Reorder sequence, search, or click any row to view and edit in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={heroSearch}
+                      onChange={setHeroSearch}
+                      placeholder="Search hero banners by image URL..."
+                      total={data.heroImages.length}
+                      filtered={filteredHeroImages.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        disabled={data.heroImages.length >= 7}
+                        onClick={() => {
+                          if (data.heroImages.length >= 7) {
+                            showToast("Maximum limit of 7 hero banners reached", "error");
+                            return;
+                          }
+                          const newIdx = data.heroImages.length;
+                          setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
+                          setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
+                        }}
+                        className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all border ${
+                          data.heroImages.length >= 7
+                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                            : "bg-purple-50 hover:bg-purple-100 text-[#6F20E8] border-purple-200 cursor-pointer"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" /> {data.heroImages.length >= 7 ? "Max 7 Reached" : "Add Banner"}
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.heroImages.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No hero images added yet</p>
+                  </div>
+                ) : filteredHeroImages.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No hero banners matching &quot;{heroSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setHeroSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      disabled={data.heroImages.length >= 7}
-                      onClick={() => {
-                        if (data.heroImages.length >= 7) {
-                          showToast("Maximum limit of 7 hero banners reached", "error");
-                          return;
-                        }
-                        const newIdx = data.heroImages.length;
-                        setData((p) => p ? { ...p, heroImages: [...p.heroImages, ""] } : p);
-                        setActiveModal({ type: "hero", idOrIndex: newIdx, isNew: true, mode: "edit" });
-                      }}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all border ${
-                        data.heroImages.length >= 7
-                          ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                          : "bg-purple-50 hover:bg-purple-100 text-[#6F20E8] border-purple-200 cursor-pointer"
-                      }`}
-                    >
-                      <Plus className="w-4 h-4" /> {data.heroImages.length >= 7 ? "Max 7 Reached" : "Add Banner"}
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.heroImages.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No hero images added yet</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[520px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-14">Slide</th>
-                        <th className="py-3.5 px-4 w-28">Preview</th>
-                        <th className="py-3.5 px-4 min-w-[180px]">Image Source</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.heroImages.map((url, i) => (
-                        <tr
-                          key={i}
-                          onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center">
-                            <span className="w-7 h-7 rounded-full bg-purple-50 text-[#6F20E8] font-bold text-xs inline-flex items-center justify-center border border-purple-200">
-                              {i + 1}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="w-24 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
-                              {url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={url} alt={`Slide ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <ImageIcon className="w-6 h-6 text-gray-300" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <p className="font-medium text-gray-900 truncate max-w-md">{url || <span className="text-gray-400 italic">No image URL configured</span>}</p>
-                            <span className="text-xs text-gray-400">Click to view details</span>
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "hero", idOrIndex: i, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "hero", idOrIndex: i, name: `Hero Slide ${i + 1}` })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete Slide"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[520px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-20 whitespace-nowrap">Slide / Order</th>
+                          <th className="py-3.5 px-4 w-28">Preview</th>
+                          <th className="py-3.5 px-4 min-w-[180px]">Image Source</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredHeroImages.map(({ url, origIdx }) => (
+                          <tr
+                            key={origIdx}
+                            draggable={true}
+                            onDragStart={(e) => handleDragStart(e, "heroImages", origIdx)}
+                            onDragOver={(e) => handleDragOver(e, "heroImages", origIdx)}
+                            onDragLeave={() => handleDragLeave("heroImages", origIdx)}
+                            onDrop={(e) => handleDrop(e, "heroImages", origIdx)}
+                            onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                            onClick={() => setActiveModal({ type: "hero", idOrIndex: origIdx, mode: "view" })}
+                            className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                              draggedItem?.section === "heroImages" && draggedItem?.id === origIdx ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                            } ${
+                              dragOverItem?.section === "heroImages" && dragOverItem?.id === origIdx ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                            }`}
+                          >
+                            <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-1.5">
+                                <span
+                                  className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                  title="Drag row to reorder sequence"
+                                  aria-label="Drag handle"
+                                >
+                                  <GripVertical className="w-4 h-4" />
+                                </span>
+                                <span className="w-6 h-6 rounded-full bg-purple-50 text-[#6F20E8] font-bold text-xs inline-flex items-center justify-center border border-purple-200">
+                                  {origIdx + 1}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="w-24 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                                {url ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={url} alt={`Slide ${origIdx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                ) : (
+                                  <ImageIcon className="w-6 h-6 text-gray-300" />
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <p className="font-medium text-gray-900 truncate max-w-md">{url || <span className="text-gray-400 italic">No image URL configured</span>}</p>
+                              <span className="text-xs text-gray-400">Click to view details</span>
+                            </td>
+                            <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveModal({ type: "hero", idOrIndex: origIdx, mode: "view" })}
+                                  className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                  title="View details (Read Only)"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveModal({ type: "hero", idOrIndex: origIdx, mode: "edit" })}
+                                  className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                  title="Edit details"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDeletePrompt({ type: "hero", idOrIndex: origIdx, name: `Hero Slide ${origIdx + 1}` })}
+                                  className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                  title="Delete Slide"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── CLIENT LOGOS MARQUEE (TABLE VIEW + MODAL POP SCREEN) ──── */}
-          {activeTab === "clients" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Client Companies & Marquee Logos"
-                subtitle="All client entries displayed in a table. Click any entry or photo to view and edit in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "clients" && (() => {
+            const clientList = data.clients || [];
+            const filteredClients = clientList.filter((c) =>
+              !clientsSearch.trim() ||
+              c.name.toLowerCase().includes(clientsSearch.toLowerCase()) ||
+              (c.tag && c.tag.toLowerCase().includes(clientsSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Client Companies & Marquee Logos (${clientList.length})`}
+                  subtitle="All client entries displayed in a table. Reorder sequence, search, or click any entry to view and edit in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={clientsSearch}
+                      onChange={setClientsSearch}
+                      placeholder="Search clients by name or category tag..."
+                      total={clientList.length}
+                      filtered={filteredClients.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newClient: ClientCompany = {
+                            id: `client-${genId()}`,
+                            name: "",
+                            tag: "",
+                            logo: "",
+                          };
+                          setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
+                          setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add Client Company
+                      </button>
+                    </div>
+                  }
+                />
+
+                {/* Logo Photo Validation Notice */}
+                <div className="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs text-purple-900 font-medium flex items-center gap-2.5 shadow-sm">
+                  <ShieldCheck className="w-4 h-4 text-[#6F20E8] shrink-0" />
+                  <span>
+                    <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>5 MB</strong> in size. Logos are displayed seamlessly without background boxes.
+                  </span>
+                </div>
+
+                {clientList.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No client companies added yet</p>
+                    <p className="text-xs text-gray-400 mt-1">Click &quot;Add Client Company&quot; above to add brands.</p>
+                  </div>
+                ) : filteredClients.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No client companies matching &quot;{clientsSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setClientsSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newClient: ClientCompany = {
-                          id: `client-${genId()}`,
-                          name: "",
-                          tag: "",
-                          logo: "",
-                        };
-                        setData((p) => p ? { ...p, clients: [...(p.clients || []), newClient] } : p);
-                        setActiveModal({ type: "client", idOrIndex: newClient.id, isNew: true, mode: "edit" });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                    >
-                      <Plus className="w-4 h-4" /> Add Client Company
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {/* Logo Photo Validation Notice */}
-              <div className="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs text-purple-900 font-medium flex items-center gap-2.5 shadow-sm">
-                <ShieldCheck className="w-4 h-4 text-[#6F20E8] shrink-0" />
-                <span>
-                  <strong>Client Logo Validation:</strong> Photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>5 MB</strong> in size. Logos are displayed seamlessly without background boxes.
-                </span>
-              </div>
-
-              {(!data.clients || data.clients.length === 0) ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No client companies added yet</p>
-                  <p className="text-xs text-gray-400 mt-1">Click &quot;Add Client Company&quot; above to add brands.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[560px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-20">Logo</th>
-                        <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Company / Institution Name</th>
-                        <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Category / Tag</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.clients.map((client, i) => (
-                        <tr
-                          key={client.id || i}
-                          onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            {i + 1}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="w-16 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center p-1 overflow-hidden shrink-0">
-                              {client.logo ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={client.logo} alt={client.name} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <Building2 className="w-5 h-5 text-gray-300" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <div className="font-bold text-gray-900 leading-tight">{client.name || "Untitled Client"}</div>
-                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            {client.tag ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 whitespace-nowrap">
-                                {client.tag}
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-400">—</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "client", idOrIndex: client.id, name: client.name || "this client" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Remove Client"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[560px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-20">Logo</th>
+                          <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Company / Institution Name</th>
+                          <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Category / Tag</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredClients.map((client) => {
+                          const origIdx = clientList.findIndex((x) => x.id === client.id);
+                          return (
+                            <tr
+                              key={client.id || origIdx}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "clients", client.id)}
+                              onDragOver={(e) => handleDragOver(e, "clients", client.id)}
+                              onDragLeave={() => handleDragLeave("clients", client.id)}
+                              onDrop={(e) => handleDrop(e, "clients", client.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "clients" && draggedItem?.id === client.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "clients" && dragOverItem?.id === client.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="w-16 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center p-1 overflow-hidden shrink-0">
+                                  {client.logo ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={client.logo} alt={client.name} className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform" />
+                                  ) : (
+                                    <Building2 className="w-5 h-5 text-gray-300" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="font-bold text-gray-900 leading-tight">{client.name || "Untitled Client"}</div>
+                                <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                {client.tag ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 whitespace-nowrap">
+                                    {client.tag}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400">—</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "client", idOrIndex: client.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "client", idOrIndex: client.id, name: client.name || "this client" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Remove Client"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── PORTFOLIO (TABLE VIEW + MODAL POP SCREEN) ─────────────── */}
-          {activeTab === "portfolio" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Portfolio Projects"
-                subtitle="All projects organized in a table. Click any row or action icon to view and edit details in a popup modal screen."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "portfolio" && (() => {
+            const filteredPortfolio = data.portfolio.filter((item) =>
+              !portfolioSearch.trim() ||
+              item.title.toLowerCase().includes(portfolioSearch.toLowerCase()) ||
+              item.category.toLowerCase().includes(portfolioSearch.toLowerCase()) ||
+              (item.location && item.location.toLowerCase().includes(portfolioSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Portfolio Projects (${data.portfolio.length})`}
+                  subtitle="All projects organized in a table. Reorder sequence, search, or click any row to view and edit details in a popup modal screen."
+                  searchBar={
+                    <SearchBar
+                      value={portfolioSearch}
+                      onChange={setPortfolioSearch}
+                      placeholder="Search portfolio by title, category, location..."
+                      total={data.portfolio.length}
+                      filtered={filteredPortfolio.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newItem: PortfolioItem = {
+                            id: genId(),
+                            slug: `project-${genId()}`,
+                            title: "",
+                            category: "Hoardings",
+                            image: "",
+                            images: [],
+                            location: "",
+                            featured: false,
+                            sortOrder: data.portfolio.length + 1,
+                          };
+                          setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
+                          setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add Project
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.portfolio.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <LayoutGrid className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No portfolio projects found</p>
+                  </div>
+                ) : filteredPortfolio.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No portfolio projects matching &quot;{portfolioSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setPortfolioSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newItem: PortfolioItem = {
-                          id: genId(),
-                          slug: `project-${genId()}`,
-                          title: "",
-                          category: "Hoardings",
-                          image: "",
-                          images: [],
-                          location: "",
-                          featured: false,
-                          sortOrder: data.portfolio.length + 1,
-                        };
-                        setData((p) => p ? { ...p, portfolio: [...p.portfolio, newItem] } : p);
-                        setActiveModal({ type: "portfolio", idOrIndex: newItem.id, isNew: true, mode: "edit" });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                    >
-                      <Plus className="w-4 h-4" /> Add Project
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.portfolio.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <LayoutGrid className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No portfolio projects found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[680px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-20">Photo</th>
-                        <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Project Title</th>
-                        <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
-                        <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Location</th>
-                        <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.portfolio.map((item, idx) => (
-                        <tr
-                          key={item.id}
-                          onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            {idx + 1}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
-                              {item.image ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <ImageIcon className="w-5 h-5 text-gray-300" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <div className="font-bold text-gray-900 leading-tight">{item.title || "Untitled Project"}</div>
-                            <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
-                              {item.category}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs font-medium">
-                            {item.location || "—"}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            {item.featured ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
-                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-400">Standard</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "portfolio", idOrIndex: item.id, name: item.title || "this project" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete Project"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[680px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-20">Photo</th>
+                          <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Project Title</th>
+                          <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
+                          <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Location</th>
+                          <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredPortfolio.map((item) => {
+                          const origIdx = data.portfolio.findIndex((x) => x.id === item.id);
+                          return (
+                            <tr
+                              key={item.id}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "portfolio", item.id)}
+                              onDragOver={(e) => handleDragOver(e, "portfolio", item.id)}
+                              onDragLeave={() => handleDragLeave("portfolio", item.id)}
+                              onDrop={(e) => handleDrop(e, "portfolio", item.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "portfolio" && draggedItem?.id === item.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "portfolio" && dragOverItem?.id === item.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                                  {item.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                  ) : (
+                                    <ImageIcon className="w-5 h-5 text-gray-300" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="font-bold text-gray-900 leading-tight">{item.title || "Untitled Project"}</div>
+                                <span className="text-[11px] font-normal text-gray-400">Click to view details</span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
+                                  {item.category}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs font-medium">
+                                {item.location || "—"}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                {item.featured ? (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
+                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400">Standard</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "portfolio", idOrIndex: item.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "portfolio", idOrIndex: item.id, name: item.title || "this project" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete Project"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── SERVICES (TABLE VIEW + MODAL POP SCREEN) ──────────────── */}
-          {activeTab === "services" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Services"
-                subtitle="All services listed in a table. Click any entry or action icon to view and edit details in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "services" && (() => {
+            const filteredServices = data.services.filter((svc) =>
+              !servicesSearch.trim() ||
+              svc.title.toLowerCase().includes(servicesSearch.toLowerCase()) ||
+              svc.category.toLowerCase().includes(servicesSearch.toLowerCase()) ||
+              (svc.shortDescription && svc.shortDescription.toLowerCase().includes(servicesSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Services (${data.services.length})`}
+                  subtitle="All services listed in a table. Reorder sequence, search, or click any entry to view and edit details in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={servicesSearch}
+                      onChange={setServicesSearch}
+                      placeholder="Search services by title, category, description..."
+                      total={data.services.length}
+                      filtered={filteredServices.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const s: Service = {
+                            id: genId(),
+                            slug: `service-${genId()}`,
+                            title: "",
+                            shortDescription: "",
+                            description: "",
+                            image: "",
+                            category: "Flex Banner",
+                            features: [],
+                            featured: false,
+                            sortOrder: data.services.length + 1,
+                          };
+                          setData((p) => p ? { ...p, services: [...p.services, s] } : p);
+                          setActiveModal({ type: "service", idOrIndex: s.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add Service
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.services.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No services found</p>
+                  </div>
+                ) : filteredServices.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No services matching &quot;{servicesSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setServicesSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const s: Service = {
-                          id: genId(),
-                          slug: `service-${genId()}`,
-                          title: "",
-                          shortDescription: "",
-                          description: "",
-                          image: "",
-                          category: "Flex Banner",
-                          features: [],
-                          featured: false,
-                          sortOrder: data.services.length + 1,
-                        };
-                        setData((p) => p ? { ...p, services: [...p.services, s] } : p);
-                        setActiveModal({ type: "service", idOrIndex: s.id, isNew: true, mode: "edit" });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                    >
-                      <Plus className="w-4 h-4" /> Add Service
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.services.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No services found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[640px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-20">Photo</th>
-                        <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Service Title</th>
-                        <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
-                        <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Key Features</th>
-                        <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.services.map((svc, idx) => (
-                        <tr
-                          key={svc.id}
-                          onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            {idx + 1}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
-                              {svc.image ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={svc.image} alt={svc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <Briefcase className="w-5 h-5 text-gray-300" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-bold text-gray-900 leading-tight">{svc.title || "Untitled Service"}</div>
-                            {svc.shortDescription ? (
-                              <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{svc.shortDescription}</p>
-                            ) : (
-                              <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
-                              {svc.category}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs">
-                            <span className="font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 whitespace-nowrap inline-flex items-center gap-1">
-                              • {svc.features?.length || 0} bullet point(s)
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            {svc.featured ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
-                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-400">Standard</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "service", idOrIndex: svc.id, name: svc.title || "this service" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete Service"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[640px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-20">Photo</th>
+                          <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">Service Title</th>
+                          <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Category</th>
+                          <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Key Features</th>
+                          <th className="py-3.5 px-4 min-w-[110px] whitespace-nowrap">Status</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredServices.map((svc) => {
+                          const origIdx = data.services.findIndex((x) => x.id === svc.id);
+                          return (
+                            <tr
+                              key={svc.id}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "services", svc.id)}
+                              onDragOver={(e) => handleDragOver(e, "services", svc.id)}
+                              onDragLeave={() => handleDragLeave("services", svc.id)}
+                              onDrop={(e) => handleDrop(e, "services", svc.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "services" && draggedItem?.id === svc.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "services" && dragOverItem?.id === svc.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                                  {svc.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={svc.image} alt={svc.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                  ) : (
+                                    <Briefcase className="w-5 h-5 text-gray-300" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-gray-900 leading-tight">{svc.title || "Untitled Service"}</div>
+                                {svc.shortDescription ? (
+                                  <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{svc.shortDescription}</p>
+                                ) : (
+                                  <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
+                                  {svc.category}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap text-gray-600 text-xs">
+                                <span className="font-semibold text-gray-700 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 whitespace-nowrap inline-flex items-center gap-1">
+                                  • {svc.features?.length || 0} bullet point(s)
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                {svc.featured ? (
+                                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
+                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400">Standard</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "service", idOrIndex: svc.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "service", idOrIndex: svc.id, name: svc.title || "this service" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete Service"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* ── MACHINES (TABLE VIEW + MODAL POP SCREEN) ──────────────── */}
+          {activeTab === "machines" && (() => {
+            const machineList = data.machines || [];
+            const filteredMachines = machineList.filter((m) =>
+              !machinesSearch.trim() ||
+              m.name.toLowerCase().includes(machinesSearch.toLowerCase()) ||
+              (m.gujaratiName && m.gujaratiName.toLowerCase().includes(machinesSearch.toLowerCase())) ||
+              (m.badge && m.badge.toLowerCase().includes(machinesSearch.toLowerCase())) ||
+              (m.tagline && m.tagline.toLowerCase().includes(machinesSearch.toLowerCase())) ||
+              (m.speedOrSpec && m.speedOrSpec.toLowerCase().includes(machinesSearch.toLowerCase())) ||
+              (m.idealFor && m.idealFor.toLowerCase().includes(machinesSearch.toLowerCase())) ||
+              (m.description && m.description.toLowerCase().includes(machinesSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Shop Machinery & Equipment (${machineList.length})`}
+                  subtitle="Manage heavy printing machinery, specs, photos, and capabilities. Reorder sequence, search, or click any entry to view and edit details."
+                  searchBar={
+                    <SearchBar
+                      value={machinesSearch}
+                      onChange={setMachinesSearch}
+                      placeholder="Search machines by name, badge, specs..."
+                      total={machineList.length}
+                      filtered={filteredMachines.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newMachine: MachineItem = {
+                            id: `machine-${genId()}`,
+                            name: "",
+                            gujaratiName: "",
+                            badge: "",
+                            image: "",
+                            tagline: "",
+                            description: "",
+                            capabilities: [],
+                            idealFor: "",
+                            speedOrSpec: "",
+                            sortOrder: (machineList.length || 0) + 1,
+                          };
+                          setNewMachineDraft(newMachine);
+                          setModalError(null);
+                          setActiveModal({ type: "machine", idOrIndex: newMachine.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add Machine
+                      </button>
+                    </div>
+                  }
+                />
+
+                {/* Machine Photo & Ordering Validation Notice */}
+                <div className="p-3.5 rounded-xl bg-purple-50/80 border border-purple-200/80 text-xs text-purple-900 font-medium flex items-center gap-2.5 shadow-sm">
+                  <ShieldCheck className="w-4 h-4 text-[#6F20E8] shrink-0" />
+                  <span>
+                    <strong>Machine Validation &amp; Ordering:</strong> Machine photos must be in <strong>JPG, JPEG, PNG, or WEBP</strong> format and up to <strong>5 MB</strong> (min 50×50px). Use the <strong>drag handle (⋮⋮)</strong> on any row to decide the order; the sequence updates on the site instantly.
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
+
+                {machineList.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Cpu className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No machinery entries added yet</p>
+                    <p className="text-xs text-gray-400 mt-1">Click &quot;Add Machine&quot; above to add your shop&apos;s printers and cutters.</p>
+                  </div>
+                ) : filteredMachines.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No machinery matching &quot;{machinesSearch}&quot;</p>
+                    <button
+                      type="button"
+                      onClick={() => setMachinesSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[720px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-20">Photo</th>
+                          <th className="py-3.5 px-4 min-w-[200px] whitespace-nowrap">Machine Name &amp; Gujarati</th>
+                          <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Badge / Type</th>
+                          <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">Key Specs &amp; Capabilities</th>
+                          <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Ideal Applications</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredMachines.map((m) => {
+                          const origIdx = machineList.findIndex((x) => x.id === m.id);
+                          const isDragging = draggedMachineId === m.id;
+                          const isDragOver = dragOverMachineId === m.id;
+
+                          return (
+                            <tr
+                              key={m.id}
+                              draggable={true}
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData("text/plain", m.id);
+                                e.dataTransfer.effectAllowed = "move";
+                                setDraggedMachineId(m.id);
+                              }}
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.dataTransfer.dropEffect = "move";
+                                if (dragOverMachineId !== m.id) {
+                                  setDragOverMachineId(m.id);
+                                }
+                              }}
+                              onDragLeave={() => {
+                                if (dragOverMachineId === m.id) {
+                                  setDragOverMachineId(null);
+                                }
+                              }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const sourceId = e.dataTransfer.getData("text/plain") || draggedMachineId;
+                                setDraggedMachineId(null);
+                                setDragOverMachineId(null);
+                                if (!sourceId || sourceId === m.id || !data?.machines) return;
+
+                                const list = [...data.machines];
+                                const fromIndex = list.findIndex((x) => x.id === sourceId);
+                                const toIndex = list.findIndex((x) => x.id === m.id);
+
+                                if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+                                const [moved] = list.splice(fromIndex, 1);
+                                list.splice(toIndex, 0, moved);
+
+                                const reordered = list.map((item, idx) => ({
+                                  ...item,
+                                  sortOrder: idx + 1,
+                                }));
+
+                                const updated: SiteData = { ...data, machines: reordered };
+                                dataRef.current = updated;
+                                setData(updated);
+                                fetch("/api/machines", {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ machines: reordered }),
+                                }).catch((err) => console.warn("Supabase machines reorder sync error:", err));
+                                handleSave(updated);
+                              }}
+                              onDragEnd={() => {
+                                setDraggedMachineId(null);
+                                setDragOverMachineId(null);
+                              }}
+                              onClick={() => setActiveModal({ type: "machine", idOrIndex: m.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                isDragging ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                isDragOver ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                                  {m.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={m.image} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                  ) : (
+                                    <Cpu className="w-5 h-5 text-gray-300" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-gray-900 leading-tight">{m.name || "Untitled Machine"}</div>
+                                {m.gujaratiName && (
+                                  <div className="text-xs font-medium text-[#6F20E8] mt-0.5">{m.gujaratiName}</div>
+                                )}
+                                {m.tagline ? (
+                                  <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{m.tagline}</p>
+                                ) : (
+                                  <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                {m.badge ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-[#6F20E8] border border-purple-200 whitespace-nowrap">
+                                    {m.badge}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-gray-400">—</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap text-xs text-gray-600">
+                                <div>
+                                  <span className="font-medium text-gray-800">{m.speedOrSpec || "—"}</span>
+                                </div>
+                                <span className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded text-[11px] border border-gray-200 whitespace-nowrap inline-flex items-center gap-1 mt-1">
+                                  • {(m.capabilities || []).length} capability point(s)
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-500 max-w-xs truncate">
+                                {m.idealFor || "—"}
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "machine", idOrIndex: m.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "machine", idOrIndex: m.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "machine", idOrIndex: m.id, name: m.name || "this machine" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete Machine"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── TEAM (TABLE VIEW + MODAL POP SCREEN) ─────────────────── */}
-          {activeTab === "team" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Team Members"
-                subtitle="All team members displayed in a table. Click any row or action icon to view and edit details in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "team" && (() => {
+            const filteredTeam = data.team.filter((m) =>
+              !teamSearch.trim() ||
+              m.name.toLowerCase().includes(teamSearch.toLowerCase()) ||
+              m.role.toLowerCase().includes(teamSearch.toLowerCase()) ||
+              (m.bio && m.bio.toLowerCase().includes(teamSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Team Members (${data.team.length})`}
+                  subtitle="All team members displayed in a table. Reorder sequence, search, or click any row or action icon to view and edit details in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={teamSearch}
+                      onChange={setTeamSearch}
+                      placeholder="Search team members by name, role, bio..."
+                      total={data.team.length}
+                      filtered={filteredTeam.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const m: TeamMember = {
+                            id: genId(),
+                            name: "",
+                            role: "",
+                            bio: "",
+                            image: "",
+                            socialLinks: {},
+                            sortOrder: data.team.length + 1,
+                          };
+                          setData((p) => p ? { ...p, team: [...p.team, m] } : p);
+                          setActiveModal({ type: "team", idOrIndex: m.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add Member
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.team.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No team members added yet</p>
+                  </div>
+                ) : filteredTeam.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No team members matching &quot;{teamSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setTeamSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const m: TeamMember = {
-                          id: genId(),
-                          name: "",
-                          role: "",
-                          bio: "",
-                          image: "",
-                          socialLinks: {},
-                          sortOrder: data.team.length + 1,
-                        };
-                        setData((p) => p ? { ...p, team: [...p.team, m] } : p);
-                        setActiveModal({ type: "team", idOrIndex: m.id, isNew: true, mode: "edit" });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                    >
-                      <Plus className="w-4 h-4" /> Add Member
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.team.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No team members added yet</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[580px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-20">Photo</th>
-                        <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">Full Name</th>
-                        <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Role / Position</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.team.map((m, idx) => (
-                        <tr
-                          key={m.id}
-                          onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            {idx + 1}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
-                              {m.image ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={m.image} alt={m.name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform" />
-                              ) : (
-                                <Users className="w-5 h-5 text-gray-300" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-bold text-gray-900 leading-tight">{m.name || "Untitled Member"}</div>
-                            {m.bio ? (
-                              <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{m.bio}</p>
-                            ) : (
-                              <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <span className="inline-flex items-center font-semibold text-xs text-[#6F20E8] bg-purple-50 px-3 py-1 rounded-full border border-purple-200 shadow-sm whitespace-nowrap">
-                              {m.role || "Member"}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "team", idOrIndex: m.id, name: m.name || "this member" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete Member"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[580px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-20">Photo</th>
+                          <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">Full Name</th>
+                          <th className="py-3.5 px-4 min-w-[170px] whitespace-nowrap">Role / Position</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredTeam.map((m) => {
+                          const origIdx = data.team.findIndex((x) => x.id === m.id);
+                          return (
+                            <tr
+                              key={m.id}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "team", m.id)}
+                              onDragOver={(e) => handleDragOver(e, "team", m.id)}
+                              onDragLeave={() => handleDragLeave("team", m.id)}
+                              onDrop={(e) => handleDrop(e, "team", m.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "team" && draggedItem?.id === m.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "team" && dragOverItem?.id === m.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                                  {m.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={m.image} alt={m.name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform" />
+                                  ) : (
+                                    <Users className="w-5 h-5 text-gray-300" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4">
+                                <div className="font-bold text-gray-900 leading-tight">{m.name || "Untitled Member"}</div>
+                                {m.bio ? (
+                                  <p className="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{m.bio}</p>
+                                ) : (
+                                  <span className="text-[11px] font-normal text-gray-400">Click to view/edit details</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <span className="inline-flex items-center font-semibold text-xs text-[#6F20E8] bg-purple-50 px-3 py-1 rounded-full border border-purple-200 shadow-sm whitespace-nowrap">
+                                  {m.role || "Member"}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "team", idOrIndex: m.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "team", idOrIndex: m.id, name: m.name || "this member" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete Member"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── TESTIMONIALS (TABLE VIEW + MODAL POP SCREEN) ─────────── */}
-          {activeTab === "testimonials" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title={`Client Reviews (${data.testimonials.length}/30)`}
-                subtitle="All client reviews listed in a table (up to 30 maximum). Click any entry or action icon to view and edit details in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "testimonials" && (() => {
+            const filteredReviews = data.testimonials.filter((t) =>
+              !testimonialsSearch.trim() ||
+              t.name.toLowerCase().includes(testimonialsSearch.toLowerCase()) ||
+              (t.business && t.business.toLowerCase().includes(testimonialsSearch.toLowerCase())) ||
+              (t.quote && t.quote.toLowerCase().includes(testimonialsSearch.toLowerCase()))
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Client Reviews (${data.testimonials.length}/30)`}
+                  subtitle="All client reviews listed in a table (up to 30 maximum). Reorder sequence, search, or click any entry to view and edit details in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={testimonialsSearch}
+                      onChange={setTestimonialsSearch}
+                      placeholder="Search reviews by name, business, quote..."
+                      total={data.testimonials.length}
+                      filtered={filteredReviews.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        disabled={data.testimonials.length >= 30}
+                        onClick={() => {
+                          if (data.testimonials.length >= 30) {
+                            showToast("You can have a maximum of 30 client reviews.", "error");
+                            return;
+                          }
+                          const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
+                          setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
+                          setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
+                        }}
+                        className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md ${
+                          data.testimonials.length >= 30
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                            : "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-[#6F20E8]/20"
+                        }`}
+                      >
+                        <Plus className="w-4 h-4" /> {data.testimonials.length >= 30 ? "Limit Reached (30)" : "Add Review"}
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.testimonials.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No reviews found</p>
+                  </div>
+                ) : filteredReviews.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No reviews matching &quot;{testimonialsSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setTestimonialsSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      disabled={data.testimonials.length >= 30}
-                      onClick={() => {
-                        if (data.testimonials.length >= 30) {
-                          showToast("You can have a maximum of 30 client reviews.", "error");
-                          return;
-                        }
-                        const newT = { id: genId(), name: "", business: "", quote: "", rating: 5 };
-                        setData((p) => p ? { ...p, testimonials: [...p.testimonials, newT] } : p);
-                        setActiveModal({ type: "testimonial", idOrIndex: newT.id, isNew: true, mode: "edit" });
-                      }}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md ${
-                        data.testimonials.length >= 30
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-                          : "bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white shadow-[#6F20E8]/20"
-                      }`}
-                    >
-                      <Plus className="w-4 h-4" /> {data.testimonials.length >= 30 ? "Limit Reached (30)" : "Add Review"}
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.testimonials.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No reviews found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[660px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 w-28 whitespace-nowrap">Rating</th>
-                        <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Client Name</th>
-                        <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Business</th>
-                        <th className="py-3.5 px-4 min-w-[200px]">Review Quote</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.testimonials.map((t, idx) => (
-                        <tr
-                          key={t.id}
-                          onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            {idx + 1}
-                          </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <div className="flex items-center gap-0.5">
-                              {[1,2,3,4,5].map((s) => (
-                                <Star key={s} className={`w-3.5 h-3.5 ${s <= t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`} />
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">
-                            {t.name || "Client"}
-                          </td>
-                          <td className="py-3 px-4 text-xs text-gray-600 font-medium whitespace-nowrap">
-                            {t.business || "—"}
-                          </td>
-                          <td className="py-3 px-4 text-xs text-gray-500 max-w-sm truncate">
-                            &quot;{t.quote}&quot;
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "testimonial", idOrIndex: t.id, name: t.name || "this review" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete Review"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[660px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap"># / Order</th>
+                          <th className="py-3.5 px-4 w-28 whitespace-nowrap">Rating</th>
+                          <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Client Name</th>
+                          <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Business</th>
+                          <th className="py-3.5 px-4 min-w-[200px]">Review Quote</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredReviews.map((t) => {
+                          const origIdx = data.testimonials.findIndex((x) => x.id === t.id);
+                          return (
+                            <tr
+                              key={t.id}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "testimonials", t.id)}
+                              onDragOver={(e) => handleDragOver(e, "testimonials", t.id)}
+                              onDragLeave={() => handleDragLeave("testimonials", t.id)}
+                              onDrop={(e) => handleDrop(e, "testimonials", t.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "testimonials" && draggedItem?.id === t.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "testimonials" && dragOverItem?.id === t.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-4 text-center">{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 whitespace-nowrap">
+                                <div className="flex items-center gap-0.5">
+                                  {[1,2,3,4,5].map((s) => (
+                                    <Star key={s} className={`w-3.5 h-3.5 ${s <= t.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`} />
+                                  ))}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">
+                                {t.name || "Client"}
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-600 font-medium whitespace-nowrap">
+                                {t.business || "—"}
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-500 max-w-sm truncate">
+                                &quot;{t.quote}&quot;
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "testimonial", idOrIndex: t.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "testimonial", idOrIndex: t.id, name: t.name || "this review" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete Review"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── FAQS (TABLE VIEW + MODAL POP SCREEN) ──────────────────── */}
-          {activeTab === "faqs" && (
-            <div className="space-y-6">
-              <SectionHeader
-                title="Frequently Asked Questions"
-                subtitle="All questions listed in a table. Click any entry or action icon to view and edit details in a popup modal."
-                actionButton={
-                  <div className="flex items-center gap-2">
+          {activeTab === "faqs" && (() => {
+            const filteredFaqs = data.faqs.filter((faq) =>
+              !faqsSearch.trim() ||
+              faq.question.toLowerCase().includes(faqsSearch.toLowerCase()) ||
+              faq.answer.toLowerCase().includes(faqsSearch.toLowerCase())
+            );
+
+            return (
+              <div className="space-y-6">
+                <SectionHeader
+                  title={`Frequently Asked Questions (${data.faqs.length})`}
+                  subtitle="All questions listed in a table. Reorder sequence, search, or click any entry or action icon to view and edit details in a popup modal."
+                  searchBar={
+                    <SearchBar
+                      value={faqsSearch}
+                      onChange={setFaqsSearch}
+                      placeholder="Search FAQs by question or answer..."
+                      total={data.faqs.length}
+                      filtered={filteredFaqs.length}
+                    />
+                  }
+                  actionButton={
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        disabled={saving}
+                        className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      >
+                        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFaq = { id: genId(), question: "", answer: "" };
+                          setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
+                          setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true, mode: "edit" });
+                        }}
+                        className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
+                      >
+                        <Plus className="w-4 h-4" /> Add FAQ
+                      </button>
+                    </div>
+                  }
+                />
+
+                {data.faqs.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No FAQs found</p>
+                  </div>
+                ) : filteredFaqs.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                    <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-semibold text-gray-700">No FAQs matching &quot;{faqsSearch}&quot;</p>
                     <button
                       type="button"
-                      onClick={() => handleSave()}
-                      disabled={saving}
-                      className="px-4 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-md shadow-[#6F20E8]/20 transition-all disabled:opacity-50 active:scale-[0.98]"
+                      onClick={() => setFaqsSearch("")}
+                      className="mt-2 text-xs font-semibold text-[#6F20E8] hover:underline"
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin inline-block mr-1" />}
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newFaq = { id: genId(), question: "", answer: "" };
-                        setData((p) => p ? { ...p, faqs: [...p.faqs, newFaq] } : p);
-                        setActiveModal({ type: "faq", idOrIndex: newFaq.id, isNew: true, mode: "edit" });
-                      }}
-                      className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-[#6F20E8] to-[#8A3FFC] hover:opacity-95 text-white text-xs md:text-sm font-semibold rounded-xl transition-all shadow-md shadow-[#6F20E8]/20"
-                    >
-                      <Plus className="w-4 h-4" /> Add FAQ
+                      Clear search
                     </button>
                   </div>
-                }
-              />
-
-              {data.faqs.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-                  <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-gray-700">No FAQs found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <table className="w-full min-w-[560px] text-left border-collapse">
-                    <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="py-3.5 px-4 text-center w-12">#</th>
-                        <th className="py-3.5 px-4 min-w-[180px]">Question</th>
-                        <th className="py-3.5 px-4 min-w-[240px]">Answer Preview</th>
-                        <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
-                      {data.faqs.map((faq, i) => (
-                        <tr
-                          key={faq.id}
-                          onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
-                          className="hover:bg-purple-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="py-3 px-4 text-center text-xs font-bold text-gray-400">
-                            Q{i + 1}
-                          </td>
-                          <td className="py-3 px-4 font-bold text-gray-900 max-w-xs truncate">
-                            {faq.question}
-                          </td>
-                          <td className="py-3 px-4 text-xs text-gray-500 max-w-md truncate">
-                            {faq.answer}
-                          </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
-                                className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
-                                title="View details (Read Only)"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "edit" })}
-                                className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
-                                title="Edit details"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeletePrompt({ type: "faq", idOrIndex: faq.id, name: faq.question || "this FAQ" })}
-                                className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-                                title="Delete FAQ"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <table className="w-full min-w-[560px] text-left border-collapse">
+                      <thead className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-3.5 px-3 text-center w-16 whitespace-nowrap">Q# / Order</th>
+                          <th className="py-3.5 px-4 min-w-[180px]">Question</th>
+                          <th className="py-3.5 px-4 min-w-[240px]">Answer Preview</th>
+                          <th className="py-3.5 px-4 text-right w-36 whitespace-nowrap">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-sm">
+                        {filteredFaqs.map((faq) => {
+                          const origIdx = data.faqs.findIndex((x) => x.id === faq.id);
+                          return (
+                            <tr
+                              key={faq.id}
+                              draggable={true}
+                              onDragStart={(e) => handleDragStart(e, "faqs", faq.id)}
+                              onDragOver={(e) => handleDragOver(e, "faqs", faq.id)}
+                              onDragLeave={() => handleDragLeave("faqs", faq.id)}
+                              onDrop={(e) => handleDrop(e, "faqs", faq.id)}
+                              onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                              onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
+                              className={`hover:bg-purple-50/50 transition-all cursor-pointer group ${
+                                draggedItem?.section === "faqs" && draggedItem?.id === faq.id ? "opacity-30 bg-purple-100 scale-[0.99]" : ""
+                              } ${
+                                dragOverItem?.section === "faqs" && dragOverItem?.id === faq.id ? "border-t-2 border-[#6F20E8] bg-purple-50/80 shadow-inner" : ""
+                              }`}
+                            >
+                              <td className="py-3 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <span
+                                    className="text-gray-400 hover:text-[#6F20E8] cursor-grab active:cursor-grabbing p-1 rounded hover:bg-purple-100 transition-colors"
+                                    title="Drag row to reorder sequence"
+                                    aria-label="Drag handle"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </span>
+                                  <span className="text-xs font-bold text-gray-500 w-6 text-center">Q{origIdx + 1}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 font-bold text-gray-900 max-w-xs truncate">
+                                {faq.question}
+                              </td>
+                              <td className="py-3 px-4 text-xs text-gray-500 max-w-md truncate">
+                                {faq.answer}
+                              </td>
+                              <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "view" })}
+                                    className="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-[#6F20E8] transition-all"
+                                    title="View details (Read Only)"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveModal({ type: "faq", idOrIndex: faq.id, mode: "edit" })}
+                                    className="p-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 text-gray-700 hover:text-[#6F20E8] transition-all"
+                                    title="Edit details"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeletePrompt({ type: "faq", idOrIndex: faq.id, name: faq.question || "this FAQ" })}
+                                    className="p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    title="Delete FAQ"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── INQUIRIES & LEADS MANAGEMENT ────────────────────────── */}
           {activeTab === "inquiries" && (
@@ -3108,6 +4070,13 @@ export default function AdminDashboard() {
                 return;
               }
               setModalError(null);
+              // Directly persist service to Supabase 'services' table
+              await fetch("/api/services", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(currentSvc),
+              }).catch((err) => console.warn("Direct Supabase service update error:", err));
+
               await handleSave(latestData);
               closeModal();
             }}
@@ -3744,6 +4713,262 @@ export default function AdminDashboard() {
                   });
                 }}
               />
+            </div>
+          </ModalWrapper>
+        );
+      })()}
+
+      {/* 8. Machine Modal */}
+      {activeModal?.type === "machine" && (() => {
+        const isNewDraft = Boolean(activeModal.isNew);
+        const currentData = dataRef.current || data;
+        const machine = (isNewDraft && newMachineDraft?.id === activeModal.idOrIndex)
+          ? newMachineDraft
+          : (currentData?.machines || []).find((x) => x.id === activeModal.idOrIndex);
+
+        if (!machine) return null;
+        const isReadOnly = activeModal.mode === "view";
+
+        const updateMachineField = (fieldKey: keyof MachineItem, value: unknown) => {
+          if (isReadOnly) return;
+          setModalError(null);
+          if (isNewDraft) {
+            setNewMachineDraft((prev) => prev ? { ...prev, [fieldKey]: value } : prev);
+          } else {
+            const base = dataRef.current || data;
+            if (!base) return;
+            const updatedMachines = (base.machines || []).map((x) =>
+              x.id === machine.id ? { ...x, [fieldKey]: value } : x
+            );
+            const updated = { ...base, machines: updatedMachines };
+            dataRef.current = updated;
+            setData(updated);
+          }
+        };
+
+        return (
+          <ModalWrapper
+            title={isReadOnly ? "View Machine" : isNewDraft ? "Add Machine" : "Edit Machine"}
+            subtitle={
+              isReadOnly
+                ? "Machinery specifications, photo, and capabilities (Read Only)"
+                : isNewDraft
+                ? "Fill in machine specifications, photo, and capabilities, then click Save to add"
+                : "View or edit machine specifications, photo, and capabilities"
+            }
+            icon={<Cpu className="w-5 h-5 text-[#6F20E8]" />}
+            onClose={closeModal}
+            errorMessage={modalError}
+            mode={activeModal.mode || "edit"}
+            onEdit={() => setActiveModal((p) => p ? { ...p, mode: "edit" } : p)}
+            onSave={async () => {
+              if (!machine.name || !machine.name.trim()) {
+                setModalError("Machine Name is required. Please fill in the machine name before saving.");
+                return;
+              }
+              if (machine.image && machine.image.trim()) {
+                const img = machine.image.trim();
+                const hasValidExt = /\.(jpe?g|png|webp)(\?.*)?$/i.test(img);
+                const isUrlOrLocal = /^(https?:\/\/|\/|data:image\/)/i.test(img);
+                if (!hasValidExt && !isUrlOrLocal) {
+                  setModalError("Machine Photo must be a valid JPG, JPEG, PNG, or WEBP file.");
+                  return;
+                }
+              }
+              const cleanedCapabilities = (machine.capabilities || []).map((c) => c.trim()).filter(Boolean);
+              const base = dataRef.current || data;
+              if (!base) return;
+
+              let updatedMachines: MachineItem[];
+              const itemToSave = isNewDraft
+                ? {
+                    ...machine,
+                    capabilities: cleanedCapabilities,
+                    sortOrder: (base.machines || []).length + 1,
+                  }
+                : {
+                    ...machine,
+                    capabilities: cleanedCapabilities,
+                  };
+
+              if (isNewDraft) {
+                updatedMachines = [...(base.machines || []), itemToSave];
+                setNewMachineDraft(null);
+              } else {
+                updatedMachines = (base.machines || []).map((x) =>
+                  x.id === machine.id ? itemToSave : x
+                );
+              }
+
+              // Direct database persistence for machine in Supabase 'machines' table
+              fetch("/api/machines", {
+                method: isNewDraft ? "POST" : "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(itemToSave),
+              }).catch((err) => console.warn("Direct Supabase machine save error:", err));
+
+              const sanitizedLatest = { ...base, machines: updatedMachines } as SiteData;
+              dataRef.current = sanitizedLatest;
+              setData(sanitizedLatest);
+              setModalError(null);
+              await handleSave(sanitizedLatest);
+              closeModal();
+            }}
+            saving={saving}
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Machine Name *</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.name}
+                    onChange={(e) => updateMachineField("name", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. StarFlex 3200 Pro"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Gujarati Name</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.gujaratiName || ""}
+                    onChange={(e) => updateMachineField("gujaratiName", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. સ્ટારફ્લેક્સ ૩૨૦૦ પ્રો"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Badge / Machine Type</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.badge || ""}
+                    onChange={(e) => updateMachineField("badge", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. Industrial Banner Giant"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Tagline / Subtitle</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.tagline || ""}
+                    onChange={(e) => updateMachineField("tagline", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. High-Volume Flex & Vinyl Printing"
+                  />
+                </div>
+              </div>
+
+              <ImageInput
+                label="Machine Photo"
+                value={machine.image}
+                readOnly={isReadOnly}
+                onChange={(v) => updateMachineField("image", v)}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Speed / Technical Specifications</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.speedOrSpec || ""}
+                    onChange={(e) => updateMachineField("speedOrSpec", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. 10 ft width • 1200 DPI • 1,500 sq ft/hr"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Ideal Applications</label>
+                  <input
+                    type="text"
+                    disabled={isReadOnly}
+                    readOnly={isReadOnly}
+                    value={machine.idealFor || ""}
+                    onChange={(e) => updateMachineField("idealFor", e.target.value)}
+                    className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                    placeholder="e.g. Roadside hoardings, flex banners, vinyl wall wraps"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Machine Overview / Description</label>
+                <textarea
+                  rows={3}
+                  disabled={isReadOnly}
+                  readOnly={isReadOnly}
+                  value={machine.description || ""}
+                  onChange={(e) => updateMachineField("description", e.target.value)}
+                  className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                  placeholder="Describe machine performance, output quality, technology, and reliability..."
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <label className={labelCls}>Bullet Points / Key Capabilities</label>
+                    <p className="text-[11px] text-gray-400">List bullet points highlighting this machine&apos;s features and strengths</p>
+                  </div>
+                  {!isReadOnly && (
+                    <button
+                      type="button"
+                      onClick={() => updateMachineField("capabilities", [...(machine.capabilities || []), ""])}
+                      className="text-xs text-[#6F20E8] hover:text-[#5B16C7] font-semibold flex items-center gap-1 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200"
+                    >
+                      <Plus className="w-3 h-3" /> Add Bullet Point
+                    </button>
+                  )}
+                </div>
+                {(!machine.capabilities || machine.capabilities.length === 0) && isReadOnly && (
+                  <p className="text-xs text-gray-400 italic">No bullet points listed</p>
+                )}
+                {(machine.capabilities || []).map((cap, fi) => (
+                  <div key={fi} className="flex items-center gap-2 mb-2">
+                    <span className="text-[#6F20E8] font-black text-base select-none shrink-0">•</span>
+                    <input
+                      type="text"
+                      disabled={isReadOnly}
+                      readOnly={isReadOnly}
+                      value={cap}
+                      onChange={(e) => {
+                        const caps = [...(machine.capabilities || [])];
+                        caps[fi] = e.target.value;
+                        updateMachineField("capabilities", caps);
+                      }}
+                      className={field + (isReadOnly ? " bg-gray-100 cursor-not-allowed text-gray-700" : "")}
+                      placeholder={`Bullet point ${fi + 1}`}
+                    />
+                    {!isReadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const caps = (machine.capabilities || []).filter((_, idx) => idx !== fi);
+                          updateMachineField("capabilities", caps);
+                        }}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                        title="Remove capability"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </ModalWrapper>
         );

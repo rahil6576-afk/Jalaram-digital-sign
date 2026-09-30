@@ -9,7 +9,41 @@ import PageHero from "@/components/common/PageHero";
 
 export default function ServicesPage() {
   const currentData = useSiteData();
+  const [services, setServices] = useState(currentData.services);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  // Load directly from Supabase Services API (database-driven sorting)
+  useEffect(() => {
+    const fetchServices = () => {
+      fetch(`/api/services?t=${Date.now()}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.services) && data.services.length > 0) {
+            setServices(data.services);
+          }
+        })
+        .catch((err) => console.warn("Could not fetch from /api/services:", err));
+    };
+
+    fetchServices();
+
+    // Re-fetch live from database on site content updates
+    window.addEventListener("site-content-updated", fetchServices);
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("jalaram_site_sync");
+        bc.onmessage = () => fetchServices();
+      }
+    } catch {
+      // safe fallback
+    }
+
+    return () => {
+      window.removeEventListener("site-content-updated", fetchServices);
+      if (bc) bc.close();
+    };
+  }, []);
 
   useEffect(() => {
     const handleScrollToHash = () => {
@@ -48,7 +82,7 @@ export default function ServicesPage() {
       <section className="py-12 sm:py-20 md:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {currentData.services.map((service) => {
+            {services.map((service) => {
               const targetId = service.slug || service.id;
               const isHighlighted = highlightedId === targetId;
               return (

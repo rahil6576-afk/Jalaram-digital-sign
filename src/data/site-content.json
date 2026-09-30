@@ -246,7 +246,7 @@
     "hours": "Mon - Sat: 9:00 AM - 8:00 PM",
     "phone": "+91 85111 33363",
     "address": "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India",
-    "mapsLink": "https://maps.app.goo.gl/AEParp5vNkxJ8T8h8",
+    "mapsLink": "https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India",
     "whatsapp": "918511133363",
     "extraEmail": "",
     "extraPhone": "",
@@ -1072,31 +1072,141 @@
   "testimonials": [
     {
       "id": "1",
-      "name": "Vikram Mehta",
-      "quote": "Outstanding quality and incredibly fast turnaround. The signage transformed our storefront completely and brought in noticeable foot traffic from day one.",
+      "name": "Shubh Patel",
+      "quote": "I got a banner and LED board made here, and the quality is unbelievable — truly excellent and far better than expected. The prices are very budget-friendly, making it a great value for money. The staff is polite, cooperative, and ensures smooth service. A special thanks to the owner, Manasbhai Thakkar, for his professional and friendly approach. Fully satisfied and highly recommended!",
       "rating": 5,
-      "business": "Apex Retail Solutions"
+      "business": "Google Verified Review"
     },
     {
       "id": "2",
-      "name": "Harish Patel",
-      "quote": "We ordered outdoor hoardings and LED letter signage for our commercial complex. The color clarity, material sturdiness, and installation speed exceeded our expectations.",
+      "name": "Rutu Patel",
+      "quote": "I had an excellent experience with Jalaram Digital Sign. Their work quality is outstanding, and they pay great attention to every detail. The team is professional, friendly, and always ready to help. They completed my work on time and exceeded my expectations with the final result. If you’re looking for high-quality digital signage, printing, or branding solutions with reliable service and reasonable pricing, I highly recommend Jalaram Digital Sign.",
       "rating": 5,
-      "business": "Gandhinagar Trade Center"
+      "business": "Google Verified Review"
     },
     {
       "id": "3",
-      "name": "Sneha Joshi",
-      "quote": "The 3D acrylic backlit signage they designed and mounted for our cafe entrance looks phenomenal at night. Exceptional craftsmanship and polite team.",
+      "name": "SOURODIP SENGUPTA",
+      "quote": "Well behaved staff. Very efficient and on time service. Thanks a lot to the staffs. Highly recommended.",
       "rating": 5,
-      "business": "GreenLeaf Restaurant & Cafe"
+      "business": "Google Verified Review"
     },
     {
       "id": "4",
-      "name": "Amit Trivedi",
-      "quote": "Working with Jalaram Digital Sign for our real estate sites across Gandhinagar and Ahmedabad. Reliable, prompt delivery, and unmatched weather durability.",
+      "name": "Harish Patel",
+      "quote": "We ordered outdoor hoardings and LED letter signage for our commercial complex. The color clarity, material sturdiness, and installation speed exceeded our expectations. Truly 5-star service!",
       "rating": 5,
-      "business": "Shreeji Developers"
+      "business": "Google Verified Review"
+    }
+  ],
+  "machines": [
+    {
+      "id": "solvent",
+      "name": "Solvent Printer",
+      "gujaratiName": "સોલ્વન્ટ પ્રિન્ટર",
+      "badge": "Heavy-Duty Outdoor",
+      "image": "/images/machines/solvent-printer.jpg",
+      "tagline": "Large-format outdoor flex and billboard powerhouse",
+      "description": "Industrial high-speed solvent printing engineered for high-impact outdoor media with extreme weather resilience against Gujarat's intense heat, heavy monsoon rain, and direct sunlight.",
+      "capabilities": [
+        "10+ feet seamless roll-to-roll printing width",
+        "Deep pigment penetration into PVC flex for long-lasting vibrancy",
+        "100% weather, water & UV sunlight fade resistant",
+        "Ideal for massive hoardings with fast turnaround"
+      ],
+      "idealFor": "Highway Hoardings, Outdoor Flex Banners, Building Wraps, Event Backdrops",
+      "speedOrSpec": "High-Volume Production • Solvent Base Inks",
+      "sortOrder": 1
+    },
+    {
+      "id": "eco-solvent",
+      "name": "Eco Solvent Printer",
+      "gujaratiName": "ઇકો સોલ્વન્ટ પ્રિન્ટર",
+      "badge": "Ultra-HD 1440 DPI",
+      "image": "/images/machines/eco-solvent-printer.jpg",
+      "tagline": "Odorless photo-quality commercial vinyl & vehicle graphics",
+      "description": "High-precision, environmentally friendly printing technology delivering photographic sharpness, smooth color gradations, and rich color saturation without toxic chemical odors.",
+      "capabilities": [
+        "Microscopic dot precision up to 1440 DPI photographic output",
+        "Odor-free, non-toxic formulation safe for retail and indoor spaces",
+        "Superior ink adhesion on self-adhesive vinyl and specialty media",
+        "Rich color gamut with deep blacks and vibrant brand colors"
+      ],
+      "idealFor": "Vehicle Wraps, Retail Store Graphics, Glass Murals, Roll-Up Standees, Canvas",
+      "speedOrSpec": "Micro-Piezo Precision • Eco-Friendly Inks",
+      "sortOrder": 2
+    },
+    {
+      "id": "plotter-cutting",
+      "name": "Plotter Cutting",
+      "gujaratiName": "પ્લોટર કટીંગ મશીન",
+      "badge": "Micro-Precision CNC",
+      "image": "/images/machines/plotter-cutting.jpg",
+      "tagline": "Computerized contour cutting for stickers & radium work",
+      "description": "Advanced computerized knife cutting plotter equipped with optical eye sensor registration to kiss-cut and die-cut intricate logos, decals, and reflective sheeting with surgical accuracy.",
+      "capabilities": [
+        "Optical sensor for exact print-and-cut contour alignment",
+        "Micro-precision cut capability for small intricate typography",
+        "Effortless cutting of radium, fluorescent, and reflective tapes",
+        "Kiss-cut sheets and individual die-cut sticker outputs"
+      ],
+      "idealFor": "Radium Work, Vehicle Number Plates, Die-Cut Stickers, Frosted Film Graphics",
+      "speedOrSpec": "Optical Eye Sensor • 0.05mm Repeatability",
+      "sortOrder": 3
+    },
+    {
+      "id": "lamination",
+      "name": "Lamination Machine",
+      "gujaratiName": "લેમિનેશન મશીન",
+      "badge": "Thermal & Cold Roll",
+      "image": "/images/machines/lamination-machine.jpg",
+      "tagline": "Protective shield against scratches, moisture & UV rays",
+      "description": "Heavy-duty roll-to-roll cold and thermal lamination system that seals printed graphics with protective optical-grade gloss, matte, or textured overlaminates to multiply product lifespan.",
+      "capabilities": [
+        "Bubble-free and wrinkle-free pneumatic silicone roller pressure",
+        "Cold pressure-sensitive and heated roll lamination modes",
+        "Gloss, Matte, Sparkle & Velvet anti-scratch protective finishes",
+        "Triples graphic durability against dust, fingerprint oil & washing"
+      ],
+      "idealFor": "Vinyl Decals, Sunboard Mounts, Fleet Graphics, Menu Boards, Corporate Signage",
+      "speedOrSpec": "Dual Heat-Assisted Rollers • 65-Inch Width",
+      "sortOrder": 4
+    },
+    {
+      "id": "co2-laser",
+      "name": "CO2 Laser Machine",
+      "gujaratiName": "CO2 લેસર કટીંગ મશીન",
+      "badge": "Laser Engraving & Cut",
+      "image": "/images/machines/co2-laser-machine.jpg",
+      "tagline": "CNC laser cutting for 3D acrylic letters & architectural signage",
+      "description": "High-power industrial CO2 laser cutting and engraving system designed for surgical cutting of acrylic, wood, MDF, and plastic sheets with flawless flame-polished crystal-clear edges.",
+      "capabilities": [
+        "Smooth flame-polished edges requiring zero manual hand polishing",
+        "Cuts cast acrylic up to 20mm thickness and high-density MDF boards",
+        "High-speed precision vector cutting and raster engraving",
+        "Ideal for creating 3D embossed logo elements and LED channel letters"
+      ],
+      "idealFor": "3D Acrylic Letters, Architectural Name Plates, LED Sign Faces, Wood Plaques",
+      "speedOrSpec": "High-Power Laser Tube • 0.02mm Accuracy",
+      "sortOrder": 5
+    },
+    {
+      "id": "flatbed-uv",
+      "name": "Flatbed UV Print",
+      "gujaratiName": "ફ્લેટબેડ UV પ્રિન્ટર",
+      "badge": "Direct Substrate UV LED",
+      "image": "/images/machines/flatbed-uv-printer.jpg",
+      "tagline": "Direct printing on rigid acrylic, glass, wood, sunboard & ACP",
+      "description": "State-of-the-art flatbed UV printing technology capable of printing directly onto virtually any rigid or flexible material with instant UV LED ink curing and tactile raised embossing.",
+      "capabilities": [
+        "Direct printing on Acrylic, Sunboard, ACP, Glass, Wood & Metal sheets",
+        "Instant UV LED curing with zero drying wait time or ink smearing",
+        "Dedicated White Ink & Gloss Varnish channels for 3D raised texture",
+        "Exceptional indoor and outdoor scratch and chemical resistance"
+      ],
+      "idealFor": "ACP Facades, Acrylic Sign Boards, Glass Partitions, Wooden Murals, Luxury Signs",
+      "speedOrSpec": "Industrial UV LED Lamps • White + Varnish",
+      "sortOrder": 6
     }
   ]
 }

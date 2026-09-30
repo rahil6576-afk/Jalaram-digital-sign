@@ -9,11 +9,51 @@ interface HomeReviewsSectionProps {
   testimonials?: TestimonialItem[];
 }
 
+// Filter strictly to 5-star reviews only (removes 1-star, 2-star, etc.)
+const filterFiveStarsOnly = (items: TestimonialItem[]) =>
+  items.filter((item) => item.rating === undefined || Number(item.rating) === 5);
+
 export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSectionProps) {
+  const [reviewsList, setReviewsList] = useState<TestimonialItem[]>(() =>
+    filterFiveStarsOnly(testimonials)
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
 
-  const totalReviews = testimonials.length;
+  // Sync if testimonials prop updates — only keep 5 star reviews
+  useEffect(() => {
+    if (testimonials && testimonials.length > 0) {
+      setReviewsList(filterFiveStarsOnly(testimonials));
+    }
+  }, [testimonials]);
+
+  // Fetch reviews directly from Google Reviews API — only keep 5 star reviews
+  useEffect(() => {
+    fetch("/api/reviews")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          const fiveStarReviews = data.reviews.filter(
+            (r: { rating?: number }) => r.rating === undefined || Number(r.rating) === 5
+          );
+          if (fiveStarReviews.length > 0) {
+            const mapped: TestimonialItem[] = fiveStarReviews.map(
+              (r: { user?: string; text?: string; rating?: number }, idx: number) => ({
+                id: `google-review-${idx}`,
+                name: r.user || "Client",
+                business: "Google Verified Review",
+                quote: r.text || "",
+                rating: 5,
+              })
+            );
+            setReviewsList(mapped);
+          }
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch Google reviews:", err));
+  }, []);
+
+  const totalReviews = reviewsList.length;
 
   const nextSlide = useCallback(() => {
     if (totalReviews <= 1) return;
@@ -37,9 +77,9 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
     return () => clearInterval(interval);
   }, [totalReviews]);
 
-  if (!testimonials || totalReviews === 0) return null;
+  if (!reviewsList || totalReviews === 0) return null;
 
-  const currentReview = testimonials[currentIndex];
+  const currentReview = reviewsList[currentIndex];
 
   const variants = {
     enter: (dir: number) => ({
@@ -90,7 +130,7 @@ export default function HomeReviewsSection({ testimonials = [] }: HomeReviewsSec
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/80 border border-purple-200/80 text-[#6F20E8] font-bold text-xs tracking-wider uppercase mb-4">
               <Star className="w-3.5 h-3.5 fill-[#6F20E8]" />
-              <span>Rated 4.9/5 by 500+ Businesses</span>
+              <span>Rated 5.0/5 on Google Verified Reviews</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-[1.1] mb-3">
               WHAT OUR{" "}

@@ -8,6 +8,7 @@ export type PortfolioItem = SiteData["portfolio"][number];
 export type TeamMember = SiteData["team"][number];
 export type TestimonialItem = SiteData["testimonials"][number];
 export type FaqItem = SiteData["faqs"][number];
+export type MachineItem = SiteData["machines"][number];
 export interface ClientItem {
   id: string;
   name: string;
@@ -49,15 +50,42 @@ export async function getLiveSiteData(): Promise<SiteData> {
     if (isSupabaseConfigured()) {
       const supabase = getSupabaseAdmin();
       if (supabase) {
+        // 1. Fetch main site structure
         const { data, error } = await supabase
           .from("site_content")
           .select("content")
           .eq("id", "main")
           .maybeSingle();
 
-        if (!error && data?.content && (data.content as SiteData).business) {
-          return data.content as SiteData;
+        let baseData = (!error && data?.content && (data.content as SiteData).business)
+          ? (data.content as SiteData)
+          : getSiteData();
+
+        // 2. Fetch services directly from the dedicated 'services' table in Supabase
+        const { data: servicesRows, error: sErr } = await supabase
+          .from("services")
+          .select("*")
+          .order("sort_order", { ascending: true });
+
+        if (!sErr && Array.isArray(servicesRows) && servicesRows.length > 0) {
+          baseData = {
+            ...baseData,
+            services: servicesRows.map((row) => ({
+              id: String(row.id),
+              slug: row.slug || String(row.id),
+              title: row.title,
+              shortDescription: row.short_description || "",
+              description: row.description || "",
+              image: row.image || "",
+              category: row.category || "",
+              features: Array.isArray(row.features) ? row.features : [],
+              featured: Boolean(row.featured),
+              sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
+            })),
+          };
         }
+
+        return baseData;
       }
     }
   } catch (err) {
@@ -65,4 +93,38 @@ export async function getLiveSiteData(): Promise<SiteData> {
   }
 
   return getSiteData();
+}
+
+// Direct helper to query services directly from Supabase 'services' table
+export async function getServicesFromSupabase(): Promise<ServiceItem[]> {
+  try {
+    const { getSupabaseAdmin, isSupabaseConfigured } = await import("@/lib/supabase");
+    if (isSupabaseConfigured()) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data, error } = await supabase
+          .from("services")
+          .select("*")
+          .order("sort_order", { ascending: true });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data.map((row) => ({
+            id: String(row.id),
+            slug: row.slug || String(row.id),
+            title: row.title,
+            shortDescription: row.short_description || "",
+            description: row.description || "",
+            image: row.image || "",
+            category: row.category || "",
+            features: Array.isArray(row.features) ? row.features : [],
+            featured: Boolean(row.featured),
+            sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
+          }));
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch services from Supabase table:", err);
+  }
+  return (siteContentJson as SiteData).services || [];
 }

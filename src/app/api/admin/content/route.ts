@@ -10,6 +10,23 @@ const SEED_CONTENT_PATH = path.join(process.cwd(), "src", "data", "site-content.
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const FIXED_ADDRESS = "G-24, 25, 26, 31, Sector 11, Gandhinagar, Gujarat 382010, India";
+const FIXED_MAPS_LINK = "https://maps.google.com/?q=G-24%2C%2025%2C%2026%2C%2031%2C%20Sector%2011%2C%20Gandhinagar%2C%20Gujarat%20382010%2C%20India";
+
+function sanitizeContent(content: any) {
+  if (!content || typeof content !== "object") return content;
+  if (content.business) {
+    content.business.address = FIXED_ADDRESS;
+    content.business.mapsLink = FIXED_MAPS_LINK;
+  }
+  if (Array.isArray(content.testimonials)) {
+    content.testimonials = content.testimonials.filter(
+      (t: any) => t.rating === undefined || Number(t.rating) === 5
+    );
+  }
+  return content;
+}
+
 export async function GET() {
   try {
     const noCacheHeaders = {
@@ -29,7 +46,41 @@ export async function GET() {
           .maybeSingle();
 
         if (!error && data?.content) {
-          return NextResponse.json(data.content, { headers: noCacheHeaders });
+          const content = sanitizeContent({ ...data.content });
+
+          // Fetch latest services directly from the dedicated 'services' table in Supabase
+          try {
+            const { data: dbServices, error: sErr } = await supabase
+              .from("services")
+              .select("*")
+              .order("sort_order", { ascending: true });
+
+            if (!sErr && Array.isArray(dbServices) && dbServices.length > 0) {
+              content.services = dbServices.map((row) => ({
+                id: String(row.id),
+                slug: row.slug || String(row.id),
+                title: row.title,
+                shortDescription: row.short_description || "",
+                description: row.description || "",
+                image: row.image || "",
+                category: row.category || "",
+                features: Array.isArray(row.features) ? row.features : [],
+                featured: Boolean(row.featured),
+                sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
+              }));
+            }
+          } catch (svcErr) {
+            console.warn("Could not query Supabase services table in GET:", svcErr);
+          }
+
+          if (!Array.isArray(content.machines) || content.machines.length === 0) {
+            content.machines = (defaultSiteData as unknown as { machines?: unknown[] }).machines || [];
+          }
+          if (!Array.isArray(content.clients) || content.clients.length === 0) {
+            content.clients = (defaultSiteData as unknown as { clients?: unknown[] }).clients || [];
+          }
+
+          return NextResponse.json(content, { headers: noCacheHeaders });
         }
       }
     }
@@ -37,27 +88,29 @@ export async function GET() {
     // 2. Fall back to local file storage
     if (fs.existsSync(RUNTIME_CONTENT_PATH)) {
       const data = fs.readFileSync(RUNTIME_CONTENT_PATH, "utf-8");
-      return NextResponse.json(JSON.parse(data), { headers: noCacheHeaders });
+      return NextResponse.json(sanitizeContent(JSON.parse(data)), { headers: noCacheHeaders });
     }
     if (fs.existsSync(SEED_CONTENT_PATH)) {
       const data = fs.readFileSync(SEED_CONTENT_PATH, "utf-8");
-      return NextResponse.json(JSON.parse(data), { headers: noCacheHeaders });
+      return NextResponse.json(sanitizeContent(JSON.parse(data)), { headers: noCacheHeaders });
     }
-    return NextResponse.json(defaultSiteData, { headers: noCacheHeaders });
+    return NextResponse.json(sanitizeContent(defaultSiteData), { headers: noCacheHeaders });
   } catch (error) {
     console.error("Error reading site content:", error);
-    return NextResponse.json(defaultSiteData);
+    return NextResponse.json(sanitizeContent(defaultSiteData));
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const updatedData = await request.json();
+    const rawData = await request.json();
 
     // Basic structure validation
-    if (!updatedData || typeof updatedData !== "object") {
+    if (!rawData || typeof rawData !== "object") {
       return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
     }
+
+    const updatedData = sanitizeContent(rawData);
 
     if (!updatedData.business || !updatedData.portfolio || !updatedData.services) {
       return NextResponse.json(
@@ -83,6 +136,63 @@ export async function POST(request: NextRequest) {
 
         if (dbError) {
           console.error("Supabase site_content update error:", dbError);
+        }
+
+        // 1b. Synchronize individual services to the dedicated 'services' table in Supabase
+        if (Array.isArray(updatedData.services) && updatedData.services.length > 0) {
+          try {
+            await Promise.all(
+              updatedData.services.map(async (s: any, idx: number) => {
+                const idStr = String(s.id);
+                const order = typeof s.sortOrder === "number" ? s.sortOrder : idx + 1;
+                const updatePayload: Record<string, any> = {
+                  sort_order: order,
+                };
+                if (s.title) updatePayload.title = s.title.trim();
+                if (s.shortDescription !== undefined) updatePayload.short_description = s.shortDescription;
+                if (s.description !== undefined) updatePayload.description = s.description;
+                if (s.image !== undefined) updatePayload.image = s.image;
+                if (s.category !== undefined) updatePayload.category = s.category;
+                if (s.features !== undefined) updatePayload.features = Array.isArray(s.features) ? s.features : [];
+                if (s.featured !== undefined) updatePayload.featured = Boolean(s.featured);
+                if (s.slug && typeof s.slug === "string" && s.slug.trim()) {
+                  updatePayload.slug = s.slug.trim();
+                }
+
+                const { data: updatedRows } = await supabase
+                  .from("services")
+                  .update(updatePayload)
+                  .eq("id", idStr)
+                  .select("id");
+
+                if (!updatedRows || updatedRows.length === 0) {
+                  await supabase.from("services").insert([{
+                    id: idStr,
+                    slug: s.slug || `service-${idStr}`,
+                    title: s.title || "Untitled Service",
+                    short_description: s.shortDescription || "",
+                    description: s.description || "",
+                    image: s.image || "",
+                    category: s.category || "General",
+                    features: Array.isArray(s.features) ? s.features : [],
+                    featured: Boolean(s.featured),
+                    sort_order: order,
+                  }]);
+                }
+              })
+            );
+
+            // Remove any services that were deleted in admin
+            const currentIds = updatedData.services.map((s: any) => String(s.id));
+            if (currentIds.length > 0) {
+              await supabase
+                .from("services")
+                .delete()
+                .not("id", "in", `(${currentIds.map((id: string) => `"${id}"`).join(",")})`);
+            }
+          } catch (svcSyncErr) {
+            console.warn("Error synchronizing services table in Supabase:", svcSyncErr);
+          }
         }
       }
     }

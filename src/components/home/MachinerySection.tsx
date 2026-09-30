@@ -28,6 +28,7 @@ interface MachineItem {
   capabilities: string[];
   idealFor: string;
   speedOrSpec: string;
+  sortOrder?: number;
 }
 
 const MACHINES: MachineItem[] = [
@@ -147,7 +148,67 @@ const MACHINES: MachineItem[] = [
   },
 ];
 
+import { useSiteData } from "@/context/SiteDataContext";
+import { useEffect, useState } from "react";
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  solvent: Printer,
+  "eco-solvent": Sparkles,
+  "plotter-cutting": Scissors,
+  lamination: Layers,
+  "co2-laser": Zap,
+  "flatbed-uv": SunMedium,
+};
+
 export default function MachinerySection() {
+  const siteData = useSiteData();
+  const rawList = (siteData?.machines && siteData.machines.length > 0) ? siteData.machines : MACHINES;
+  const [machines, setMachines] = useState<any[]>(rawList);
+
+  useEffect(() => {
+    const fetchMachines = () => {
+      fetch(`/api/machines?t=${Date.now()}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.machines) && data.machines.length > 0) {
+            setMachines(data.machines);
+          }
+        })
+        .catch((err) => console.warn("Could not fetch from /api/machines:", err));
+    };
+
+    fetchMachines();
+
+    window.addEventListener("site-content-updated", fetchMachines);
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("jalaram_site_sync");
+        bc.onmessage = () => fetchMachines();
+      }
+    } catch {
+      // safe fallback
+    }
+
+    return () => {
+      window.removeEventListener("site-content-updated", fetchMachines);
+      if (bc) bc.close();
+    };
+  }, []);
+
+  // Sync if context updates
+  useEffect(() => {
+    if (siteData?.machines && siteData.machines.length > 0) {
+      setMachines(siteData.machines);
+    }
+  }, [siteData?.machines]);
+
+  const machineList = [...machines].sort((a, b) => {
+    const orderA = typeof a.sortOrder === "number" ? a.sortOrder : (typeof a.sort_order === "number" ? a.sort_order : 999);
+    const orderB = typeof b.sortOrder === "number" ? b.sortOrder : (typeof b.sort_order === "number" ? b.sort_order : 999);
+    return orderA - orderB;
+  });
+
   return (
     <section id="machinery" className="py-20 sm:py-24 md:py-32 bg-zinc-50 border-t border-b border-black/5 relative overflow-hidden scroll-mt-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -182,8 +243,8 @@ export default function MachinerySection() {
 
         {/* 6-Grid Machine Cards With Real Photos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {MACHINES.map((machine, index) => {
-            const Icon = machine.icon;
+          {machineList.map((machine, index) => {
+            const Icon = ICON_MAP[machine.id] || Cpu;
             return (
               <motion.div
                 key={machine.id}
@@ -194,16 +255,23 @@ export default function MachinerySection() {
                 className="group bg-white rounded-2xl border border-black/8 hover:border-[#6F20E8]/40 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between text-left"
               >
                 <div>
-                  {/* MACHINE REAL PHOTO CONTAINER */}
-                  <div className="relative aspect-[16/10] w-full bg-gray-900 overflow-hidden">
-                    <Image
-                      src={machine.image}
-                      alt={machine.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                    {/* MACHINE REAL PHOTO CONTAINER */}
+                    <div className="relative aspect-[16/10] w-full bg-gray-900 overflow-hidden">
+                      {machine.image ? (
+                        <Image
+                          src={machine.image}
+                          alt={machine.name || "Machinery"}
+                          fill
+                          unoptimized={machine.image.startsWith("http") || machine.image.startsWith("data:")}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-500">
+                          <Cpu className="w-12 h-12 text-purple-400/40" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
 
                     {/* Machine Badge */}
                     <div className="absolute top-3 right-3">
@@ -246,19 +314,27 @@ export default function MachinerySection() {
                     </p>
 
                     {/* Capabilities */}
-                    <div className="pt-2 border-t border-gray-100 space-y-2">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
-                        Capabilities &amp; Features:
-                      </span>
-                      <ul className="space-y-1.5">
-                        {machine.capabilities.map((cap, cIdx) => (
-                          <li key={cIdx} className="text-xs text-gray-700 flex items-start gap-2">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                            <span>{cap}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {(() => {
+                      const caps = Array.isArray(machine.capabilities) && machine.capabilities.length > 0
+                        ? machine.capabilities
+                        : (Array.isArray(machine.features) ? machine.features : []);
+                      if (caps.length === 0) return null;
+                      return (
+                        <div className="pt-2 border-t border-gray-100 space-y-2">
+                          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+                            Capabilities &amp; Features:
+                          </span>
+                          <ul className="space-y-1.5">
+                            {caps.map((cap: string, cIdx: number) => (
+                              <li key={cIdx} className="text-xs text-gray-700 flex items-start gap-2">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                                <span>{cap}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 

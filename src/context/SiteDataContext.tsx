@@ -55,30 +55,81 @@ export function SiteDataProvider({
   // Fetch fresh content from server API (reads directly from Supabase / disk)
   const refreshSiteData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/content?t=${Date.now()}`, {
-        cache: "no-store",
-        headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.business && Array.isArray(json.services)) {
-          updateLocalSiteData(json);
+      const [contentRes, servicesRes, machinesRes] = await Promise.allSettled([
+        fetch(`/api/admin/content?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
+        }),
+        fetch(`/api/services?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
+        }),
+        fetch(`/api/machines?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Pragma": "no-cache", "Cache-Control": "no-cache" }
+        }),
+      ]);
+
+      let json: any = null;
+      if (contentRes.status === "fulfilled" && contentRes.value.ok) {
+        json = await contentRes.value.json();
+      }
+
+      let dbServices: any = null;
+      if (servicesRes.status === "fulfilled" && servicesRes.value.ok) {
+        const sJson = await servicesRes.value.json();
+        if (sJson.success && Array.isArray(sJson.services)) {
+          dbServices = sJson.services;
         }
+      }
+
+      let dbMachines: any = null;
+      if (machinesRes.status === "fulfilled" && machinesRes.value.ok) {
+        const mJson = await machinesRes.value.json();
+        if (mJson.success && Array.isArray(mJson.machines)) {
+          dbMachines = mJson.machines;
+        }
+      }
+
+      if (json && json.business) {
+        const finalData = {
+          ...json,
+          ...(dbServices && dbServices.length > 0 ? { services: dbServices } : {}),
+          ...(dbMachines && dbMachines.length > 0 ? { machines: dbMachines } : {}),
+        };
+        setSiteData(finalData);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(finalData));
+          localStorage.setItem(`${STORAGE_KEY}_time`, Date.now().toString());
+        } catch {
+          // safe fallback
+        }
+      } else {
+        setSiteData((prev) => ({
+          ...prev,
+          ...(dbServices && dbServices.length > 0 ? { services: dbServices } : {}),
+          ...(dbMachines && dbMachines.length > 0 ? { machines: dbMachines } : {}),
+        }));
       }
     } catch (err) {
       console.warn("Could not refresh live site data:", err);
     }
-  }, [updateLocalSiteData]);
+  }, []);
 
   useEffect(() => {
-    // 1. Only if initialData was not provided, check cached storage
+    // 1. Only if initialData was not provided, check cached storage for non-services and non-machines content
     if (!initialData) {
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed?.business) {
-            setSiteData(parsed);
+            // Keep default initial services & machines until live database response arrives
+            setSiteData((prev) => ({
+              ...parsed,
+              services: prev.services || (defaultSiteData as SiteData).services,
+              machines: prev.machines || (defaultSiteData as SiteData).machines,
+            }));
           }
         }
       } catch {
@@ -86,7 +137,7 @@ export function SiteDataProvider({
       }
     }
 
-    // 2. Fetch latest data from server
+    // 2. Fetch latest data directly from database
     refreshSiteData();
 
     // 3. Listen for in-app updates dispatched when admin clicks Save
